@@ -32,6 +32,7 @@ namespace sb_admin_2.Web1.Domain
             menu.Add(new Navbar { Id = 19, nameOption = "Main", controller = "Home", action = "Main", status = true, isParent = false, parentId = 0 });
             menu.Add(new Navbar { Id = 20, nameOption = "Person", controller = "Home", action = "Person", status = true, isParent = false, parentId = 0 });
             menu.Add(new Navbar { Id = 21, nameOption = "Order", controller = "Home", action = "Order", status = true, isParent = false, parentId = 0 });
+            menu.Add(new Navbar { Id = 22, nameOption = "Actions", controller = "Home", action = "Actions", status = true, isParent = false, parentId = 0 });
 
             return menu.ToList();
         }

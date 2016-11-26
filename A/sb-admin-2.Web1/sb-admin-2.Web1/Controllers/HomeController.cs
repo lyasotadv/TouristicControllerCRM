@@ -4,6 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
+using sb_admin_2.Web1.Domain;
+
 namespace sb_admin_2.Web1.Controllers
 {
     public class HomeController : Controller
@@ -75,17 +77,37 @@ namespace sb_admin_2.Web1.Controllers
 
         public ActionResult Person()
         {
-            return View("Person"); 
+            PersonData data = new PersonData();
+            data.Person.CreateTestData();
+            data.ActionList.CreateTestData(10);
+            data.ContactList.CreateTestData(2);
+            data.DocumentList.CreateTestData(2);
+            return View("Person", data);
         }
 
         public ActionResult Order()
         {
-            return View("Order");
+            OrderData data = new OrderData();
+            data.Order.CreateTestData();
+            data.PersonList.CreateTestData(10);
+            data.InvoiceList.CreateTestData(10);
+            data.ActionList.CreateTestData(10);
+            return View("Order", data);
         }
 
         public ActionResult Main()
         {
-            return View("Main");
+            MainData data = new MainData();
+            data.PersonList.CreateTestData(20);
+            data.OrderList.CreateTestData(20);
+            return View("Main", data);
+        }
+
+        public ActionResult Actions()
+        {
+            ActionData data = new ActionData();
+            data.ActionInform.CreateTestData();
+            return View("Actions", data);
         }
     }
 }

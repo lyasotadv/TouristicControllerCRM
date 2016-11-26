@@ -113,11 +113,24 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\NavbarController.cs" />
+    <Compile Include="Domain\ActionData.cs" />
     <Compile Include="Domain\Data.cs" />
+    <Compile Include="Domain\MainData.cs" />
+    <Compile Include="Domain\OrderData.cs" />
+    <Compile Include="Domain\PersonData.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ActionHistory.cs" />
+    <Compile Include="Models\ActionInform.cs" />
+    <Compile Include="Models\Contact.cs" />
+    <Compile Include="Models\Document.cs" />
+    <Compile Include="Models\IDebugModel.cs" />
+    <Compile Include="Models\Invoice.cs" />
+    <Compile Include="Models\Money.cs" />
     <Compile Include="Models\Navbar.cs" />
+    <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -908,6 +921,7 @@
     <Content Include="Views\Home\Person.cshtml" />
     <Content Include="Views\Home\Order.cshtml" />
     <Content Include="Views\Home\Main.cshtml" />
+    <Content Include="Views\Home\Actions.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

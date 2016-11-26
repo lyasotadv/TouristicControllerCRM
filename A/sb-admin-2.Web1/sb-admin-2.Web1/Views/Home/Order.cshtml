@@ -1,10 +1,26 @@
-﻿
+﻿@model sb_admin_2.Web1.Domain.OrderData
+
 @{
     ViewBag.Title = "Order";
 }
 
-<h2>Order</h2>
+<script>
+    $(document).ready(function () {
+        $('#dataTables-exampleA').DataTable({
+            responsive: true
+        });
+    });
 
+    $(document).ready(function () {
+        $('#dataTables-exampleB').DataTable({
+            responsive: true
+        });
+    });
+</script>
+
+<div class="row">
+    <h2>Order</h2>
+</div>
 
 <div class="row">
     <div class="col-lg-10">
@@ -25,7 +41,7 @@
         </div>
         <div>
             <h5>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                @Html.DisplayFor(model => model.Order.DescriptionWide)
             </h5>
         </div>
     </div>
@@ -40,28 +56,25 @@
             <!-- /.panel-heading -->
             <div class="panel-body">
                 <div class="dataTable_wrapper">
-                    <table class="table table-striped table-bordered table-hover">
+                    <table class="table table-striped table-bordered table-hover" id="dataTables-exampleA">
                         <thead>
                             <tr>
                                 <th>First name</th>
                                 <th>Second name</th>
+                                <th>Gender</th>
                                 <th>Organization</th>
-                                <th>Description</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="odd gradeX">
-                                <td>Bob</td>
-                                <td>BobX</td>
-                                <td>Sender</td>
-                                <td>Guy</td>
-                            </tr>
-                            <tr class="even gradeX">
-                                <td>Alisa</td>
-                                <td>AlisaX</td>
-                                <td>Reciever</td>
-                                <td>Girl</td>
-                            </tr>
+                            @foreach (var item in Model.PersonList)
+                            {
+                                <tr class="odd gradeX">
+                                    <td>@Html.DisplayFor(model => item.FirstName)</td>
+                                    <td>@Html.DisplayFor(model => item.SecondName)</td>
+                                    <td>@Html.DisplayFor(model => item.Gender)</td>
+                                    <td>@Html.DisplayFor(model => item.Organization)</td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -81,7 +94,7 @@
             <!-- /.panel-heading -->
             <div class="panel-body">
                 <div class="dataTable_wrapper">
-                    <table class="table table-striped table-bordered table-hover">
+                    <table class="table table-striped table-bordered table-hover" id="dataTables-exampleB">
                         <thead>
                             <tr>
                                 <th>Description</th>
@@ -90,16 +103,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="odd gradeX">
-                                <td>Tickets A</td>
-                                <td>active</td>
-                                <td>$100</td>
-                            </tr>
-                            <tr class="odd gradeX">
-                                <td>Tickets B</td>
-                                <td>closed</td>
-                                <td>$100</td>
-                            </tr>
+                            @foreach (var item in Model.InvoiceList)
+                            {
+                                <tr class="odd gradeX">
+                                    <td>@Html.DisplayFor(model => item.Description)</td>
+                                    <td>@Html.DisplayFor(model => item.Status)</td>
+                                    <td>@Html.DisplayFor(model => item.Amount.ValStr)</td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -119,24 +130,52 @@
     </h3>
 </div>
 
-@for (int n = 0; n<5; n++)
+@foreach (var item in Model.ActionList)
 {
     <div class="row">
         <div class="col-lg-12">
-            <div class="panel panel-green">
-                <div class="panel-heading">
-                    Bob BobX
+            @if (item.Status == sb_admin_2.Web1.Models.ActionHistory.ActionHistoryStatus.green)
+            {
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        @Html.DisplayFor(model => item.Person.FullName)
+                    </div>
+                    <div class="panel-body">
+                        <p>@Html.DisplayFor(model => item.Content)</p>
+                    </div>
+                    <div class="panel-footer">
+                        @Html.DisplayFor(model => item.Created)
+                    </div>
                 </div>
-                <div class="panel-body">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tincidunt est vitae ultrices accumsan. Aliquam ornare lacus adipiscing, posuere lectus et, fringilla augue.</p>
+            }
+            else if (item.Status == sb_admin_2.Web1.Models.ActionHistory.ActionHistoryStatus.red)
+            {
+                <div class="panel panel-red">
+                    <div class="panel-heading">
+                        @Html.DisplayFor(model => item.Person.FullName)
+                    </div>
+                    <div class="panel-body">
+                        <p>@Html.DisplayFor(model => item.Content)</p>
+                    </div>
+                    <div class="panel-footer">
+                        @Html.DisplayFor(model => item.Created)
+                    </div>
                 </div>
-                <div class="panel-footer">
-                    1900-01-01
+            }
+            else if (item.Status == sb_admin_2.Web1.Models.ActionHistory.ActionHistoryStatus.yellow)
+            {
+                <div class="panel panel-yellow">
+                    <div class="panel-heading">
+                        @Html.DisplayFor(model => item.Person.FullName)
+                    </div>
+                    <div class="panel-body">
+                        <p>@Html.DisplayFor(model => item.Content)</p>
+                    </div>
+                    <div class="panel-footer">
+                        @Html.DisplayFor(model => item.Created)
+                    </div>
                 </div>
-            </div>
-            <!-- /.col-lg-4 -->
+            }
         </div>
     </div>
 }
-
-
