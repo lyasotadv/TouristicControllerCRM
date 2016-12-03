@@ -109,5 +109,18 @@ namespace sb_admin_2.Web1.Controllers
             data.ActionInform.CreateTestData();
             return View("Actions", data);
         }
+
+        [HttpPost]
+        public ActionResult Order(OrderData data, string Command)
+        {
+            return RedirectToAction("Order");
+        }
+
+        [HttpPost]
+        public ActionResult SaveButtonAvia(string A, string B)
+        {
+            //return Json(new { Result = "OK" });
+            return Json(A + " " + B);
+        }
     }
 }

@@ -2,180 +2,854 @@
 
 @{
     ViewBag.Title = "Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<head>
+    <title>
+        Order
+    </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
 <script>
-    $(document).ready(function () {
-        $('#dataTables-exampleA').DataTable({
-            responsive: true
-        });
-    });
+    //$(document).ready(function () {
+    //    $('#dataTables-exampleA').DataTable({
+    //        responsive: true
+    //    });
+    //});
 
     $(document).ready(function () {
-        $('#dataTables-exampleB').DataTable({
-            responsive: true
+        $('#dataTables-exampleA').DataTable({
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
         });
     });
 </script>
 
+<!--Title-->
 <div class="row">
     <h2>Order</h2>
 </div>
 
+<!--Search-->
 <div class="row">
-    <div class="col-lg-10">
-        <input class="form-control">
+    <div class="col-lg-11">
+        <div class="form-group input-group">
+            <input class="form-control" placeholder="Order key words">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button">
+                    <i class="fa fa-search"></i>
+                </button>
+            </span>
+        </div>
     </div>
     <div class="col-lg-1">
-        <button type="button" class="btn btn-default">Search</button>
-    </div>
-    <div class="col-lg-1">
-        <button type="button" class="btn btn-default">Add</button>
+        <button type="button" class="btn btn-default">New</button>
     </div>
 </div>
 
+<!--Description-->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="row">
+            <div class="col-lg-12">
+                <h4>Description</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                @Html.DisplayFor(model => model.Order.DescriptionWide)
+                <button type="button"><i class="glyphicon glyphicon-pencil"></i></button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h4>Keys</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                @Html.DisplayFor(model => model.Order.Keys)
+                <button type="button"><i class="glyphicon glyphicon-pencil"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel panel-body">
+            <div class="panel-heading">
+                <h3>Add new...</h3>
+            </div>
+            <div class="row">
+                <!--Avia-->
+                <div class="col-lg-3">
+                    <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newaviaticket" title="Avia ticket" onclick="InputStatusClearAll()">
+                        <i class="fa fa-plane fa-1x"></i>
+                    </button>
+                </div>
+                <!--Hotel-->
+                <div class="col-lg-3">
+                    <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newhotel" title="Hotel">
+                        <i class="fa fa-home fa-1x"></i>
+                    </button>
+                </div>
+                <!--Insurance-->
+                <div class="col-lg-3">
+                    <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newinsurance" title="Insurance">
+                        <i class="fa fa-medkit fa-1x"></i>
+                    </button>
+                </div>
+                <!--Train-->
+                <div class="col-lg-3">
+                    <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newtrainticket" title="Insurance">
+                        <i class="fa fa-subway fa-1x"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Amount-->
+<div class="row">
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plus fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">$710</div>
+                        <div>Offer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plus fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">$360</div>
+                        <div>Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plus fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">$1830</div>
+                        <div>Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plus fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Void</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Invoice table-->
 <div class="row">
     <div class="col-lg-12">
-        <div>
-            <label>Description</label>
-        </div>
-        <div>
-            <h5>
-                @Html.DisplayFor(model => model.Order.DescriptionWide)
-            </h5>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                Persons
+                Invoices
             </div>
-            <!-- /.panel-heading -->
             <div class="panel-body">
                 <div class="dataTable_wrapper">
                     <table class="table table-striped table-bordered table-hover" id="dataTables-exampleA">
                         <thead>
                             <tr>
-                                <th>First name</th>
-                                <th>Second name</th>
-                                <th>Gender</th>
-                                <th>Organization</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.PersonList)
-                            {
-                                <tr class="odd gradeX">
-                                    <td>@Html.DisplayFor(model => item.FirstName)</td>
-                                    <td>@Html.DisplayFor(model => item.SecondName)</td>
-                                    <td>@Html.DisplayFor(model => item.Gender)</td>
-                                    <td>@Html.DisplayFor(model => item.Organization)</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <button type="button" class="btn btn-default">Add</button>
-            </div>
-            <!-- /.panel-body -->
-        </div>
-        <!-- /.panel -->
-    </div>
-    <!-- /.col-lg-12 -->
-
-    <div class="col-lg-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                Invoice
-            </div>
-            <!-- /.panel-heading -->
-            <div class="panel-body">
-                <div class="dataTable_wrapper">
-                    <table class="table table-striped table-bordered table-hover" id="dataTables-exampleB">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th>Status</th>
+                                <th><i class="fa fa-check"></i></th>
+                                <th>Client</th>
+                                <th>Service type</th>
+                                <th>Path</th>
+                                <th>Date</th>
                                 <th>Amount</th>
+                                <th>Responsible</th>
+                                <th>Status</th>
+                                <th>Edit</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Model.InvoiceList)
-                            {
-                                <tr class="odd gradeX">
-                                    <td>@Html.DisplayFor(model => item.Description)</td>
-                                    <td>@Html.DisplayFor(model => item.Status)</td>
-                                    <td>@Html.DisplayFor(model => item.Amount.ValStr)</td>
-                                </tr>
-                            }
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Ivanov Ivan</td>
+                                <td>Avia ticket</td>
+                                <td>Kiev - Paris</td>
+                                <td>27dec16 - 05jan17</td>
+                                <td>$170</td>
+                                <td>Ivanov Ivan</td>
+                                <td>Offer</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Annova Anna</td>
+                                <td>Avia ticket</td>
+                                <td>Kiev - Paris</td>
+                                <td>27dec16 - 05jan17</td>
+                                <td>$170</td>
+                                <td>Ivanov Ivan</td>
+                                <td>Offer</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Ivanov Ivan</td>
+                                <td>Avia ticket</td>
+                                <td>Kiev - Paris</td>
+                                <td>28dec16 - 06jan17</td>
+                                <td>$185</td>
+                                <td>Ivanov Ivan</td>
+                                <td>Offer</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Annova Anna</td>
+                                <td>Avia ticket</td>
+                                <td>Kiev - Paris</td>
+                                <td>28dec16 - 06jan17</td>
+                                <td>$185</td>
+                                <td>Ivanov Ivan</td>
+                                <td>Offer</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Ivanov Ivan</td>
+                                <td>Avia ticket</td>
+                                <td>Kiev - Berlin</td>
+                                <td>27dec16 - 05jan17</td>
+                                <td>$180</td>
+                                <td>Ivanov Ivan</td>
+                                <td>Booked</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Annova Anna</td>
+                                <td>Avia ticket</td>
+                                <td>Kiev - Berlin</td>
+                                <td>27dec16 - 05jan17</td>
+                                <td>$180</td>
+                                <td>Ivanov Ivan</td>
+                                <td>Booked</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Ivanov Ivan</td>
+                                <td>Isurance</td>
+                                <td>EU</td>
+                                <td>25dec16 - 10jan17</td>
+                                <td>$15</td>
+                                <td>Annova Anna</td>
+                                <td>Sold</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Annova Anna</td>
+                                <td>Isurance</td>
+                                <td>EU</td>
+                                <td>25dec16 - 10jan17</td>
+                                <td>$15</td>
+                                <td>Annova Anna</td>
+                                <td>Sold</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Ivanov Ivan</td>
+                                <td>Hotel</td>
+                                <td>Berlin</td>
+                                <td>28dec16 - 04jan17</td>
+                                <td>$900</td>
+                                <td>Annova Anna</td>
+                                <td>Sold</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>Annova Anna</td>
+                                <td>Hotel</td>
+                                <td>Berlin</td>
+                                <td>28dec16 - 04jan17</td>
+                                <td>$900</td>
+                                <td>Annova Anna</td>
+                                <td>Sold</td>
+                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
-                <button type="button" class="btn btn-default">Add</button>
             </div>
-            <!-- /.panel-body -->
         </div>
-        <!-- /.panel -->
     </div>
-    <!-- /.col-lg-12 -->
 </div>
-<!-- /.row -->
 
+<!--Avia-->
 <div class="row">
-    <h3>
-        Activity
-    </h3>
-</div>
-
-@foreach (var item in Model.ActionList)
-{
-    <div class="row">
-        <div class="col-lg-12">
-            @if (item.Status == sb_admin_2.Web1.Models.ActionHistory.ActionHistoryStatus.green)
-            {
-                <div class="panel panel-green">
-                    <div class="panel-heading">
-                        @Html.DisplayFor(model => item.Person.FullName)
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plane fa-5x"></i>
                     </div>
-                    <div class="panel-body">
-                        <p>@Html.DisplayFor(model => item.Content)</p>
-                    </div>
-                    <div class="panel-footer">
-                        @Html.DisplayFor(model => item.Created)
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">4 / $710</div>
+                        <div>Offer</div>
                     </div>
                 </div>
-            }
-            else if (item.Status == sb_admin_2.Web1.Models.ActionHistory.ActionHistoryStatus.red)
-            {
-                <div class="panel panel-red">
-                    <div class="panel-heading">
-                        @Html.DisplayFor(model => item.Person.FullName)
-                    </div>
-                    <div class="panel-body">
-                        <p>@Html.DisplayFor(model => item.Content)</p>
-                    </div>
-                    <div class="panel-footer">
-                        @Html.DisplayFor(model => item.Created)
-                    </div>
-                </div>
-            }
-            else if (item.Status == sb_admin_2.Web1.Models.ActionHistory.ActionHistoryStatus.yellow)
-            {
-                <div class="panel panel-yellow">
-                    <div class="panel-heading">
-                        @Html.DisplayFor(model => item.Person.FullName)
-                    </div>
-                    <div class="panel-body">
-                        <p>@Html.DisplayFor(model => item.Content)</p>
-                    </div>
-                    <div class="panel-footer">
-                        @Html.DisplayFor(model => item.Created)
-                    </div>
-                </div>
-            }
+            </div>
         </div>
     </div>
-}
+
+    <div class="col-lg-3">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plane fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">2 / $360</div>
+                        <div>Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plane fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plane fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Void</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Hotel-->
+<div class="row">
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-home fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Offer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-home fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-home fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">2 / $1800</div>
+                        <div>Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-home fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Void</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Insurance-->
+<div class="row">
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-medkit fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Offer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-medkit fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-medkit fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">2 / $30</div>
+                        <div>Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-medkit fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Void</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Modal-->
+
+<script>
+
+    function InputStatusClear(id)
+    {
+        $(id).removeClass("has-success").removeClass("has-error");
+    }
+
+    function InputStatusClearAll()
+    {
+        InputStatusClear('#divQuickParse');
+    }
+
+    function myDemo()
+    {
+        InputStatusClear('#divQuickParse');
+        if (document.getElementById("inputQuickParse").value == "125")
+            $('#divQuickParse').addClass("has-success");
+        else
+            $('#divQuickParse').addClass("has-error");
+    };
+</script>
+
+<!--Avia-->
+<div class="modal fade" id="newaviaticket" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">New avia ticket</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group" id="divQuickParse">
+                            <input class="form-control" placeholder="Quick parse" id="inputQuickParse">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="myDemo()">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <label>or...</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="From" id="inputFrom">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="To">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="Date">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select class="form-control">
+                                <option>Offer</option>
+                                <option>Booked</option>
+                                <option>Sold</option>
+                                <option>Void</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" id="btnSave" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#btnSave').click(function (event) {
+            event.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveButtonAvia", "Home")',
+                dataType: 'json',
+                data: { A: document.getElementById("inputQuickParse").value, B: document.getElementById("inputFrom").value },
+                success: function (data) {
+                    alert('success: ' + data);
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        });
+    });
+</script>
+
+<!--Hotel-->
+<div class="modal fade" id="newhotel" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">New hotel</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="City">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="Hotel name">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="From">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="Till">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="Persons">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select class="form-control">
+                                <option>Offer</option>
+                                <option>Booked</option>
+                                <option>Sold</option>
+                                <option>Void</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Insurance-->
+<div class="modal fade" id="newinsurance" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">New insurance</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Train-->
+<div class="modal fade" id="newtrainticket" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">New train ticket</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

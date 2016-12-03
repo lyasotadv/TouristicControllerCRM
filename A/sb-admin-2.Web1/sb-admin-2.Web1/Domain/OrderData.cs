@@ -24,6 +24,5 @@ namespace sb_admin_2.Web1.Domain
         public InvoiceList InvoiceList { get; private set; }
 
         public ActionHistoryList ActionList { get; private set; }
-
     }
 }

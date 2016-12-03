@@ -64,12 +64,15 @@ namespace sb_admin_2.Web1.Models
 
         public DateTime LastUpdate { get; set; }
 
+        public string Keys { get; set; }
+
         public void CreateTestData()
         {
             Description = "Default";
             DescriptionWide = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
             Status = "active";
             LastUpdate = DateTime.Now;
+            Keys = "lorem, ipsum";
         }
     }
 }
