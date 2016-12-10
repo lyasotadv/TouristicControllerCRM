@@ -5,6 +5,8 @@ using System.Web;
 using System.Web.Mvc;
 
 using sb_admin_2.Web1.Domain;
+using sb_admin_2.Web1.Models.Mapping;
+using sb_admin_2.Web1.Models;
 
 namespace sb_admin_2.Web1.Controllers
 {
@@ -75,24 +77,21 @@ namespace sb_admin_2.Web1.Controllers
             return View("Login");
         }
 
+        public HomeController()
+        {
+            mappingController = new MappingController();
+        }
+
+        private MappingController mappingController { get; set; }
+
         public ActionResult Person()
         {
-            PersonData data = new PersonData();
-            data.Person.CreateTestData();
-            data.ActionList.CreateTestData(10);
-            data.ContactList.CreateTestData(2);
-            data.DocumentList.CreateTestData(2);
-            return View("Person", data);
+            return View("Person", mappingController.personData);
         }
 
         public ActionResult Order()
         {
-            OrderData data = new OrderData();
-            data.Order.CreateTestData();
-            data.PersonList.CreateTestData(10);
-            data.InvoiceList.CreateTestData(10);
-            data.ActionList.CreateTestData(10);
-            return View("Order", data);
+            return View("Order", mappingController.orderData);
         }
 
         public ActionResult Main()
@@ -111,16 +110,31 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
-        public ActionResult Order(OrderData data, string Command)
+        public ActionResult SaveButtonAvia(string A, string B)
         {
-            return RedirectToAction("Order");
+
+            return Json(A + " " + B);
         }
 
         [HttpPost]
-        public ActionResult SaveButtonAvia(string A, string B)
+        public ActionResult UpdateDescriptionWide(string val)
         {
-            //return Json(new { Result = "OK" });
-            return Json(A + " " + B);
+            mappingController.orderData.Order.DescriptionWide = val;
+            return Json(val);
+        }
+
+        [HttpPost]
+        public ActionResult UpdateKeys(string val)
+        {
+            mappingController.orderData.Order.Keys = val;
+            return Json(val);
+        }
+
+        [HttpPost]
+        public ActionResult FindIncoice(int id)
+        {
+            Invoice invoice = mappingController.orderData.InvoiceList.Find((item) => { return item.ID == id; });
+            return Json(invoice);
         }
     }
 }

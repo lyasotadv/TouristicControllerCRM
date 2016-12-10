@@ -5,24 +5,60 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<head>
-    <title>
-        Order
-    </title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-</head>
-
 <script>
-    //$(document).ready(function () {
-    //    $('#dataTables-exampleA').DataTable({
-    //        responsive: true
-    //    });
-    //});
+    function DescriptionWideMakeEditable() {
+        //alert('Yep');
+        document.getElementById("pDescriptionWide").contentEditable = true;
+        document.getElementById("buttonDescriptionWide").style = "display: normal";
+    };
+
+    function DescriptionWideSave() {
+        document.getElementById("pDescriptionWide").contentEditable = false;
+        document.getElementById("buttonDescriptionWide").style = "display: none";
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("UpdateDescriptionWide", "Home")',
+            dataType: 'json',
+            data: { val: document.getElementById("pDescriptionWide").innerText },
+            success: function (data) {
+
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    };
+
+    function KeysMakeEditable() {
+        //alert('Yep');
+        document.getElementById("pKeys").contentEditable = true;
+        document.getElementById("buttonKeys").style = "display: normal";
+    };
+
+    function KeysSave() {
+        document.getElementById("pKeys").contentEditable = false;
+        document.getElementById("buttonKeys").style = "display: none";
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("UpdateKeys", "Home")',
+            dataType: 'json',
+            data: { val: document.getElementById("pKeys").innerText },
+            success: function (data) {
+
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    };
 
     $(document).ready(function () {
-        $('#dataTables-exampleA').DataTable({
+        $('#tableInvoice').DataTable({
             initComplete: function () {
-                this.api().columns().every(function () {
+                this.api().columns([1, 2, 3, 4, 5, 6, 7, 8]).every(function () {
+
                     var column = this;
                     var select = $('<select><option value=""></option></select>')
                         .appendTo($(column.footer()).empty())
@@ -35,7 +71,6 @@
                                 .search(val ? '^' + val + '$' : '', true, false)
                                 .draw();
                         });
-
                     column.data().unique().sort().each(function (d, j) {
                         select.append('<option value="' + d + '">' + d + '</option>')
                     });
@@ -43,7 +78,128 @@
             }
         });
     });
+
+    function InputStatusClear(id) {
+        $(id).removeClass("has-success").removeClass("has-error");
+    }
+
+    function InputStatusClearAll() {
+        InputStatusClear('#divQuickParse');
+
+        $('#inputQuickParse').val('');
+        $('#inputCompany').val('');
+        $('#inputFrom').val('');
+        $('#inputTo').val('');
+        $('#inputDate').val('');
+        $('#inputDateBack').val('');
+        document.getElementById("radioOneWay").checked = true;
+        UpdateTripTypeRadioButton();
+        $('#selectStatusAvia').val('offer').change();
+        document.getElementById("newaviaticketlabel").innerText = "New avia ticket";
+    }
+
+    function myDemo() {
+        InputStatusClear('#divQuickParse');
+        if (document.getElementById("inputQuickParse").value == "125")
+            $('#divQuickParse').addClass("has-success");
+        else
+            $('#divQuickParse').addClass("has-error");
+    };
+
+    function UpdateTripTypeRadioButton()
+    {
+        if (document.getElementById("radioRoundTrip").checked)
+        {
+            $('#divDate').removeClass('col-lg-12').addClass('col-lg-6');
+            document.getElementById("divDateBack").style = "display: normal";
+        }
+        if (document.getElementById("radioOneWay").checked)
+        {
+            $('#divDate').removeClass('col-lg-6').addClass('col-lg-12');
+            document.getElementById("divDateBack").style = "display: none";
+        }
+    }
+
+    $(function () {
+        $('#btnSave').click(function (event) {
+            event.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveButtonAvia", "Home")',
+                dataType: 'json',
+                data: {
+                    A: document.getElementById("selectStatusAvia").value,
+                    B: document.getElementById("inputFrom").value
+                },
+                success: function (data) {
+                    $('#newaviaticket').modal('toggle');
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        });
+    });
+
+    function FillAviaTicket(id)
+    {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindIncoice", "Home")',
+            dataType: 'json',
+            data: { id: id },
+            success: function (data) {
+                if (data != null)
+                {
+                    if (data.Service == "Avia ticket")
+                    {
+                        document.getElementById("newaviaticketlabel").innerText = "Edit avia ticket";
+                        document.getElementById("inputCompany").value = data.ServiceProvider;
+                        document.getElementById("inputFrom").value = data.StartPoint;
+                        document.getElementById("inputTo").value = data.FinalDestination;
+                        document.getElementById("inputDate").value = data.DepartureStr;
+                        if (data.IsRoundTrip == true)
+                        {
+                            document.getElementById("radioRoundTrip").checked = true;
+                            document.getElementById("inputDateBack").value = data.DepartureBackStr;
+                        }
+                        else
+                        {
+                            document.getElementById("radioOneWay").checked = true;
+                        }
+                        UpdateTripTypeRadioButton();
+
+                        switch(data.Status)
+                        {
+                            case "Offer":
+                                $('#selectStatusAvia').val('offer').change();
+                                break;
+                            case "Booked":
+                                $('#selectStatusAvia').val('booked').change();
+                                break;
+                            case "Sold":
+                                $('#selectStatusAvia').val('sold').change();
+                                break;
+                            case "Void":
+                                $('#selectStatusAvia').val('void').change();
+                                break;
+                        }
+                    }
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
 </script>
+
+<head>
+    <title>
+        Order
+    </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
 
 <!--Title-->
 <div class="row">
@@ -77,8 +233,10 @@
         </div>
         <div class="row">
             <div class="col-lg-12">
-                @Html.DisplayFor(model => model.Order.DescriptionWide)
-                <button type="button"><i class="glyphicon glyphicon-pencil"></i></button>
+                <p id="pDescriptionWide" contenteditable="false" ondblclick="DescriptionWideMakeEditable()">
+                    @Html.DisplayFor(model => model.Order.DescriptionWide)
+                </p>
+                <button id="buttonDescriptionWide" type="button" onclick="DescriptionWideSave()" style="display: none"><i class="glyphicon glyphicon-pencil"></i></button>
             </div>
         </div>
         <div class="row">
@@ -88,8 +246,10 @@
         </div>
         <div class="row">
             <div class="col-lg-12">
-                @Html.DisplayFor(model => model.Order.Keys)
-                <button type="button"><i class="glyphicon glyphicon-pencil"></i></button>
+                <p id="pKeys" contenteditable="false" ondblclick="KeysMakeEditable()">
+                    @Html.DisplayFor(model => model.Order.Keys)
+                </p>
+                <button id="buttonKeys" type="button" onclick="KeysSave()" style="display: none"><i class="glyphicon glyphicon-pencil"></i></button>
             </div>
         </div>
     </div>
@@ -204,12 +364,13 @@
             </div>
             <div class="panel-body">
                 <div class="dataTable_wrapper">
-                    <table class="table table-striped table-bordered table-hover" id="dataTables-exampleA">
+                    <table class="table table-striped table-bordered table-hover" id="tableInvoice">
                         <thead>
                             <tr>
                                 <th><i class="fa fa-check"></i></th>
                                 <th>Client</th>
                                 <th>Service type</th>
+                                <th>Provider</th>
                                 <th>Path</th>
                                 <th>Date</th>
                                 <th>Amount</th>
@@ -218,177 +379,42 @@
                                 <th>Edit</th>
                             </tr>
                         </thead>
+                        <tfoot>
+                            <tr>
+                                <th><i class="fa fa-check"></i></th>
+                                <th>Client</th>
+                                <th>Service type</th>
+                                <th>Provider</th>
+                                <th>Path</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Responsible</th>
+                                <th>Status</th>
+                                <th>Edit</th>
+                            </tr>
+                        </tfoot>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Ivanov Ivan</td>
-                                <td>Avia ticket</td>
-                                <td>Kiev - Paris</td>
-                                <td>27dec16 - 05jan17</td>
-                                <td>$170</td>
-                                <td>Ivanov Ivan</td>
-                                <td>Offer</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Annova Anna</td>
-                                <td>Avia ticket</td>
-                                <td>Kiev - Paris</td>
-                                <td>27dec16 - 05jan17</td>
-                                <td>$170</td>
-                                <td>Ivanov Ivan</td>
-                                <td>Offer</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Ivanov Ivan</td>
-                                <td>Avia ticket</td>
-                                <td>Kiev - Paris</td>
-                                <td>28dec16 - 06jan17</td>
-                                <td>$185</td>
-                                <td>Ivanov Ivan</td>
-                                <td>Offer</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Annova Anna</td>
-                                <td>Avia ticket</td>
-                                <td>Kiev - Paris</td>
-                                <td>28dec16 - 06jan17</td>
-                                <td>$185</td>
-                                <td>Ivanov Ivan</td>
-                                <td>Offer</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Ivanov Ivan</td>
-                                <td>Avia ticket</td>
-                                <td>Kiev - Berlin</td>
-                                <td>27dec16 - 05jan17</td>
-                                <td>$180</td>
-                                <td>Ivanov Ivan</td>
-                                <td>Booked</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Annova Anna</td>
-                                <td>Avia ticket</td>
-                                <td>Kiev - Berlin</td>
-                                <td>27dec16 - 05jan17</td>
-                                <td>$180</td>
-                                <td>Ivanov Ivan</td>
-                                <td>Booked</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Ivanov Ivan</td>
-                                <td>Isurance</td>
-                                <td>EU</td>
-                                <td>25dec16 - 10jan17</td>
-                                <td>$15</td>
-                                <td>Annova Anna</td>
-                                <td>Sold</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Annova Anna</td>
-                                <td>Isurance</td>
-                                <td>EU</td>
-                                <td>25dec16 - 10jan17</td>
-                                <td>$15</td>
-                                <td>Annova Anna</td>
-                                <td>Sold</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Ivanov Ivan</td>
-                                <td>Hotel</td>
-                                <td>Berlin</td>
-                                <td>28dec16 - 04jan17</td>
-                                <td>$900</td>
-                                <td>Annova Anna</td>
-                                <td>Sold</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" value="">
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>Annova Anna</td>
-                                <td>Hotel</td>
-                                <td>Berlin</td>
-                                <td>28dec16 - 04jan17</td>
-                                <td>$900</td>
-                                <td>Annova Anna</td>
-                                <td>Sold</td>
-                                <td><button type="button"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                            </tr>
+                            @foreach (var item in Model.InvoiceList)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" value="">
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>@Html.DisplayFor(model => item.Client.FullName)</td>
+                                    <td>@Html.DisplayFor(model => item.Service)</td>
+                                    <td>@Html.DisplayFor(model => item.ServiceProvider)</td>
+                                    <td>@Html.DisplayFor(model => item.Path)</td>
+                                    <td>@Html.DisplayFor(model => item.Date)</td>
+                                    <td>@Html.DisplayFor(model => item.Amount.ValStr)</td>
+                                    <td>@Html.DisplayFor(model => item.ResponsiblePerson.FullName)</td>
+                                    <td>@Html.DisplayFor(model => item.Status)</td>
+                                    <td><button type="button" data-toggle="modal" data-target="#newaviaticket" onclick="FillAviaTicket('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -601,35 +627,13 @@
 
 <!--Modal-->
 
-<script>
-
-    function InputStatusClear(id)
-    {
-        $(id).removeClass("has-success").removeClass("has-error");
-    }
-
-    function InputStatusClearAll()
-    {
-        InputStatusClear('#divQuickParse');
-    }
-
-    function myDemo()
-    {
-        InputStatusClear('#divQuickParse');
-        if (document.getElementById("inputQuickParse").value == "125")
-            $('#divQuickParse').addClass("has-success");
-        else
-            $('#divQuickParse').addClass("has-error");
-    };
-</script>
-
 <!--Avia-->
 <div class="modal fade" id="newaviaticket" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">New avia ticket</h4>
+                <h4 class="modal-title" id="newaviaticketlabel">New avia ticket</h4>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -652,6 +656,18 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="form-group input-group">
+                            <input class="form-control" placeholder="Company" id="inputCompany">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group">
                             <input class="form-control" placeholder="From" id="inputFrom">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button">
@@ -664,7 +680,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="form-group input-group">
-                            <input class="form-control" placeholder="To">
+                            <input class="form-control" placeholder="To" id="inputTo">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button">
                                     <i class="fa fa-check"></i>
@@ -673,10 +689,28 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosInline" id="radioOneWay" value="option1" onclick="UpdateTripTypeRadioButton()" checked>One way
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosInline" id="radioRoundTrip" value="option2" onclick="UpdateTripTypeRadioButton()">Round trip
+                    </label>
+                </div>
                 <div class="row">
-                    <div class="col-lg-12">
+                    <div class="col-lg-12" id="divDate">
                         <div class="form-group input-group">
-                            <input class="form-control" placeholder="Date">
+                            <input class="form-control" placeholder="Date" id="inputDate">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" style="display: none" id="divDateBack">
+                        <div class="form-group input-group">
+                            <input class="form-control" placeholder="Date" id="inputDateBack">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button">
                                     <i class="fa fa-check"></i>
@@ -689,11 +723,11 @@
                     <div class="col-lg-12">
                         <div class="form-group">
                             <label>Status</label>
-                            <select class="form-control">
-                                <option>Offer</option>
-                                <option>Booked</option>
-                                <option>Sold</option>
-                                <option>Void</option>
+                            <select class="form-control" id="selectStatusAvia">
+                                <option value="offer">Offer</option>
+                                <option value="booked">Booked</option>
+                                <option value="sold">Sold</option>
+                                <option value="void">Void</option>
                             </select>
                         </div>
                     </div>
@@ -701,31 +735,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="submit" id="btnSave" class="btn btn-primary">Save</button>
+                <button type="button" id="btnSave" class="btn btn-primary">Save</button>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    $(function () {
-        $('#btnSave').click(function (event) {
-            event.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("SaveButtonAvia", "Home")',
-                dataType: 'json',
-                data: { A: document.getElementById("inputQuickParse").value, B: document.getElementById("inputFrom").value },
-                success: function (data) {
-                    alert('success: ' + data);
-                },
-                error: function () {
-                    alert('error');
-                }
-            });
-        });
-    });
-</script>
 
 <!--Hotel-->
 <div class="modal fade" id="newhotel" tabindex="-1" role="dialog" aria-hidden="true">

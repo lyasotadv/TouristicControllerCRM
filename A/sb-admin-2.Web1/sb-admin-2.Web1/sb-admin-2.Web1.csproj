@@ -127,6 +127,7 @@
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\IDebugModel.cs" />
     <Compile Include="Models\Invoice.cs" />
+    <Compile Include="Models\Mapping\MappingController.cs" />
     <Compile Include="Models\Money.cs" />
     <Compile Include="Models\Navbar.cs" />
     <Compile Include="Models\Order.cs" />
@@ -339,9 +340,9 @@
     <Content Include="bower_components\datatables\media\images\sort_both.png" />
     <Content Include="bower_components\datatables\media\images\sort_desc.png" />
     <Content Include="bower_components\datatables\media\images\sort_desc_disabled.png" />
+    <Content Include="bower_components\datatables\media\js\jquery-1.12.3.js" />
     <Content Include="bower_components\datatables\media\js\jquery.dataTables.js" />
     <Content Include="bower_components\datatables\media\js\jquery.dataTables.min.js" />
-    <Content Include="bower_components\datatables\media\js\jquery.js" />
     <Content Include="bower_components\flot.tooltip\js\excanvas.min.js" />
     <Content Include="bower_components\flot.tooltip\js\jquery.flot.js" />
     <Content Include="bower_components\flot.tooltip\js\jquery.flot.tooltip.js" />
