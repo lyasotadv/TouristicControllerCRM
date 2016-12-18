@@ -83,9 +83,12 @@
         $(id).removeClass("has-success").removeClass("has-error");
     }
 
+    var EditedInvoiceID = 0;
+
     function InputStatusClearAll() {
         InputStatusClear('#divQuickParse');
 
+        EditedInvoiceID = 0;
         $('#inputQuickParse').val('');
         $('#inputCompany').val('');
         $('#inputFrom').val('');
@@ -128,11 +131,12 @@
                 url: '@Url.Action("SaveButtonAvia", "Home")',
                 dataType: 'json',
                 data: {
-                    A: document.getElementById("selectStatusAvia").value,
-                    B: document.getElementById("inputFrom").value
+                    id: EditedInvoiceID,
+                    Status: document.getElementById("selectStatusAvia").value
                 },
                 success: function (data) {
                     $('#newaviaticket').modal('toggle');
+                    location.reload();
                 },
                 error: function () {
                     alert('error');
@@ -143,6 +147,7 @@
 
     function FillAviaTicket(id)
     {
+        EditedInvoiceID = id;
         $.ajax({
             type: 'POST',
             url: '@Url.Action("FindIncoice", "Home")',
@@ -172,16 +177,16 @@
                         switch(data.Status)
                         {
                             case "Offer":
-                                $('#selectStatusAvia').val('offer').change();
+                                $('#selectStatusAvia').val('Offer').change();
                                 break;
                             case "Booked":
-                                $('#selectStatusAvia').val('booked').change();
+                                $('#selectStatusAvia').val('Booked').change();
                                 break;
                             case "Sold":
-                                $('#selectStatusAvia').val('sold').change();
+                                $('#selectStatusAvia').val('Sold').change();
                                 break;
                             case "Void":
-                                $('#selectStatusAvia').val('void').change();
+                                $('#selectStatusAvia').val('Soid').change();
                                 break;
                         }
                     }
@@ -226,62 +231,81 @@
 <!--Description-->
 <div class="row">
     <div class="col-lg-8">
-        <div class="row">
-            <div class="col-lg-12">
-                <h4>Description</h4>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-10">
+                        <h3>Order information</h3>
+                    </div>
+                    <div class="col-lg-2" style="text-align: right">
+                        <button type="button" class="btn btn-primary btn-circle btn-lg"><i class="glyphicon glyphicon-pencil"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h4>Description</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <p id="pDescriptionWide" contenteditable="false" ondblclick="DescriptionWideMakeEditable()">
+                            @Html.DisplayFor(model => model.Order.DescriptionWide)
+                        </p>
+                        <button id="buttonDescriptionWide" type="button" onclick="DescriptionWideSave()" style="display: none"><i class="glyphicon glyphicon-pencil"></i></button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h4>Keys</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <p id="pKeys" contenteditable="false" ondblclick="KeysMakeEditable()">
+                            @Html.DisplayFor(model => model.Order.Keys)
+                        </p>
+                        <button id="buttonKeys" type="button" onclick="KeysSave()" style="display: none"><i class="glyphicon glyphicon-pencil"></i></button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <p id="pDescriptionWide" contenteditable="false" ondblclick="DescriptionWideMakeEditable()">
-                    @Html.DisplayFor(model => model.Order.DescriptionWide)
-                </p>
-                <button id="buttonDescriptionWide" type="button" onclick="DescriptionWideSave()" style="display: none"><i class="glyphicon glyphicon-pencil"></i></button>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <h4>Keys</h4>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <p id="pKeys" contenteditable="false" ondblclick="KeysMakeEditable()">
-                    @Html.DisplayFor(model => model.Order.Keys)
-                </p>
-                <button id="buttonKeys" type="button" onclick="KeysSave()" style="display: none"><i class="glyphicon glyphicon-pencil"></i></button>
-            </div>
-        </div>
+
+        
     </div>
     <div class="col-lg-4">
-        <div class="panel panel-body">
+        <div class="panel panel-default">
             <div class="panel-heading">
-                <h3>Add new...</h3>
+                Add new...
             </div>
-            <div class="row">
-                <!--Avia-->
-                <div class="col-lg-3">
-                    <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newaviaticket" title="Avia ticket" onclick="InputStatusClearAll()">
-                        <i class="fa fa-plane fa-1x"></i>
-                    </button>
-                </div>
-                <!--Hotel-->
-                <div class="col-lg-3">
-                    <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newhotel" title="Hotel">
-                        <i class="fa fa-home fa-1x"></i>
-                    </button>
-                </div>
-                <!--Insurance-->
-                <div class="col-lg-3">
-                    <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newinsurance" title="Insurance">
-                        <i class="fa fa-medkit fa-1x"></i>
-                    </button>
-                </div>
-                <!--Train-->
-                <div class="col-lg-3">
-                    <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newtrainticket" title="Insurance">
-                        <i class="fa fa-subway fa-1x"></i>
-                    </button>
+            <div class="panel-body">
+                <div class="row">
+                    <!--Avia-->
+                    <div class="col-lg-3">
+                        <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newaviaticket" title="Avia ticket" onclick="InputStatusClearAll()">
+                            <i class="fa fa-plane fa-1x"></i>
+                        </button>
+                    </div>
+                    <!--Hotel-->
+                    <div class="col-lg-3">
+                        <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newhotel" title="Hotel">
+                            <i class="fa fa-home fa-1x"></i>
+                        </button>
+                    </div>
+                    <!--Insurance-->
+                    <div class="col-lg-3">
+                        <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newinsurance" title="Insurance">
+                            <i class="fa fa-medkit fa-1x"></i>
+                        </button>
+                    </div>
+                    <!--Train-->
+                    <div class="col-lg-3">
+                        <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newtrainticket" title="Insurance">
+                            <i class="fa fa-subway fa-1x"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -360,7 +384,40 @@
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                Invoices
+                
+                <div class="row">
+                    <div class="col-lg-9">
+                        <h3>Invoices</h3>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="row">
+                            <!--Avia-->
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newaviaticket" title="Avia ticket" onclick="InputStatusClearAll()">
+                                    <i class="fa fa-plane fa-1x"></i>
+                                </button>
+                            </div>
+                            <!--Hotel-->
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newhotel" title="Hotel">
+                                    <i class="fa fa-home fa-1x"></i>
+                                </button>
+                            </div>
+                            <!--Insurance-->
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newinsurance" title="Insurance">
+                                    <i class="fa fa-medkit fa-1x"></i>
+                                </button>
+                            </div>
+                            <!--Train-->
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newtrainticket" title="Insurance">
+                                    <i class="fa fa-subway fa-1x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="panel-body">
                 <div class="dataTable_wrapper">
@@ -724,10 +781,10 @@
                         <div class="form-group">
                             <label>Status</label>
                             <select class="form-control" id="selectStatusAvia">
-                                <option value="offer">Offer</option>
-                                <option value="booked">Booked</option>
-                                <option value="sold">Sold</option>
-                                <option value="void">Void</option>
+                                <option value="Offer">Offer</option>
+                                <option value="Booked">Booked</option>
+                                <option value="Sold">Sold</option>
+                                <option value="Void">Void</option>
                             </select>
                         </div>
                     </div>

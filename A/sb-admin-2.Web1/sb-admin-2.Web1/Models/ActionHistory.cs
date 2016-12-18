@@ -36,7 +36,6 @@ namespace sb_admin_2.Web1.Models
             Status = (ActionHistoryStatus)rand.Next(3);
 
             Person = new Person();
-            Person.CreateTestData();
             Order = new Order();
             Order.CreateTestData();
             Created = DateTime.Now;

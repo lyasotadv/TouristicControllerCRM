@@ -124,10 +124,12 @@
     <Compile Include="Models\ActionHistory.cs" />
     <Compile Include="Models\ActionInform.cs" />
     <Compile Include="Models\Contact.cs" />
+    <Compile Include="Models\Country.cs" />
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\IDebugModel.cs" />
     <Compile Include="Models\Invoice.cs" />
     <Compile Include="Models\Mapping\MappingController.cs" />
+    <Compile Include="Models\Mapping\Preferences.cs" />
     <Compile Include="Models\Money.cs" />
     <Compile Include="Models\Navbar.cs" />
     <Compile Include="Models\Order.cs" />

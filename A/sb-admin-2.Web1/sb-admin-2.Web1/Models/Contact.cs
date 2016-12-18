@@ -5,12 +5,7 @@ using System.Web;
 
 namespace sb_admin_2.Web1.Models
 {
-    public class ContactList : ModelList<Contact>
-    {
-
-    }
-
-    public class Contact : IDebugModel
+    public class Contact
     {
         private enum ContactType { email, mobile };
 
@@ -61,12 +56,5 @@ namespace sb_admin_2.Web1.Models
         public string Content { get; set; }
 
         public string Description { get; set; }
-
-        public void CreateTestData()
-        {
-            _contactType = ContactType.email;
-            Content = @"blabla@gmail.com";
-            Description = "Lorem ipsum";
-        }
     }
 }

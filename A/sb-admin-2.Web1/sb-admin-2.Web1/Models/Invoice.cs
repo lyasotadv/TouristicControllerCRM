@@ -5,6 +5,8 @@ using System.Web;
 
 using System.Globalization;
 
+using sb_admin_2.Web1.Models.Mapping;
+
 namespace sb_admin_2.Web1.Models
 {
     public class InvoiceList : List<Invoice>
@@ -104,8 +106,6 @@ namespace sb_admin_2.Web1.Models
 
         protected ServiceType serviceType;
 
-        protected CultureInfo cultureInfo;
-
         protected abstract string GetPath();
 
         protected abstract void SetPath(string val);
@@ -167,7 +167,6 @@ namespace sb_admin_2.Web1.Models
             serviceType = new ServiceType();
             Client = new Person();
             ResponsiblePerson = new Person();
-            cultureInfo = CultureInfo.CreateSpecificCulture("en-UK");
         }
 
         public void CreateTestData()
@@ -262,13 +261,13 @@ namespace sb_admin_2.Web1.Models
 
         public string DepartureStr 
         {
-            get { return Departure.ToString("ddMMMyy", cultureInfo); }
+            get { return Departure.ToString("ddMMMyy", Preferences.cultureInfo); }
             set { throw new NotImplementedException("DepatureStr for avia ticket is not implemented"); }
         }
 
         public string DepartureBackStr 
         {
-            get { return DepartureBack.ToString("ddMMMyy", cultureInfo); }
+            get { return DepartureBack.ToString("ddMMMyy", Preferences.cultureInfo); }
             set { throw new NotImplementedException("DepatureStr for avia ticket is not implemented"); }
         }
     }

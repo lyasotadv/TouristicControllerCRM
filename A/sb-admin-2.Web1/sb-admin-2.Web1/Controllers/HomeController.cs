@@ -77,12 +77,12 @@ namespace sb_admin_2.Web1.Controllers
             return View("Login");
         }
 
-        public HomeController()
+        static HomeController()
         {
             mappingController = new MappingController();
         }
 
-        private MappingController mappingController { get; set; }
+        static private MappingController mappingController { get; set; }
 
         public ActionResult Person()
         {
@@ -97,7 +97,6 @@ namespace sb_admin_2.Web1.Controllers
         public ActionResult Main()
         {
             MainData data = new MainData();
-            data.PersonList.CreateTestData(20);
             data.OrderList.CreateTestData(20);
             return View("Main", data);
         }
@@ -110,10 +109,14 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveButtonAvia(string A, string B)
+        public ActionResult SaveButtonAvia(int id, string Status)
         {
-
-            return Json(A + " " + B);
+            Invoice invoice = mappingController.orderData.InvoiceList.Find((item) => { return item.ID == id; });
+            if (invoice != null)
+            {
+                invoice.Status = Status;
+            }
+            return Json("");
         }
 
         [HttpPost]
@@ -135,6 +138,19 @@ namespace sb_admin_2.Web1.Controllers
         {
             Invoice invoice = mappingController.orderData.InvoiceList.Find((item) => { return item.ID == id; });
             return Json(invoice);
+        }
+
+        [HttpPost]
+        public ActionResult FindPassport(int id)
+        {
+            Passport passport = mappingController.personData.Person.PassportList.Find((item) => { return item.ID == id; });
+            return Json(passport);
+        }
+
+        [HttpPost]
+        public ActionResult GetPersonalData()
+        {
+            return Json(mappingController.personData.Person);
         }
     }
 }

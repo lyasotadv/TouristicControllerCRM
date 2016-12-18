@@ -25,15 +25,10 @@ namespace sb_admin_2.Web1.Models.Mapping
         private void TestDataInit()
         {
             orderData.Order.CreateTestData();
-            orderData.PersonList.CreateTestData(10);
-            orderData.ActionList.CreateTestData(10);
-
-            personData.Person.CreateTestData();
-            personData.ActionList.CreateTestData(10);
-            personData.ContactList.CreateTestData(2);
-            personData.DocumentList.CreateTestData(2);
 
             TestDataInitInvoice();
+            TestDataInitPerson();
+
         }
 
         private void TestDataInitInvoice()
@@ -178,6 +173,66 @@ namespace sb_admin_2.Web1.Models.Mapping
             //invoice10.Status = "Sold";
             //invoice10.ServiceProvider = "Verona hotel";
             //orderData.InvoiceList.Add(invoice10);
+        }
+
+        private void TestDataInitPerson()
+        {
+            personData.Person.FirstName = "Ivan";
+            personData.Person.SecondName = "Ivanov";
+            personData.Person.MiddleName = "Ibn";
+
+            personData.Person.Birth = new DateTime(1980, 07, 25);
+            personData.Person.Gender = "male";
+            personData.Person.Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+            personData.Person.Organization = "Lorem ipsum dolor sit amet";
+
+            Country ukr = new Country() { Name = "Ukraine" };
+            Country eng = new Country() { Name = "United Kingdom" };
+            Country usa = new Country() { Name = "USA" };
+            Country eu = new Country() { Name = "EU" };
+            Country uae = new Country() { Name = "UAE" };
+
+            personData.Person.Citizen = ukr;
+
+            Passport passportA = new Passport();
+            passportA.CountryOfEmmitation = ukr;
+            passportA.SerialNumber = "XX000000";
+            passportA.ValidTill = new DateTime(2020, 05, 30);
+            passportA.Description = "First passport";
+            passportA.ID = 1;
+            passportA.PersonName = "Ivanov Ivan";
+            passportA.Citizen = ukr;
+
+            Passport passportB = new Passport();
+            passportB.CountryOfEmmitation = ukr;
+            passportB.SerialNumber = "YY555555";
+            passportB.ValidTill = new DateTime(2025, 10, 10);
+            passportB.Description = "Second passport";
+            passportB.ID = 2;
+            passportB.PersonName = "Ivanov Ivan";
+            passportB.Citizen = ukr;
+
+
+            passportA.AddViza(eng, new DateTime(2018, 05, 10));
+            passportA.AddViza(usa, new DateTime(2024, 12, 20));
+            passportA.AddViza(uae, new DateTime(2017, 02, 08));
+            passportB.AddViza(eu, new DateTime(2017, 08, 13));
+            
+            personData.Person.PassportList.Add(passportA);
+            personData.Person.PassportList.Add(passportB);
+
+            Contact contactA = new Contact();
+            contactA.contactType = "e-mail";
+            contactA.Description = "Personal";
+            contactA.Content = "blablabla@bla.com";
+
+            Contact contactB = new Contact();
+            contactB.contactType = "mobile";
+            contactB.Description = "Mobile";
+            contactB.Content = "+380000000000";
+
+            personData.Person.ContactList.Add(contactA);
+            personData.Person.ContactList.Add(contactB);
         }
     }
 }

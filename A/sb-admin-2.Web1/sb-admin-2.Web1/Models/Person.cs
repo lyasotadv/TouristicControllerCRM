@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
+using sb_admin_2.Web1.Models.Mapping;
+
 namespace sb_admin_2.Web1.Models
 {
-    public class PersonList : ModelList<Person>
+    public class PersonList : List<Person>
     {
         
     }
 
-    public class Person : IDebugModel
+    public class Person
     {
         private enum Sex { male, female };
 
@@ -19,6 +21,8 @@ namespace sb_admin_2.Web1.Models
         public string FirstName { get; set; }
         
         public string SecondName { get; set; }
+
+        public string MiddleName { get; set; }
 
         public string Gender 
         { 
@@ -57,19 +61,27 @@ namespace sb_admin_2.Web1.Models
 
         public DateTime Birth { get; set; }
 
-        public string FullName
+        public string BirthStr
         {
-            get { return FirstName + " " + SecondName; }   
+            get { return Birth.ToString("ddMMMyy", Preferences.cultureInfo); }
+            set { throw new NotImplementedException("Setter for BirthStr havnt been implemented"); }
         }
 
-        public void CreateTestData()
+        public string FullName
         {
-            FirstName = "Lorem";
-            SecondName = "Ipsum";
-            Gender = "male";
-            Organization = "Default";
-            Birth = DateTime.Now.Date;
-            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+            get { return FirstName + " " + MiddleName + " " + SecondName; }   
+        }
+
+        public List<Passport> PassportList { get; private set; }
+
+        public Country Citizen { get; set; }
+
+        public List<Contact> ContactList { get; private set; }
+
+        public Person()
+        {
+            PassportList = new List<Passport>();
+            ContactList = new List<Contact>();
         }
     }
 }
