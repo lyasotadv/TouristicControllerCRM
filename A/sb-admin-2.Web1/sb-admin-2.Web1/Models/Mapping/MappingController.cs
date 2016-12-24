@@ -213,11 +213,11 @@ namespace sb_admin_2.Web1.Models.Mapping
             passportB.Citizen = ukr;
 
 
-            passportA.AddViza(eng, new DateTime(2018, 05, 10));
-            passportA.AddViza(usa, new DateTime(2024, 12, 20));
-            passportA.AddViza(uae, new DateTime(2017, 02, 08));
-            passportB.AddViza(eu, new DateTime(2017, 08, 13));
-            
+            passportA.AddViza(eng, new DateTime(2018, 05, 10), 1);
+            passportA.AddViza(usa, new DateTime(2024, 12, 20), 2);
+            passportA.AddViza(uae, new DateTime(2017, 02, 08), 3);
+            passportB.AddViza(eu, new DateTime(2017, 08, 13), 4);
+
             personData.Person.PassportList.Add(passportA);
             personData.Person.PassportList.Add(passportB);
 
@@ -225,11 +225,13 @@ namespace sb_admin_2.Web1.Models.Mapping
             contactA.contactType = "e-mail";
             contactA.Description = "Personal";
             contactA.Content = "blablabla@bla.com";
+            contactA.ID = 1;
 
             Contact contactB = new Contact();
             contactB.contactType = "mobile";
             contactB.Description = "Mobile";
             contactB.Content = "+380000000000";
+            contactB.ID = 2;
 
             personData.Person.ContactList.Add(contactA);
             personData.Person.ContactList.Add(contactB);

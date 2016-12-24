@@ -120,6 +120,21 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
+        public ActionResult SaveOrderInformation(string Description, string DescriptionWide, string Keys)
+        {
+            mappingController.orderData.Order.Description = Description;
+            mappingController.orderData.Order.DescriptionWide = DescriptionWide;
+            mappingController.orderData.Order.Keys = Keys;
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult GetOrderInformation()
+        {
+            return Json(mappingController.orderData.Order);
+        }
+
+        [HttpPost]
         public ActionResult UpdateDescriptionWide(string val)
         {
             mappingController.orderData.Order.DescriptionWide = val;
@@ -151,6 +166,22 @@ namespace sb_admin_2.Web1.Controllers
         public ActionResult GetPersonalData()
         {
             return Json(mappingController.personData.Person);
+        }
+
+        [HttpPost]
+        public ActionResult FindContact(int id)
+        {
+            Contact contact = mappingController.personData.Person.ContactList.Find((item) => { return item.ID == id; });
+            return Json(contact);
+        }
+
+        public ActionResult FindViza(int id, string PassportSerial)
+        {
+            Viza viza = null;
+            Passport passport = mappingController.personData.Person.PassportList.Find((item) => { return item.SerialNumber == PassportSerial; });
+            if (passport != null)
+                viza = passport.VizaList.Find((item) => { return item.ID == id; });
+            return Json(viza);
         }
     }
 }

@@ -56,5 +56,7 @@ namespace sb_admin_2.Web1.Models
         public string Content { get; set; }
 
         public string Description { get; set; }
+
+        public int ID { get; set; }
     }
 }

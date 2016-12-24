@@ -5,200 +5,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<script>
-    function DescriptionWideMakeEditable() {
-        //alert('Yep');
-        document.getElementById("pDescriptionWide").contentEditable = true;
-        document.getElementById("buttonDescriptionWide").style = "display: normal";
-    };
-
-    function DescriptionWideSave() {
-        document.getElementById("pDescriptionWide").contentEditable = false;
-        document.getElementById("buttonDescriptionWide").style = "display: none";
-
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("UpdateDescriptionWide", "Home")',
-            dataType: 'json',
-            data: { val: document.getElementById("pDescriptionWide").innerText },
-            success: function (data) {
-
-            },
-            error: function () {
-                alert('error');
-            }
-        });
-    };
-
-    function KeysMakeEditable() {
-        //alert('Yep');
-        document.getElementById("pKeys").contentEditable = true;
-        document.getElementById("buttonKeys").style = "display: normal";
-    };
-
-    function KeysSave() {
-        document.getElementById("pKeys").contentEditable = false;
-        document.getElementById("buttonKeys").style = "display: none";
-
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("UpdateKeys", "Home")',
-            dataType: 'json',
-            data: { val: document.getElementById("pKeys").innerText },
-            success: function (data) {
-
-            },
-            error: function () {
-                alert('error');
-            }
-        });
-    };
-
-    $(document).ready(function () {
-        $('#tableInvoice').DataTable({
-            initComplete: function () {
-                this.api().columns([1, 2, 3, 4, 5, 6, 7, 8]).every(function () {
-
-                    var column = this;
-                    var select = $('<select><option value=""></option></select>')
-                        .appendTo($(column.footer()).empty())
-                        .on('change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-
-                            column
-                                .search(val ? '^' + val + '$' : '', true, false)
-                                .draw();
-                        });
-                    column.data().unique().sort().each(function (d, j) {
-                        select.append('<option value="' + d + '">' + d + '</option>')
-                    });
-                });
-            }
-        });
-    });
-
-    function InputStatusClear(id) {
-        $(id).removeClass("has-success").removeClass("has-error");
-    }
-
-    var EditedInvoiceID = 0;
-
-    function InputStatusClearAll() {
-        InputStatusClear('#divQuickParse');
-
-        EditedInvoiceID = 0;
-        $('#inputQuickParse').val('');
-        $('#inputCompany').val('');
-        $('#inputFrom').val('');
-        $('#inputTo').val('');
-        $('#inputDate').val('');
-        $('#inputDateBack').val('');
-        document.getElementById("radioOneWay").checked = true;
-        UpdateTripTypeRadioButton();
-        $('#selectStatusAvia').val('offer').change();
-        document.getElementById("newaviaticketlabel").innerText = "New avia ticket";
-    }
-
-    function myDemo() {
-        InputStatusClear('#divQuickParse');
-        if (document.getElementById("inputQuickParse").value == "125")
-            $('#divQuickParse').addClass("has-success");
-        else
-            $('#divQuickParse').addClass("has-error");
-    };
-
-    function UpdateTripTypeRadioButton()
-    {
-        if (document.getElementById("radioRoundTrip").checked)
-        {
-            $('#divDate').removeClass('col-lg-12').addClass('col-lg-6');
-            document.getElementById("divDateBack").style = "display: normal";
-        }
-        if (document.getElementById("radioOneWay").checked)
-        {
-            $('#divDate').removeClass('col-lg-6').addClass('col-lg-12');
-            document.getElementById("divDateBack").style = "display: none";
-        }
-    }
-
-    $(function () {
-        $('#btnSave').click(function (event) {
-            event.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("SaveButtonAvia", "Home")',
-                dataType: 'json',
-                data: {
-                    id: EditedInvoiceID,
-                    Status: document.getElementById("selectStatusAvia").value
-                },
-                success: function (data) {
-                    $('#newaviaticket').modal('toggle');
-                    location.reload();
-                },
-                error: function () {
-                    alert('error');
-                }
-            });
-        });
-    });
-
-    function FillAviaTicket(id)
-    {
-        EditedInvoiceID = id;
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("FindIncoice", "Home")',
-            dataType: 'json',
-            data: { id: id },
-            success: function (data) {
-                if (data != null)
-                {
-                    if (data.Service == "Avia ticket")
-                    {
-                        document.getElementById("newaviaticketlabel").innerText = "Edit avia ticket";
-                        document.getElementById("inputCompany").value = data.ServiceProvider;
-                        document.getElementById("inputFrom").value = data.StartPoint;
-                        document.getElementById("inputTo").value = data.FinalDestination;
-                        document.getElementById("inputDate").value = data.DepartureStr;
-                        if (data.IsRoundTrip == true)
-                        {
-                            document.getElementById("radioRoundTrip").checked = true;
-                            document.getElementById("inputDateBack").value = data.DepartureBackStr;
-                        }
-                        else
-                        {
-                            document.getElementById("radioOneWay").checked = true;
-                        }
-                        UpdateTripTypeRadioButton();
-
-                        switch(data.Status)
-                        {
-                            case "Offer":
-                                $('#selectStatusAvia').val('Offer').change();
-                                break;
-                            case "Booked":
-                                $('#selectStatusAvia').val('Booked').change();
-                                break;
-                            case "Sold":
-                                $('#selectStatusAvia').val('Sold').change();
-                                break;
-                            case "Void":
-                                $('#selectStatusAvia').val('Soid').change();
-                                break;
-                        }
-                    }
-                }
-            },
-            error: function () {
-                alert('error');
-            }
-        });
-    }
-</script>
-
 <head>
     <title>
         Order
@@ -231,7 +37,8 @@
 <!--Description-->
 <div class="row">
     <div class="col-lg-8">
-
+        
+        <!--Order information-->
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="row">
@@ -239,7 +46,9 @@
                         <h3>Order information</h3>
                     </div>
                     <div class="col-lg-2" style="text-align: right">
-                        <button type="button" class="btn btn-primary btn-circle btn-lg"><i class="glyphicon glyphicon-pencil"></i></button>
+                        <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#orderinformation" onclick="FillOrderInformation()">
+                            <i class="glyphicon glyphicon-pencil"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -251,10 +60,9 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-12">
-                        <p id="pDescriptionWide" contenteditable="false" ondblclick="DescriptionWideMakeEditable()">
+                        <p id="pDescriptionWide">
                             @Html.DisplayFor(model => model.Order.DescriptionWide)
                         </p>
-                        <button id="buttonDescriptionWide" type="button" onclick="DescriptionWideSave()" style="display: none"><i class="glyphicon glyphicon-pencil"></i></button>
                     </div>
                 </div>
                 <div class="row">
@@ -264,48 +72,109 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-12">
-                        <p id="pKeys" contenteditable="false" ondblclick="KeysMakeEditable()">
+                        <p id="pKeys">
                             @Html.DisplayFor(model => model.Order.Keys)
                         </p>
-                        <button id="buttonKeys" type="button" onclick="KeysSave()" style="display: none"><i class="glyphicon glyphicon-pencil"></i></button>
                     </div>
                 </div>
             </div>
+            <!--Modal-->
+            <div class="modal fade" id="orderinformation" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="orderinformationLabel">Order informaton</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <input class="form-control" id="inputOrderDescription" placeholder="Description"></input>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <textarea class="form-control" rows="3" id="textOrderDescriptionWide" placeholder="Note"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <input class="form-control" id="inputKeyWord" placeholder="Key words"></input>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="SaveButtonOrderInformation()">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                function SaveButtonOrderInformation()
+                {
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("SaveOrderInformation", "Home")',
+                        dataType: 'json',
+                        data: {
+                            Description : document.getElementById("inputOrderDescription").value,
+                            DescriptionWide :document.getElementById("textOrderDescriptionWide").value,
+                            Keys : document.getElementById("inputKeyWord").value
+                        },
+                        success: function (data) {
+                            $('#orderinformation').modal('toggle');
+                            location.reload();
+                        },
+                        error: function () {
+                            alert('error');
+                        }
+                    });
+                }
+
+                function FillOrderInformation()
+                {
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("GetOrderInformation", "Home")',
+                        dataType: 'json',
+                        success: function (data) {
+                            document.getElementById("inputOrderDescription").value = data.Description;
+                            document.getElementById("textOrderDescriptionWide").value = data.DescriptionWide;
+                            document.getElementById("inputKeyWord").value = data.Keys;
+                        },
+                        error: function () {
+                            alert('error');
+                        }
+                    });
+                }
+            </script>
         </div>
 
-        
     </div>
     <div class="col-lg-4">
         <div class="panel panel-default">
             <div class="panel-heading">
-                Add new...
+                <div class="row">
+                    <div class="col-lg-9">
+                        <h3>Summary</h3>
+                    </div>
+                    <div class="col-lg-3" style="text-align: right">
+                        <button type="button" class="btn btn-primary btn-circle btn-lg">
+                            <i class="glyphicon glyphicon-pencil"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="panel-body">
                 <div class="row">
-                    <!--Avia-->
-                    <div class="col-lg-3">
-                        <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newaviaticket" title="Avia ticket" onclick="InputStatusClearAll()">
-                            <i class="fa fa-plane fa-1x"></i>
-                        </button>
-                    </div>
-                    <!--Hotel-->
-                    <div class="col-lg-3">
-                        <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newhotel" title="Hotel">
-                            <i class="fa fa-home fa-1x"></i>
-                        </button>
-                    </div>
-                    <!--Insurance-->
-                    <div class="col-lg-3">
-                        <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newinsurance" title="Insurance">
-                            <i class="fa fa-medkit fa-1x"></i>
-                        </button>
-                    </div>
-                    <!--Train-->
-                    <div class="col-lg-3">
-                        <button type="button" class="btn btn-primary btn-circle btn-xl" data-toggle="modal" data-target="#newtrainticket" title="Insurance">
-                            <i class="fa fa-subway fa-1x"></i>
-                        </button>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -384,7 +253,6 @@
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                
                 <div class="row">
                     <div class="col-lg-9">
                         <h3>Invoices</h3>
@@ -393,7 +261,7 @@
                         <div class="row">
                             <!--Avia-->
                             <div class="col-lg-3">
-                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newaviaticket" title="Avia ticket" onclick="InputStatusClearAll()">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newaviaticket" title="Avia ticket" onclick="ClearAviaTicket()">
                                     <i class="fa fa-plane fa-1x"></i>
                                 </button>
                             </div>
@@ -469,11 +337,68 @@
                                     <td>@Html.DisplayFor(model => item.Amount.ValStr)</td>
                                     <td>@Html.DisplayFor(model => item.ResponsiblePerson.FullName)</td>
                                     <td>@Html.DisplayFor(model => item.Status)</td>
-                                    <td><button type="button" data-toggle="modal" data-target="#newaviaticket" onclick="FillAviaTicket('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                    <td><button type="button" onclick="FillInvoiceEdit('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+                    <script>
+                        $(document).ready(function () {
+                            $('#tableInvoice').DataTable({
+                                initComplete: function () {
+                                    this.api().columns([1, 2, 3, 4, 5, 6, 7, 8]).every(function () {
+
+                                        var column = this;
+                                        var select = $('<select><option value=""></option></select>')
+                                            .appendTo($(column.footer()).empty())
+                                            .on('change', function () {
+                                                var val = $.fn.dataTable.util.escapeRegex(
+                                                    $(this).val()
+                                                );
+
+                                                column
+                                                    .search(val ? '^' + val + '$' : '', true, false)
+                                                    .draw();
+                                            });
+                                        column.data().unique().sort().each(function (d, j) {
+                                            select.append('<option value="' + d + '">' + d + '</option>')
+                                        });
+                                    });
+                                }
+                            });
+                        });
+
+                        var EditedInvoiceID = 0;
+
+                        function FillInvoiceEdit(id) {
+                            EditedInvoiceID = id;
+                            $.ajax({
+                                type: 'POST',
+                                url: '@Url.Action("FindIncoice", "Home")',
+                                dataType: 'json',
+                                data: { id: id },
+                                success: function (data) {
+                                    if (data != null) {
+                                        switch (data.Service)
+                                        {
+                                            case "Avia ticket": {
+                                                FillAviaTicket(data);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                },
+                                error: function () {
+                                    alert('error');
+                                }
+                            });
+                        }
+
+
+                        function InputStatusClear(id) {
+                            $(id).removeClass("has-success").removeClass("has-error");
+                        }
+                    </script>
                 </div>
             </div>
         </div>
@@ -698,7 +623,7 @@
                         <div class="form-group input-group" id="divQuickParse">
                             <input class="form-control" placeholder="Quick parse" id="inputQuickParse">
                             <span class="input-group-btn">
-                                <button class="btn btn-default" type="button" onclick="myDemo()">
+                                <button class="btn btn-default" type="button">
                                     <i class="fa fa-check"></i>
                                 </button>
                             </span>
@@ -792,10 +717,91 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" id="btnSave" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-primary" onclick="SaveAviaTicket()">Save</button>
             </div>
         </div>
     </div>
+    <script>
+
+        function UpdateTripTypeRadioButton() {
+            if (document.getElementById("radioRoundTrip").checked) {
+                $('#divDate').removeClass('col-lg-12').addClass('col-lg-6');
+                document.getElementById("divDateBack").style = "display: normal";
+            }
+            if (document.getElementById("radioOneWay").checked) {
+                $('#divDate').removeClass('col-lg-6').addClass('col-lg-12');
+                document.getElementById("divDateBack").style = "display: none";
+            }
+        }
+
+        function FillAviaTicket(data) {
+            document.getElementById("newaviaticketlabel").innerText = "Edit avia ticket";
+            document.getElementById("inputCompany").value = data.ServiceProvider;
+            document.getElementById("inputFrom").value = data.StartPoint;
+            document.getElementById("inputTo").value = data.FinalDestination;
+            document.getElementById("inputDate").value = data.DepartureStr;
+            if (data.IsRoundTrip == true) {
+                document.getElementById("radioRoundTrip").checked = true;
+                document.getElementById("inputDateBack").value = data.DepartureBackStr;
+            }
+            else {
+                document.getElementById("radioOneWay").checked = true;
+            }
+            UpdateTripTypeRadioButton();
+
+            switch (data.Status) {
+                case "Offer":
+                    $('#selectStatusAvia').val('Offer').change();
+                    break;
+                case "Booked":
+                    $('#selectStatusAvia').val('Booked').change();
+                    break;
+                case "Sold":
+                    $('#selectStatusAvia').val('Sold').change();
+                    break;
+                case "Void":
+                    $('#selectStatusAvia').val('Soid').change();
+                    break;
+            }
+
+            $('#newaviaticket').modal();
+        }
+
+        function SaveAviaTicket() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveButtonAvia", "Home")',
+                dataType: 'json',
+                data: {
+                    id: EditedInvoiceID,
+                    Status: document.getElementById("selectStatusAvia").value
+                },
+                success: function (data) {
+                    $('#newaviaticket').modal('toggle');
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        }
+
+        function ClearAviaTicket() {
+            InputStatusClear('#divQuickParse');
+
+            EditedInvoiceID = 0;
+            $('#inputQuickParse').val('');
+            $('#inputCompany').val('');
+            $('#inputFrom').val('');
+            $('#inputTo').val('');
+            $('#inputDate').val('');
+            $('#inputDateBack').val('');
+            document.getElementById("radioOneWay").checked = true;
+            UpdateTripTypeRadioButton();
+            $('#selectStatusAvia').val('offer').change();
+            document.getElementById("newaviaticketlabel").innerText = "New avia ticket";
+        }
+    </script>
 </div>
 
 <!--Hotel-->

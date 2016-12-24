@@ -103,7 +103,7 @@ namespace sb_admin_2.Web1.Models
 
         public Country Citizen { get; set; }
 
-        public void AddViza(Country country, DateTime expired)
+        public void AddViza(Country country, DateTime expired, int ID)
         {
             Viza viza = new Viza();
             VizaList.Add(viza);
@@ -111,6 +111,7 @@ namespace sb_admin_2.Web1.Models
             viza.CountryOfInvintation = country;
             viza.ValidTill = expired;
             viza.PassportSerial = SerialNumber;
+            viza.ID = ID;
         }
     }
 
