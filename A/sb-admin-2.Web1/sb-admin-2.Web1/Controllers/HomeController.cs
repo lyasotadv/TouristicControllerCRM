@@ -84,103 +84,187 @@ namespace sb_admin_2.Web1.Controllers
 
         static private MappingController mappingController { get; set; }
 
-        public ActionResult Person()
+        public ActionResult Person(string id)
         {
-            return View("Person", mappingController.personData);
+            if (id != null)
+            {
+                int ID = 0;
+                try
+                {
+                    ID = Convert.ToInt32(id);
+                }
+                catch
+                {
+                    throw new ArgumentException("Person ID is not convertable to valid type");
+                }
+
+                PersonData data = mappingController.ConstructPersonData(ID);
+                return View("Person", data);
+            }
+            return View("PersonList", mappingController.personListData);
         }
 
-        public ActionResult Order()
+        public ActionResult PersonList()
         {
-            return View("Order", mappingController.orderData);
+            return RedirectToAction("Person");
+        }
+
+        public ActionResult Order(string id)
+        {
+            if (id != null)
+            {
+                int ID = 0;
+                try
+                {
+                    ID = Convert.ToInt32(id);
+                }
+                catch
+                {
+                    throw new ArgumentException("Order ID is not convertable to valid type");
+                }
+
+                OrderData data = mappingController.ConstructOrderData(ID);
+                return View("Order", data);
+            }
+            return View("OrderList", mappingController.orderListData);
+        }
+
+        public ActionResult OrderList()
+        {
+            return RedirectToAction("Order");
         }
 
         public ActionResult Main()
         {
             MainData data = new MainData();
-            data.OrderList.CreateTestData(20);
             return View("Main", data);
         }
 
         public ActionResult Actions()
         {
             ActionData data = new ActionData();
-            data.ActionInform.CreateTestData();
             return View("Actions", data);
         }
 
         [HttpPost]
-        public ActionResult SaveButtonAvia(int id, string Status)
+        public ActionResult SaveButtonAvia(int OrderID, int id, string Status)
         {
-            Invoice invoice = mappingController.orderData.InvoiceList.Find((item) => { return item.ID == id; });
-            if (invoice != null)
+            Order order = mappingController.orderListData.orderList.Find(item => item.ID == OrderID);
+            if (order != null)
             {
-                invoice.Status = Status;
+                Invoice invoice = order.invoiceList.Find((item) => { return item.ID == id; });
+                if (invoice != null)
+                {
+                    invoice.Status = Status;
+                }
             }
             return Json("");
         }
 
         [HttpPost]
-        public ActionResult SaveOrderInformation(string Description, string DescriptionWide, string Keys)
+        public ActionResult SaveOrderInformation(int OrderID, string Description, string DescriptionWide, string Keys)
         {
-            mappingController.orderData.Order.Description = Description;
-            mappingController.orderData.Order.DescriptionWide = DescriptionWide;
-            mappingController.orderData.Order.Keys = Keys;
+            Order order = mappingController.orderListData.orderList.Find(item => item.ID == OrderID);
+            if (order != null)
+            {
+                order.Description = Description;
+                order.DescriptionWide = DescriptionWide;
+                order.Keys = Keys;
+            }
             return Json("");
         }
 
         [HttpPost]
-        public ActionResult GetOrderInformation()
+        public ActionResult GetOrderInformation(int OrderID)
         {
-            return Json(mappingController.orderData.Order);
+            Order order = mappingController.orderListData.orderList.Find(item => item.ID == OrderID);
+            return Json(order);
         }
 
         [HttpPost]
-        public ActionResult UpdateDescriptionWide(string val)
+        public ActionResult UpdateDescriptionWide(int OrderID, string val)
         {
-            mappingController.orderData.Order.DescriptionWide = val;
+            Order order = mappingController.orderListData.orderList.Find(item => item.ID == OrderID);
+            if (order != null)
+            {
+                order.DescriptionWide = val;
+            }
             return Json(val);
         }
 
         [HttpPost]
-        public ActionResult UpdateKeys(string val)
+        public ActionResult UpdateKeys(int OrderID, string val)
         {
-            mappingController.orderData.Order.Keys = val;
+            Order order = mappingController.orderListData.orderList.Find(item => item.ID == OrderID);
+            if (order != null)
+            {
+                order.Keys = val;
+            }
             return Json(val);
         }
 
         [HttpPost]
-        public ActionResult FindIncoice(int id)
+        public ActionResult FindIncoice(int OrderID, int id)
         {
-            Invoice invoice = mappingController.orderData.InvoiceList.Find((item) => { return item.ID == id; });
-            return Json(invoice);
+            Order order = mappingController.orderListData.orderList.Find(item => item.ID == OrderID);
+            if (order != null)
+            {
+                Invoice invoice = order.invoiceList.Find((item) => { return item.ID == id; });
+                return Json(invoice);
+            }
+            else
+            {
+                return Json("");
+            }
         }
 
         [HttpPost]
-        public ActionResult FindPassport(int id)
+        public ActionResult FindPassport(int PersonID, int id)
         {
-            Passport passport = mappingController.personData.Person.PassportList.Find((item) => { return item.ID == id; });
-            return Json(passport);
+            Person person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                Passport passport = person.PassportList.Find((item) => { return item.ID == id; });
+                return Json(passport);
+            }
+            else
+            {
+                return Json("");
+            }
         }
 
         [HttpPost]
-        public ActionResult GetPersonalData()
+        public ActionResult GetPersonalData(int PersonID)
         {
-            return Json(mappingController.personData.Person);
+            Person person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            return Json(person);
         }
 
         [HttpPost]
-        public ActionResult FindContact(int id)
+        public ActionResult FindContact(int PersonID, int id)
         {
-            Contact contact = mappingController.personData.Person.ContactList.Find((item) => { return item.ID == id; });
-            return Json(contact);
+            Person person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                Contact contact = person.ContactList.Find((item) => { return item.ID == id; });
+                return Json(contact);
+            }
+            else
+            {
+                return Json("");
+            }
         }
 
-        public ActionResult FindViza(int id, string PassportSerial)
+        public ActionResult FindViza(int PersonID, int id, string PassportSerial)
         {
             Viza viza = null;
-            Passport passport = mappingController.personData.Person.PassportList.Find((item) => { return item.SerialNumber == PassportSerial; });
-            if (passport != null)
-                viza = passport.VizaList.Find((item) => { return item.ID == id; });
+            Person person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                Passport passport = person.PassportList.Find((item) => { return item.SerialNumber == PassportSerial; });
+                if (passport != null)
+                    viza = passport.VizaList.Find((item) => { return item.ID == id; });
+            }
             return Json(viza);
         }
     }

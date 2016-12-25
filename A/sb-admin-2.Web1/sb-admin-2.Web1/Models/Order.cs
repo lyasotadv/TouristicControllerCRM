@@ -5,12 +5,12 @@ using System.Web;
 
 namespace sb_admin_2.Web1.Models
 {
-    public class OrderList : ModelList<Order>
+    public class OrderList : List<Order>
     {
         
     }
 
-    public class Order : IDebugModel
+    public class Order
     {
         private enum OrderStatus { active, closed };
 
@@ -66,13 +66,13 @@ namespace sb_admin_2.Web1.Models
 
         public string Keys { get; set; }
 
-        public void CreateTestData()
+        public InvoiceList invoiceList { get; private set; }
+
+        public int ID { get; set; }
+
+        public Order()
         {
-            Description = "Default";
-            DescriptionWide = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
-            Status = "active";
-            LastUpdate = DateTime.Now;
-            Keys = "lorem, ipsum";
+            invoiceList = new InvoiceList();
         }
     }
 }

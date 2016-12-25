@@ -5,33 +5,78 @@ using System.Web;
 
 using sb_admin_2.Web1.Models;
 using sb_admin_2.Web1.Domain;
+using sb_admin_2.Web1.Models.Mapping.DBUtils;
 
 namespace sb_admin_2.Web1.Models.Mapping
 {
     public class MappingController
     {
-        public OrderData orderData { get; set; }
+        public OrderListData orderListData { get; set; }
 
-        public PersonData personData { get; set; }
+        public PersonListData personListData { get; set; }
 
         public MappingController()
         {
-            orderData = new OrderData();
-            personData = new PersonData();
+            Catalog catalog = new Catalog();
+
+            orderListData = new OrderListData();
+            personListData = new PersonListData();
+
+            orderListData.catalog = catalog;
+            personListData.catalog = catalog;
 
             TestDataInit();
+
+            personListData.personList.Add(new Person() { ID = 2 });
+            orderListData.orderList.Add(new Order() { ID = 2 });
+        }
+
+        public OrderData ConstructOrderData(int ID)
+        {
+            Order order = orderListData.orderList.Find(item => item.ID == ID);
+            if (order != null)
+            {
+                OrderData data = new OrderData(order);
+                data.catalog = orderListData.catalog;
+                return data;
+            }
+            else
+            {
+                throw new ArgumentException("Order with current id can not be found");
+            }
+        }
+
+        public PersonData ConstructPersonData(int ID)
+        {
+            Person person = personListData.personList.Find(item => item.ID == ID);
+            if (person != null)
+            {
+                PersonData data = new PersonData(person);
+                data.catalog = personListData.catalog;
+                return data;
+            }
+            else
+            {
+                throw new ArgumentException("Person with current id can not be found");
+            }
         }
 
         private void TestDataInit()
         {
-            orderData.Order.CreateTestData();
+            Order order = new Order();
+            orderListData.orderList.Add(order);
 
-            TestDataInitInvoice();
+            order.Keys = "lorem, ipsum";
+            order.Description = "Default";
+            order.DescriptionWide = "Lorem ipsum bla-bla";
+            order.Status = "active";
+            order.ID = 1;
+
+            TestDataInitInvoice(order);
             TestDataInitPerson();
-
         }
 
-        private void TestDataInitInvoice()
+        private void TestDataInitInvoice(Order order)
         {
             Person ivan = new Person();
             ivan.FirstName = "Ivan";
@@ -54,7 +99,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             invoice1.Status = "Offer";
             invoice1.ServiceProvider = "KLM";
             invoice1.IsRoundTrip = true;
-            orderData.InvoiceList.Add(invoice1);
+            order.invoiceList.Add(invoice1);
 
             //2
             AviaTicketInvoice invoice2 = new AviaTicketInvoice();
@@ -68,7 +113,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             invoice2.Amount.Val = 170;
             invoice2.Status = "Offer";
             invoice2.ServiceProvider = "KLM";
-            orderData.InvoiceList.Add(invoice2);
+            order.invoiceList.Add(invoice2);
 
             //3
             AviaTicketInvoice invoice3 = new AviaTicketInvoice();
@@ -82,7 +127,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             invoice3.Amount.Val = 185;
             invoice3.Status = "Offer";
             invoice3.ServiceProvider = "KLM";
-            orderData.InvoiceList.Add(invoice3);
+            order.invoiceList.Add(invoice3);
 
             //4
             AviaTicketInvoice invoice4 = new AviaTicketInvoice();
@@ -96,7 +141,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             invoice4.Amount.Val = 185;
             invoice4.Status = "Offer";
             invoice4.ServiceProvider = "KLM";
-            orderData.InvoiceList.Add(invoice4);
+            order.invoiceList.Add(invoice4);
 
             //5
             AviaTicketInvoice invoice5 = new AviaTicketInvoice();
@@ -110,7 +155,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             invoice5.Amount.Val = 180;
             invoice5.Status = "Booked";
             invoice5.ServiceProvider = "KLM";
-            orderData.InvoiceList.Add(invoice5);
+            order.invoiceList.Add(invoice5);
 
             //6
             AviaTicketInvoice invoice6 = new AviaTicketInvoice();
@@ -124,7 +169,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             invoice6.Amount.Val = 180;
             invoice6.Status = "Booked";
             invoice6.ServiceProvider = "KLM";
-            orderData.InvoiceList.Add(invoice6);
+            order.invoiceList.Add(invoice6);
 
             ////7
             //Invoice invoice7 = new InsuranceInvoice();
@@ -137,6 +182,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             //invoice7.Status = "Sold";
             //invoice7.ServiceProvider = "PZU";
             //orderData.InvoiceList.Add(invoice7);
+
 
             ////8
             //Invoice invoice8 = new InsuranceInvoice();
@@ -177,14 +223,18 @@ namespace sb_admin_2.Web1.Models.Mapping
 
         private void TestDataInitPerson()
         {
-            personData.Person.FirstName = "Ivan";
-            personData.Person.SecondName = "Ivanov";
-            personData.Person.MiddleName = "Ibn";
+            Person person = new Person();
+            personListData.personList.Add(person);
 
-            personData.Person.Birth = new DateTime(1980, 07, 25);
-            personData.Person.Gender = "male";
-            personData.Person.Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
-            personData.Person.Organization = "Lorem ipsum dolor sit amet";
+            person.FirstName = "Ivan";
+            person.SecondName = "Ivanov";
+            person.MiddleName = "Ibn";
+
+            person.Birth = new DateTime(1980, 07, 25);
+            person.Gender = "male";
+            person.Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+            person.Organization = "Lorem ipsum dolor sit amet";
+            person.ID = 1;
 
             Country ukr = new Country() { Name = "Ukraine" };
             Country eng = new Country() { Name = "United Kingdom" };
@@ -192,7 +242,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             Country eu = new Country() { Name = "EU" };
             Country uae = new Country() { Name = "UAE" };
 
-            personData.Person.Citizen = ukr;
+            person.Citizen = ukr;
 
             Passport passportA = new Passport();
             passportA.CountryOfEmmitation = ukr;
@@ -218,8 +268,8 @@ namespace sb_admin_2.Web1.Models.Mapping
             passportA.AddViza(uae, new DateTime(2017, 02, 08), 3);
             passportB.AddViza(eu, new DateTime(2017, 08, 13), 4);
 
-            personData.Person.PassportList.Add(passportA);
-            personData.Person.PassportList.Add(passportB);
+            person.PassportList.Add(passportA);
+            person.PassportList.Add(passportB);
 
             Contact contactA = new Contact();
             contactA.contactType = "e-mail";
@@ -233,8 +283,8 @@ namespace sb_admin_2.Web1.Models.Mapping
             contactB.Content = "+380000000000";
             contactB.ID = 2;
 
-            personData.Person.ContactList.Add(contactA);
-            personData.Person.ContactList.Add(contactB);
+            person.ContactList.Add(contactA);
+            person.ContactList.Add(contactB);
         }
     }
 }

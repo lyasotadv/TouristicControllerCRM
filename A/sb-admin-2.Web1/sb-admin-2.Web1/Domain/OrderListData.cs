@@ -7,13 +7,13 @@ using sb_admin_2.Web1.Models;
 
 namespace sb_admin_2.Web1.Domain
 {
-    public class OrderData : PageData
+    public class OrderListData : PageData
     {
-        public OrderData(Order order)
-        {
-            this.order = order;
-        }
+        public OrderList orderList { get; private set; }
 
-        public Order order { get; private set; }
+        public OrderListData()
+        {
+            orderList = new OrderList();
+        }
     }
 }

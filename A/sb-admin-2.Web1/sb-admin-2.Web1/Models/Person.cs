@@ -78,6 +78,8 @@ namespace sb_admin_2.Web1.Models
 
         public List<Contact> ContactList { get; private set; }
 
+        public int ID { get; set; }
+
         public Person()
         {
             PassportList = new List<Passport>();

@@ -61,7 +61,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <p id="pDescriptionWide">
-                            @Html.DisplayFor(model => model.Order.DescriptionWide)
+                            @Html.DisplayFor(model => model.order.DescriptionWide)
                         </p>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <p id="pKeys">
-                            @Html.DisplayFor(model => model.Order.Keys)
+                            @Html.DisplayFor(model => model.order.Keys)
                         </p>
                     </div>
                 </div>
@@ -117,33 +117,37 @@
                 </div>
             </div>
             <script>
-                function SaveButtonOrderInformation()
-                {
-                    $.ajax({
-                        type: 'POST',
-                        url: '@Url.Action("SaveOrderInformation", "Home")',
+    function SaveButtonOrderInformation()
+    {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SaveOrderInformation", "Home")',
+            dataType: 'json',
+            data: {
+                OrderID : '@Model.order.ID',
+                Description : document.getElementById("inputOrderDescription").value,
+                DescriptionWide :document.getElementById("textOrderDescriptionWide").value,
+                Keys : document.getElementById("inputKeyWord").value
+            },
+            success: function (data) {
+                $('#orderinformation').modal('toggle');
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    function FillOrderInformation()
+    {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetOrderInformation", "Home")',
                         dataType: 'json',
                         data: {
-                            Description : document.getElementById("inputOrderDescription").value,
-                            DescriptionWide :document.getElementById("textOrderDescriptionWide").value,
-                            Keys : document.getElementById("inputKeyWord").value
+                            OrderID : '@Model.order.ID'
                         },
-                        success: function (data) {
-                            $('#orderinformation').modal('toggle');
-                            location.reload();
-                        },
-                        error: function () {
-                            alert('error');
-                        }
-                    });
-                }
-
-                function FillOrderInformation()
-                {
-                    $.ajax({
-                        type: 'POST',
-                        url: '@Url.Action("GetOrderInformation", "Home")',
-                        dataType: 'json',
                         success: function (data) {
                             document.getElementById("inputOrderDescription").value = data.Description;
                             document.getElementById("textOrderDescriptionWide").value = data.DescriptionWide;
@@ -319,7 +323,7 @@
                             </tr>
                         </tfoot>
                         <tbody>
-                            @foreach (var item in Model.InvoiceList)
+                            @foreach (var item in Model.order.invoiceList)
                             {
                                 <tr>
                                     <td>
@@ -376,7 +380,10 @@
                                 type: 'POST',
                                 url: '@Url.Action("FindIncoice", "Home")',
                                 dataType: 'json',
-                                data: { id: id },
+                                data: {
+                                    OrderID: '@Model.order.ID',
+                                    id: id
+                                },
                                 success: function (data) {
                                     if (data != null) {
                                         switch (data.Service)
@@ -773,6 +780,8 @@
                 url: '@Url.Action("SaveButtonAvia", "Home")',
                 dataType: 'json',
                 data: {
+                    OrderID: '@Model.order.ID',
+                    orderID : '@Model.order.ID',
                     id: EditedInvoiceID,
                     Status: document.getElementById("selectStatusAvia").value
                 },

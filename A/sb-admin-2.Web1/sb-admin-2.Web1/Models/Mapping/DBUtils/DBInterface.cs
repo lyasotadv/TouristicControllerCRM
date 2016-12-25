@@ -1,0 +1,195 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using MySql.Data;
+using MySql.Data.MySqlClient;
+using System.Data;
+
+namespace sb_admin_2.Web1.Models.Mapping.DBUtils
+{
+    public class DBInterface
+    {
+        private class DBInterfaceObject
+        {
+            private MySqlConnection conn { get; set; }
+
+            public DBInterfaceObject()
+            {
+                string connStr = "server=localhost;user=root;database=sellcontroller;port=3306;password=000000";
+                conn = new MySqlConnection(connStr);
+                try
+                {
+                    conn.Open();
+                }
+                catch (Exception ex)
+                {
+                    throw new NotImplementedException("Handling of connection to DB exception was not implemented");
+                }
+            }
+
+            ~DBInterfaceObject()
+            {
+                conn.Close();
+            }
+
+            public MySqlCommand command
+            {
+                get;
+                private set;
+            }
+
+            public void Clear()
+            {
+                command = conn.CreateCommand();
+                command.Connection = conn;
+            }
+
+            public DataTable ExecuteSelection()
+            {
+                DataTable tab = new DataTable();
+                MySqlDataAdapter adapt = new MySqlDataAdapter(command);
+                adapt.Fill(tab);
+                return tab;
+            }
+
+            public void ExecuteTransaction()
+            {
+                MySqlTransaction trans = conn.BeginTransaction();
+                command.Transaction = trans;
+                command.ExecuteNonQuery();
+                trans.Commit();
+            }
+        }
+
+        static DBInterface()
+        {
+            _obj = null;
+        }
+
+        static private DBInterfaceObject _obj;
+
+        static private DBInterfaceObject obj
+        {
+            get
+            {
+                if (_obj == null)
+                    _obj = new DBInterfaceObject();
+                return _obj;
+            }
+        }
+
+        static public string CommandText
+        {
+            get
+            {
+                return obj.command.CommandText;
+            }
+            set
+            {
+                obj.Clear();
+                obj.command.CommandText = value;
+            }
+        }
+
+        static public void AddParameter(string parameterName, MySqlDbType DBType, object Value)
+        {
+            if (obj.command == null)
+                throw new NullReferenceException("DB command have not be created. Set command text before add paramaters");
+            obj.command.Parameters.Add(parameterName, DBType);
+            int cnt = obj.command.Parameters.Count;
+            obj.command.Parameters[cnt - 1].Value = Value;
+        }
+
+        static public DataTable ExecuteSelection()
+        {
+            return obj.ExecuteSelection();
+        }
+
+        static public void ExecuteTransaction()
+        {
+            obj.ExecuteTransaction();
+        }
+    }
+
+    public class InsertRow
+    {
+        private Dictionary<string, object> parameterValue;
+
+        private Dictionary<string, MySqlDbType> parameterType;
+
+        private string tableName;
+
+        private string idName;
+
+        public InsertRow(string tableName, string idName)
+        {
+            this.tableName = tableName;
+            this.idName = idName;
+            parameterValue = new Dictionary<string, object>();
+            parameterType = new Dictionary<string, MySqlDbType>();
+
+            Add(idName, MySqlDbType.Int32, PrimaryID());
+        }
+
+        private int PrimaryID()
+        {
+            DBInterface.CommandText = "SELECT MAX(" + idName + ") FROM " + tableName;
+            DataTable tab = DBInterface.ExecuteSelection();
+            if (tab.Rows.Count == 0)
+                return 0;
+            return Convert.ToInt32(tab.Rows[0][0]) + 1;
+        }
+
+        public void Add(string Name, MySqlDbType DBType, object Value)
+        {
+            parameterValue.Add(Name, Value);
+            parameterType.Add(Name, DBType);
+        }
+
+        public void Execute()
+        {
+            string com = "INSERT INTO " + tableName + " (";
+            bool first = true;
+            foreach(var item in parameterValue.Keys)
+            {
+                if (!first)
+                {
+                    com += ", ";
+                }
+                com += item;
+                first = false;
+            }
+            com += ") VALUES (@";
+
+            first = true;
+            foreach (var item in parameterValue.Keys)
+            {
+                if (!first)
+                {
+                    com += ", @";
+                }
+                com += item;
+                first = false;
+            }
+            com += ");";
+
+            DBInterface.CommandText = com;
+
+            DBInterface.AddParameter("@tab", MySqlDbType.String, tableName);
+
+            foreach(var item in parameterValue)
+            {
+                MySqlDbType DBType = MySqlDbType.String;
+                if (parameterType.TryGetValue(item.Key, out DBType))
+                {
+                    DBInterface.AddParameter("@" + item.Key, DBType, item.Value);
+                }
+            }
+
+            DBInterface.ExecuteTransaction();
+        }
+    }
+}

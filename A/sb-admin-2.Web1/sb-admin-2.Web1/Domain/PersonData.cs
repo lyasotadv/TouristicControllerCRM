@@ -7,13 +7,13 @@ using sb_admin_2.Web1.Models;
 
 namespace sb_admin_2.Web1.Domain
 {
-    public class PersonData
+    public class PersonData : PageData
     {
-        public PersonData()
+        public PersonData(Person person)
         {
-            Person = new Person();
+            this.person = person;
         }
 
-        public Person Person { get; private set; }
+        public Person person { get; private set; }
     }
 }

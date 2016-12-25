@@ -42,7 +42,10 @@
             type: 'POST',
             url: '@Url.Action("FindPassport", "Home")',
             dataType: 'json',
-            data: { id: id },
+            data: {
+                PersonID : '@Model.person.ID',
+                id: id
+            },
             success: function (data) {
                 if (data != null) {
                     document.getElementById("inputPassportSerial").value = data.SerialNumber;
@@ -64,6 +67,9 @@
             type: 'POST',
             url: '@Url.Action("GetPersonalData", "Home")',
             dataType: 'json',
+            data: {
+                PersonID : '@Model.person.ID'
+            },
             success: function (data) {
                 if (data != null) {
                     document.getElementById("inputFirstName").value = data.FirstName;
@@ -104,7 +110,10 @@
             type: 'POST',
             url: '@Url.Action("FindContact", "Home")',
             dataType: 'json',
-            data: { id: id },
+            data: {
+                PersonID: '@Model.person.ID',
+                id: id
+            },
             success: function (data) {
                 if (data != null) {
                     document.getElementById("inputContactContent").value = data.Content;
@@ -143,6 +152,7 @@
             url: '@Url.Action("FindViza", "Home")',
             dataType: 'json',
             data: {
+                PersonID: '@Model.person.ID',
                 id: id,
                 PassportSerial: PassportSerial
             },
@@ -184,16 +194,16 @@
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-lg-8">
-                                <div><h3>@Html.DisplayFor(model => model.Person.FullName)</h3></div>
+                                <div><h3>@Html.DisplayFor(model => model.person.FullName)</h3></div>
                             </div>
                             <div class="col-lg-4">
-                                <div><h3>@Html.DisplayFor(model => model.Person.BirthStr)</h3></div>
+                                <div><h3>@Html.DisplayFor(model => model.person.BirthStr)</h3></div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-12">
                                 <h5>
-                                    @Html.DisplayFor(model => model.Person.Description)
+                                    @Html.DisplayFor(model => model.person.Description)
                                 </h5>
                             </div>
                         </div>
@@ -226,7 +236,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var item in Model.Person.ContactList)
+                                    @foreach (var item in Model.person.ContactList)
                                     {
                                         <tr class="odd gradeX">
                                             <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#contactdetails" onclick="FillContactDetails('@item.ID')">@Html.DisplayFor(model => item.Content)</button></td>
@@ -267,7 +277,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var item in Model.Person.PassportList)
+                                    @foreach (var item in Model.person.PassportList)
                                     {
                                         <tr class="odd gradeX">
                                             <td>
@@ -312,7 +322,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var pass in Model.Person.PassportList)
+                                    @foreach (var pass in Model.person.PassportList)
                                     {
                                         foreach (var item in pass.VizaList)
                                         {
@@ -336,7 +346,12 @@
 
 
 
-
+<datalist id="listCountry">
+        @foreach(var item in Model.catalog.countryList)
+        {
+            <option value='@item.Name'/>
+        }
+</datalist>
 
 
 
@@ -372,12 +387,12 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="form-group" id="divCountryOfEmitation">
-                            <input class="form-control" placeholder="Country of emitation" id="inputCountryOfEmitation">
+                            <input class="form-control" placeholder="Country of emitation" id="inputCountryOfEmitation" list="listCountry">
                         </div>
                     </div>
                     <div class="col-lg-6">
                         <div class="form-group" id="divCountryOfCitizen">
-                            <input class="form-control" placeholder="Citizen" id="inputCountryOfCitizen">
+                            <input class="form-control" placeholder="Citizen" id="inputCountryOfCitizen" list="listCountry">
                         </div>
                     </div>
                 </div>
@@ -516,7 +531,7 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <select class="form-control" id="selectVizaPassport">
-                                @foreach (var item in Model.Person.PassportList)
+                                @foreach (var item in Model.person.PassportList)
                                 {
                                     <option value="@item.SerialNumber">@Html.DisplayFor(model => item.SerialNumber)</option>
                                 }
@@ -527,7 +542,7 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="form-group" id="divVizaCountry">
-                            <input class="form-control" placeholder="Country" id="inputVizaCountry">
+                            <input class="form-control" placeholder="Country" id="inputVizaCountry" list="listCountry">
                         </div>
                     </div>
                     <div class="col-lg-6">
