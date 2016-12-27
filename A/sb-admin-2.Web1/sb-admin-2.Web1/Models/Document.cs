@@ -95,7 +95,7 @@ namespace sb_admin_2.Web1.Models
                 {
                     if (str != string.Empty)
                         str += ", ";
-                    str += viza.CountryOfInvintation.Name;
+                    str += viza.CountryOfInvintation.ISO;
                 }
                 return str;
             }

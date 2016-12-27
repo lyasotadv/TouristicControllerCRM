@@ -36,5 +36,7 @@ namespace sb_admin_2.Web1.Models
     public class Country
     {
         public string Name { get; set; }
+
+        public string ISO { get; set; }
     }
 }

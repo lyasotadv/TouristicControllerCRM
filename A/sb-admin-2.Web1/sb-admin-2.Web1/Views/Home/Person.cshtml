@@ -233,14 +233,16 @@
                                     <tr>
                                         <th>Contact</th>
                                         <th>Description</th>
+                                        <th>Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var item in Model.person.ContactList)
                                     {
                                         <tr class="odd gradeX">
-                                            <td><button type="button" class="btn btn-link" data-toggle="modal" data-target="#contactdetails" onclick="FillContactDetails('@item.ID')">@Html.DisplayFor(model => item.Content)</button></td>
+                                            <td>@Html.DisplayFor(model => item.Content)</td>
                                             <td>@Html.DisplayFor(model => item.Description)</td>
+                                            <td><button type="button" data-toggle="modal" data-target="#contactdetails" onclick="FillContactDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                         </tr>
                                     }
                                 </tbody>
@@ -274,20 +276,18 @@
                                         <th>Description</th>
                                         <th>Expired</th>
                                         <th>Vizas</th>
+                                        <th>Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var item in Model.person.PassportList)
                                     {
                                         <tr class="odd gradeX">
-                                            <td>
-                                                <button type="button" class="btn btn-link" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')">
-                                                    @Html.DisplayFor(model => item.SerialNumber)
-                                                </button>
-                                            </td>
+                                            <td>@Html.DisplayFor(model => item.SerialNumber)</td>
                                             <td>@Html.DisplayFor(model => item.Description)</td>
                                             <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
                                             <td>@Html.DisplayFor(model => item.VizaListStr)</td>
+                                            <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                         </tr>
                                     }
                                 </tbody>
@@ -306,7 +306,7 @@
                                 <h3>Vizas</h3>
                             </div>
                             <div class="col-lg-2" style="text-align: right">
-                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#vizadetails"><i class="fa fa-plus fa-1x"></i></button>
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#vizadetails" onclick="ClearVizaDetails()"><i class="fa fa-plus fa-1x"></i></button>
                             </div>
                         </div>
                     </div>

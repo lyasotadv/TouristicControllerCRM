@@ -236,11 +236,11 @@ namespace sb_admin_2.Web1.Models.Mapping
             person.Organization = "Lorem ipsum dolor sit amet";
             person.ID = 1;
 
-            Country ukr = new Country() { Name = "Ukraine" };
-            Country eng = new Country() { Name = "United Kingdom" };
-            Country usa = new Country() { Name = "USA" };
-            Country eu = new Country() { Name = "EU" };
-            Country uae = new Country() { Name = "UAE" };
+            Country ukr = new Country() { Name = "Ukraine", ISO = "UA" };
+            Country eng = new Country() { Name = "United Kingdom", ISO = "GB" };
+            Country usa = new Country() { Name = "USA", ISO = "US" };
+            Country eu = new Country() { Name = "EU", ISO = "EU" };
+            Country uae = new Country() { Name = "UAE", ISO = "AE" };
 
             person.Citizen = ukr;
 
