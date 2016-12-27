@@ -81,10 +81,12 @@ namespace sb_admin_2.Web1.Models.Mapping
             Person ivan = new Person();
             ivan.FirstName = "Ivan";
             ivan.SecondName = "Ivanov";
+            ivan.ID = 3;
 
             Person anna = new Person();
             anna.FirstName = "Anna";
             anna.SecondName = "Annova";
+            anna.ID = 4;
 
             //1
             AviaTicketInvoice invoice1 = new AviaTicketInvoice();

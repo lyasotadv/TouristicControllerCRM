@@ -307,13 +307,13 @@
                             @foreach (var item in Model.order.invoiceList)
                             {
                                 <tr>
-                                    <td>@Html.DisplayFor(model => item.Client.FullName)</td>
+                                    <td><a href='@Url.Action("Person", "Home", new { id = item.Client.ID})'>@Html.DisplayFor(model => item.Client.FullName)</a></td>
                                     <td>@Html.DisplayFor(model => item.Service)</td>
                                     <td>@Html.DisplayFor(model => item.ServiceProvider)</td>
                                     <td>@Html.DisplayFor(model => item.Path)</td>
                                     <td>@Html.DisplayFor(model => item.Date)</td>
                                     <td>@Html.DisplayFor(model => item.Amount.ValStr)</td>
-                                    <td>@Html.DisplayFor(model => item.ResponsiblePerson.FullName)</td>
+                                    <td><a class="btn btn-link" href='@Url.Action("Person", "Home", new { id = item.ResponsiblePerson.ID})'>@Html.DisplayFor(model => item.ResponsiblePerson.FullName)</a></td>
                                     <td>@Html.DisplayFor(model => item.Status)</td>
                                     <td><button type="button" onclick="FillInvoiceEdit('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                 </tr>
@@ -324,7 +324,7 @@
                         $(document).ready(function () {
                             $('#tableInvoice').DataTable({
                                 initComplete: function () {
-                                    this.api().columns([0, 1, 2, 3, 4, 5, 6, 7]).every(function () {
+                                    this.api().columns([0, 6]).every(function () {
 
                                         var column = this;
                                         var select = $('<select><option value=""></option></select>')
@@ -339,7 +339,26 @@
                                                     .draw();
                                             });
                                         column.data().unique().sort().each(function (d, j) {
-                                            select.append('<option value="' + d + '">' + d + '</option>')
+                                            select.append('<option value="' + $(d).html() + '">' + $(d).html() + '</option>')
+                                        });
+                                    });
+
+                                    this.api().columns([1, 2, 3, 4, 5, 7]).every(function () {
+
+                                        var column = this;
+                                        var select = $('<select><option value=""></option></select>')
+                                            .appendTo($(column.footer()).empty())
+                                            .on('change', function () {
+                                                var val = $.fn.dataTable.util.escapeRegex(
+                                                    $(this).val()
+                                                );
+
+                                                column
+                                                    .search(val ? '^' + val + '$' : '', true, false)
+                                                    .draw();
+                                            });
+                                        column.data().unique().sort().each(function (d, j) {
+                                            select.append('<option value="' + d + '">' +d + '</option>')
                                         });
                                     });
                                 }
