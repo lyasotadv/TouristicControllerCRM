@@ -12,7 +12,18 @@ namespace sb_admin_2.Web1.Models
         
     }
 
-    public class Person
+    public abstract class PersonGeneral
+    {
+        public int ID { get; set; }
+
+        public abstract string FullName { get; }
+
+        public string Description { get; set; }
+
+        public PersonGeneral Parent { get; set; }
+    }
+
+    public class Person : PersonGeneral
     {
         private enum Sex { male, female };
 
@@ -55,10 +66,6 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public string Organization { get; set; }
-
-        public string Description { get; set; }
-
         public DateTime Birth { get; set; }
 
         public string BirthStr
@@ -67,7 +74,7 @@ namespace sb_admin_2.Web1.Models
             set { throw new NotImplementedException("Setter for BirthStr havnt been implemented"); }
         }
 
-        public string FullName
+        public override string FullName
         {
             get { return FirstName + " " + MiddleName + " " + SecondName; }   
         }
@@ -77,8 +84,6 @@ namespace sb_admin_2.Web1.Models
         public Country Citizen { get; set; }
 
         public List<Contact> ContactList { get; private set; }
-
-        public int ID { get; set; }
 
         public Person()
         {

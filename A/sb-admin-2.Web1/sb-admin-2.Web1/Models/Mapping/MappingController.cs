@@ -235,7 +235,6 @@ namespace sb_admin_2.Web1.Models.Mapping
             person.Birth = new DateTime(1980, 07, 25);
             person.Gender = "male";
             person.Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
-            person.Organization = "Lorem ipsum dolor sit amet";
             person.ID = 1;
 
             Country ukr = new Country() { Name = "Ukraine", ISO = "UA" };
@@ -273,14 +272,12 @@ namespace sb_admin_2.Web1.Models.Mapping
             person.PassportList.Add(passportA);
             person.PassportList.Add(passportB);
 
-            Contact contactA = new Contact();
-            contactA.contactType = "e-mail";
+            Contact contactA = Contact.Create("e-mail");
             contactA.Description = "Personal";
             contactA.Content = "blablabla@bla.com";
             contactA.ID = 1;
 
-            Contact contactB = new Contact();
-            contactB.contactType = "mobile";
+            Contact contactB = Contact.Create("mobile");
             contactB.Description = "Mobile";
             contactB.Content = "+380000000000";
             contactB.ID = 2;

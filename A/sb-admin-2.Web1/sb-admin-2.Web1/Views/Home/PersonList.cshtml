@@ -31,7 +31,6 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Organization</th>
                                 <th>Birth</th>
                                 <th>Gender</th>
                                 <th>Edit</th>
@@ -40,7 +39,6 @@
                         <tfoot>
                             <tr>
                                 <th>Name</th>
-                                <th>Organization</th>
                                 <th>Birth</th>
                                 <th>Gender</th>
                                 <th>Edit</th>
@@ -51,7 +49,6 @@
                             {
                                 <tr>
                                     <td>@Html.DisplayFor(model => item.FullName)</td>
-                                    <td>@Html.DisplayFor(model => item.Organization)</td>
                                     <td>@Html.DisplayFor(model => item.BirthStr)</td>
                                     <td>@Html.DisplayFor(model => item.Gender)</td>
                                     <td><a class="btn btn-default" href='@Url.Action("Person", "Home", new { id = item.ID})'><i class="glyphicon glyphicon-pencil"></i></a></td>

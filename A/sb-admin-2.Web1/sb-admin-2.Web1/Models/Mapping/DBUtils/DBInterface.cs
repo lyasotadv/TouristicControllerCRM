@@ -24,7 +24,7 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
                 {
                     conn.Open();
                 }
-                catch (Exception ex)
+                catch
                 {
                     throw new NotImplementedException("Handling of connection to DB exception was not implemented");
                 }
