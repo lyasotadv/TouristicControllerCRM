@@ -1,0 +1,559 @@
+﻿@model TravelController.Domain.PersonData
+
+@{
+    ViewBag.Title = "Person";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#tableContact').DataTable({
+            responsive: true
+        });
+    });
+
+    $(document).ready(function () {
+        $('#tableDocument').DataTable({
+            responsive: true
+        });
+    });
+
+    $(document).ready(function () {
+        $('#tableVizas').DataTable({
+            responsive: true
+        });
+    });
+
+    var EditedPassportID = 0;
+
+    function ClearPassportDetails() {
+        EditedPassportID = 0;
+
+        $('#inputPassportSerial').val('');
+        $('#inputExpireDate').val('');
+        $('#inputPersonName').val('');
+        $('#inputCountryOfEmitation').val('');
+        $('#inputCountryOfCitizen').val('');
+        $('#textpassportdescription').val('');
+    }
+
+    function FillPassportDetails(id) {
+        EditedPassportID = id;
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindPassport", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID : '@Model.person.ID',
+                id: id
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("inputPassportSerial").value = data.SerialNumber;
+                    document.getElementById("inputExpireDate").value = data.ValidTillStr;
+                    document.getElementById("inputPersonName").value = data.PersonName;
+                    document.getElementById("inputCountryOfEmitation").value = data.CountryOfEmmitation.Name;
+                    document.getElementById("inputCountryOfCitizen").value = data.Citizen.Name;
+                    document.getElementById("textpassportdescription").value = data.Description;
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    function FillPersonDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetPersonalData", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID : '@Model.person.ID'
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("inputFirstName").value = data.FirstName;
+                    document.getElementById("inputMiddleName").value = data.MiddleName;
+                    document.getElementById("inputSecondName").value = data.SecondName;
+                    document.getElementById("inputBirthDay").value = data.BirthStr;
+                    document.getElementById("textpersondescription").value = data.Description;
+
+                    switch (data.Gender) {
+                        case "male":
+                            $('#selectGender').val('Male').change();
+                            break;
+                        case "female":
+                            $('#selectGender').val('Female').change();
+                            break;
+                    }
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    EditedConatctID = 0;
+
+    function ClearContactDetails() {
+        EditedConatctID = 0;
+
+        $('#inputContactContent').val('');
+        $('#textcontactdescription').val('');
+        $('#selectContactType').val('e-mail').change();
+    }
+
+    function FillContactDetails(id) {
+        EditedConatctID = id;
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindContact", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: id
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("inputContactContent").value = data.Content;
+                    document.getElementById("textcontactdescription").value = data.Description;
+
+                    switch (data.contactType) {
+                        case "e-mail":
+                            $('#selectContactType').val('e-mail').change();
+                            break;
+                        case "mobile":
+                            $('#selectContactType').val('mobile').change();
+                            break;
+                    }
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    EditedVizaID = 0;
+
+    function ClearVizaDetails(){
+        EditedVizaID = 0;
+
+        $('#inputVizaExpired').val('');
+        $('#inputVizaCountry').val('');
+
+    }
+
+    function FillVizaDetails(id, PassportSerial){
+        EditedVizaID = 0;
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindViza", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: id,
+                PassportSerial: PassportSerial
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("inputVizaExpired").value = data.ValidTillStr;
+                    document.getElementById("inputVizaCountry").value = data.CountryOfInvintation.Name;
+                    $('#selectVizaPassport').val(data.PassportSerial).change();
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+</script>
+
+<div class="row">
+    <h2>Person</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-lg-10">
+                                <h3>Personal data</h3>
+                            </div>
+                            <div class="col-lg-2" style="text-align: right">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Edit" data-toggle="modal" data-target="#personaldata" onclick="FillPersonDetails()">
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div><h3>@Html.DisplayFor(model => model.person.FullName)</h3></div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div><h3>@Html.DisplayFor(model => model.person.BirthStr)</h3></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h5>
+                                    @Html.DisplayFor(model => model.person.Description)
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-lg-10">
+                                <h3>Contacts</h3>
+                            </div>
+                            <div class="col-lg-2" style="text-align: right">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#contactdetails" onclick="ClearContactDetails()">
+                                    <i class="fa fa-plus fa-1x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="dataTable_wrapper">
+                            <table class="table table-striped table-bordered table-hover" id="tableContact">
+                                <thead>
+                                    <tr>
+                                        <th>Contact</th>
+                                        <th>Description</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.person.ContactList)
+                                    {
+                                        <tr class="odd gradeX">
+                                            <td>@Html.DisplayFor(model => item.Content)</td>
+                                            <td>@Html.DisplayFor(model => item.Description)</td>
+                                            <td><button type="button" data-toggle="modal" data-target="#contactdetails" onclick="FillContactDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-lg-10">
+                                <h3>Passports</h3>
+                            </div>
+                            <div class="col-lg-2" style="text-align: right">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#passportdetails" onclick="ClearPassportDetails()"><i class="fa fa-plus fa-1x"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="dataTable_wrapper">
+                            <table class="table table-striped table-bordered table-hover" id="tableDocument">
+                                <thead>
+                                    <tr>
+                                        <th>Serial number</th>
+                                        <th>Description</th>
+                                        <th>Expired</th>
+                                        <th>Vizas</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.person.PassportList)
+                                    {
+                                        <tr class="odd gradeX">
+                                            <td>@Html.DisplayFor(model => item.SerialNumber)</td>
+                                            <td>@Html.DisplayFor(model => item.Description)</td>
+                                            <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
+                                            <td>@Html.DisplayFor(model => item.VizaListStr)</td>
+                                            <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-lg-10">
+                                <h3>Vizas</h3>
+                            </div>
+                            <div class="col-lg-2" style="text-align: right">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#vizadetails" onclick="ClearVizaDetails()"><i class="fa fa-plus fa-1x"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="dataTable_wrapper">
+                            <table class="table table-striped table-bordered table-hover" id="tableVizas">
+                                <thead>
+                                    <tr>
+                                        <th>Country</th>
+                                        <th>Expired</th>
+                                        <th>Passport</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var pass in Model.person.PassportList)
+                                    {
+                                        foreach (var item in pass.VizaList)
+                                        {
+                                            <tr class="odd gradeX">
+                                                <td>@Html.DisplayFor(model => item.CountryOfInvintation.Name)</td>
+                                                <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
+                                                <td>@Html.DisplayFor(model => item.PassportSerial)</td>
+                                                <td><button type="button" data-toggle="modal" data-target="#vizadetails" onclick="FillVizaDetails('@item.ID','@item.PassportSerial')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<datalist id="listCountry">
+        @foreach(var item in Model.catalog.countryList)
+        {
+            <option value='@item.Name'/>
+        }
+</datalist>
+
+
+
+<!--Modal-->
+<!--Passport-->
+<div class="modal fade" id="passportdetails" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="passportdetailslabel">Passport</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divPassportSerial">
+                            <input class="form-control" placeholder="Serial number" id="inputPassportSerial">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divExpireDate">
+                            <input class="form-control" placeholder="Expired date" id="inputExpireDate">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group" id="divPersonName">
+                            <input class="form-control" placeholder="Person name" id="inputPersonName">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divCountryOfEmitation">
+                            <input class="form-control" placeholder="Country of emitation" id="inputCountryOfEmitation" list="listCountry">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divCountryOfCitizen">
+                            <input class="form-control" placeholder="Citizen" id="inputCountryOfCitizen" list="listCountry">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="3" id="textpassportdescription" placeholder="Description"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Personal data-->
+<div class="modal fade" id="personaldata" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="personaldatalabel">Personal data</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="form-group" id="divFirstName">
+                            <input class="form-control" placeholder="First name" id="inputFirstName">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group" id="divMiddleName">
+                            <input class="form-control" placeholder="Middle name" id="inputMiddleName">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group" id="divSecondName">
+                            <input class="form-control" placeholder="Second name" id="inputSecondName">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <select class="form-control" id="selectGender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divBirth">
+                            <input class="form-control" placeholder="Birth day" id="inputBirthDay">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="3" id="textpersondescription" placeholder="Description"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Contacts-->
+<div class="modal fade" id="contactdetails" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="contactdetailslabel">Contact</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <select class="form-control" id="selectContactType">
+                                <option value="e-mail">e-mail</option>
+                                <option value="mobile">Mobile</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-9">
+                        <div class="form-group" id="divContactContent">
+                            <input class="form-control" placeholder="Contact" id="inputContactContent">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="3" id="textcontactdescription" placeholder="Description"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Viza-->
+<div class="modal fade" id="vizadetails" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="vizadetailslabel">Viza</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group" style="text-align: right">
+                            <label>
+                                Passport serial number:
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <select class="form-control" id="selectVizaPassport">
+                                @foreach (var item in Model.person.PassportList)
+                                {
+                                    <option value="@item.SerialNumber">@Html.DisplayFor(model => item.SerialNumber)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divVizaCountry">
+                            <input class="form-control" placeholder="Country" id="inputVizaCountry" list="listCountry">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divVizaExpired">
+                            <input class="form-control" placeholder="Expired" id="inputVizaExpired">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

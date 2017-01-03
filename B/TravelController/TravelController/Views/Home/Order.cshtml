@@ -1,0 +1,913 @@
+﻿@model TravelController.Domain.OrderData
+
+@{
+    ViewBag.Title = "Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <title>
+        Order
+    </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<!--Title-->
+<div class="row">
+    <h2>Order</h2>
+</div>
+
+<!--Description-->
+<div class="row">
+    <div class="col-lg-8">
+        
+        <!--Order information-->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-10">
+                        <h3>Order information</h3>
+                    </div>
+                    <div class="col-lg-2" style="text-align: right">
+                        <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#orderinformation" onclick="FillOrderInformation()">
+                            <i class="glyphicon glyphicon-pencil"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h4>Description</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <p id="pDescriptionWide">
+                            @Html.DisplayFor(model => model.order.DescriptionWide)
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h4>Keys</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <p id="pKeys">
+                            @Html.DisplayFor(model => model.order.Keys)
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!--Modal-->
+            <div class="modal fade" id="orderinformation" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="orderinformationLabel">Order informaton</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <input class="form-control" id="inputOrderDescription" placeholder="Description"></input>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <textarea class="form-control" rows="3" id="textOrderDescriptionWide" placeholder="Note"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <input class="form-control" id="inputKeyWord" placeholder="Key words"></input>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="SaveButtonOrderInformation()">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+    function SaveButtonOrderInformation()
+    {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SaveOrderInformation", "Home")',
+            dataType: 'json',
+            data: {
+                OrderID : '@Model.order.ID',
+                Description : document.getElementById("inputOrderDescription").value,
+                DescriptionWide :document.getElementById("textOrderDescriptionWide").value,
+                Keys : document.getElementById("inputKeyWord").value
+            },
+            success: function (data) {
+                $('#orderinformation').modal('toggle');
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    function FillOrderInformation()
+    {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetOrderInformation", "Home")',
+                        dataType: 'json',
+                        data: {
+                            OrderID : '@Model.order.ID'
+                        },
+                        success: function (data) {
+                            document.getElementById("inputOrderDescription").value = data.Description;
+                            document.getElementById("textOrderDescriptionWide").value = data.DescriptionWide;
+                            document.getElementById("inputKeyWord").value = data.Keys;
+                        },
+                        error: function () {
+                            alert('error');
+                        }
+                    });
+                }
+            </script>
+        </div>
+
+    </div>
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <h3>Summary</h3>
+                    </div>
+                    <div class="col-lg-3" style="text-align: right">
+                        <button type="button" class="btn btn-primary btn-circle btn-lg">
+                            <i class="glyphicon glyphicon-pencil"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Amount-->
+<div class="row">
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plus fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">$710</div>
+                        <div>Offer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plus fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">$360</div>
+                        <div>Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plus fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">$1830</div>
+                        <div>Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plus fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Void</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Invoice table-->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <h3>Invoices</h3>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="row">
+                            <!--Avia-->
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newaviaticket" title="Avia ticket" onclick="ClearAviaTicket()">
+                                    <i class="fa fa-plane fa-1x"></i>
+                                </button>
+                            </div>
+                            <!--Hotel-->
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newhotel" title="Hotel">
+                                    <i class="fa fa-home fa-1x"></i>
+                                </button>
+                            </div>
+                            <!--Insurance-->
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newinsurance" title="Insurance">
+                                    <i class="fa fa-medkit fa-1x"></i>
+                                </button>
+                            </div>
+                            <!--Train-->
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" data-toggle="modal" data-target="#newtrainticket" title="Insurance">
+                                    <i class="fa fa-subway fa-1x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="dataTable_wrapper">
+                    <table class="table table-striped table-bordered table-hover" id="tableInvoice">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>Service type</th>
+                                <th>Provider</th>
+                                <th>Path</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Responsible</th>
+                                <th>Status</th>
+                                <th>Edit</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Client</th>
+                                <th>Service type</th>
+                                <th>Provider</th>
+                                <th>Path</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Responsible</th>
+                                <th>Status</th>
+                                <th>Edit</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @foreach (var item in Model.order.invoiceList)
+                            {
+                                <tr>
+                                    <td><a href='@Url.Action("Person", "Home", new { id = item.Client.ID})'>@Html.DisplayFor(model => item.Client.FullName)</a></td>
+                                    <td>@Html.DisplayFor(model => item.Service)</td>
+                                    <td>@Html.DisplayFor(model => item.ServiceProvider)</td>
+                                    <td>@Html.DisplayFor(model => item.Path)</td>
+                                    <td>@Html.DisplayFor(model => item.Date)</td>
+                                    <td>@Html.DisplayFor(model => item.Amount.ValStr)</td>
+                                    <td><a class="btn btn-link" href='@Url.Action("Person", "Home", new { id = item.ResponsiblePerson.ID})'>@Html.DisplayFor(model => item.ResponsiblePerson.FullName)</a></td>
+                                    <td>@Html.DisplayFor(model => item.Status)</td>
+                                    <td><button type="button" onclick="FillInvoiceEdit('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <script>
+                        $(document).ready(function () {
+                            $('#tableInvoice').DataTable({
+                                initComplete: function () {
+                                    this.api().columns([0, 6]).every(function () {
+
+                                        var column = this;
+                                        var select = $('<select><option value=""></option></select>')
+                                            .appendTo($(column.footer()).empty())
+                                            .on('change', function () {
+                                                var val = $.fn.dataTable.util.escapeRegex(
+                                                    $(this).val()
+                                                );
+
+                                                column
+                                                    .search(val ? '^' + val + '$' : '', true, false)
+                                                    .draw();
+                                            });
+                                        column.data().unique().sort().each(function (d, j) {
+                                            select.append('<option value="' + $(d).html() + '">' + $(d).html() + '</option>')
+                                        });
+                                    });
+
+                                    this.api().columns([1, 2, 3, 4, 5, 7]).every(function () {
+
+                                        var column = this;
+                                        var select = $('<select><option value=""></option></select>')
+                                            .appendTo($(column.footer()).empty())
+                                            .on('change', function () {
+                                                var val = $.fn.dataTable.util.escapeRegex(
+                                                    $(this).val()
+                                                );
+
+                                                column
+                                                    .search(val ? '^' + val + '$' : '', true, false)
+                                                    .draw();
+                                            });
+                                        column.data().unique().sort().each(function (d, j) {
+                                            select.append('<option value="' + d + '">' +d + '</option>')
+                                        });
+                                    });
+                                }
+                            });
+                        });
+
+                        var EditedInvoiceID = 0;
+
+                        function FillInvoiceEdit(id) {
+                            EditedInvoiceID = id;
+                            $.ajax({
+                                type: 'POST',
+                                url: '@Url.Action("FindIncoice", "Home")',
+                                dataType: 'json',
+                                data: {
+                                    OrderID: '@Model.order.ID',
+                                    id: id
+                                },
+                                success: function (data) {
+                                    if (data != null) {
+                                        switch (data.Service)
+                                        {
+                                            case "Avia ticket": {
+                                                FillAviaTicket(data);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                },
+                                error: function () {
+                                    alert('error');
+                                }
+                            });
+                        }
+
+
+                        function InputStatusClear(id) {
+                            $(id).removeClass("has-success").removeClass("has-error");
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Avia-->
+<div class="row">
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plane fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">4 / $710</div>
+                        <div>Offer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plane fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">2 / $360</div>
+                        <div>Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plane fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-plane fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Void</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Hotel-->
+<div class="row">
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-home fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Offer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-home fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-home fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">2 / $1800</div>
+                        <div>Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-home fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Void</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Insurance-->
+<div class="row">
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-medkit fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Offer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-medkit fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Booked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-medkit fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">2 / $30</div>
+                        <div>Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <i class="fa fa-medkit fa-5x"></i>
+                    </div>
+                    <div class="col-lg-9 text-right">
+                        <div class="huge">0 / $0</div>
+                        <div>Void</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Modal-->
+
+<!--Avia-->
+<div class="modal fade" id="newaviaticket" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="newaviaticketlabel">New avia ticket</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group" id="divQuickParse">
+                            <input class="form-control" placeholder="Quick parse" id="inputQuickParse">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <label>or...</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Company" id="inputCompany">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="From" id="inputFrom">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="To" id="inputTo">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosInline" id="radioOneWay" value="option1" onclick="UpdateTripTypeRadioButton()" checked>One way
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosInline" id="radioRoundTrip" value="option2" onclick="UpdateTripTypeRadioButton()">Round trip
+                    </label>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12" id="divDate">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Date" id="inputDate">
+                        </div>
+                    </div>
+                    <div class="col-lg-6" style="display: none" id="divDateBack">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Date" id="inputDateBack">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Person" id="inputPersonAvia">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Responsible person" id="inputResponsibleAvia">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group input-group">
+                            <span class="input-group-addon">$</span>
+                            <input type="text" class="form-control" placeholder="Amount" id="inputAmountAvia">
+                            <span class="input-group-addon">.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select class="form-control" id="selectStatusAvia">
+                                <option value="Offer">Offer</option>
+                                <option value="Booked">Booked</option>
+                                <option value="Sold">Sold</option>
+                                <option value="Void">Void</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="SaveAviaTicket()">Save</button>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        function UpdateTripTypeRadioButton() {
+            if (document.getElementById("radioRoundTrip").checked) {
+                $('#divDate').removeClass('col-lg-12').addClass('col-lg-6');
+                document.getElementById("divDateBack").style = "display: normal";
+            }
+            if (document.getElementById("radioOneWay").checked) {
+                $('#divDate').removeClass('col-lg-6').addClass('col-lg-12');
+                document.getElementById("divDateBack").style = "display: none";
+            }
+        }
+
+        function FillAviaTicket(data) {
+            document.getElementById("newaviaticketlabel").innerText = "Edit avia ticket";
+            document.getElementById("inputCompany").value = data.ServiceProvider;
+            document.getElementById("inputFrom").value = data.StartPoint;
+            document.getElementById("inputTo").value = data.FinalDestination;
+            document.getElementById("inputDate").value = data.DepartureStr;
+            document.getElementById("inputPersonAvia").value = data.Client.FullName;
+            document.getElementById("inputResponsibleAvia").value = data.ResponsiblePerson.FullName;
+            document.getElementById("inputAmountAvia").value = data.Amount.ValStr;
+            if (data.IsRoundTrip == true) {
+                document.getElementById("radioRoundTrip").checked = true;
+                document.getElementById("inputDateBack").value = data.DepartureBackStr;
+            }
+            else {
+                document.getElementById("radioOneWay").checked = true;
+            }
+            UpdateTripTypeRadioButton();
+
+            switch (data.Status) {
+                case "Offer":
+                    $('#selectStatusAvia').val('Offer').change();
+                    break;
+                case "Booked":
+                    $('#selectStatusAvia').val('Booked').change();
+                    break;
+                case "Sold":
+                    $('#selectStatusAvia').val('Sold').change();
+                    break;
+                case "Void":
+                    $('#selectStatusAvia').val('Soid').change();
+                    break;
+            }
+
+            $('#newaviaticket').modal();
+        }
+
+        function SaveAviaTicket() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveButtonAvia", "Home")',
+                dataType: 'json',
+                data: {
+                    OrderID: '@Model.order.ID',
+                    orderID : '@Model.order.ID',
+                    id: EditedInvoiceID,
+                    Status: document.getElementById("selectStatusAvia").value
+                },
+                success: function (data) {
+                    $('#newaviaticket').modal('toggle');
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        }
+
+        function ClearAviaTicket() {
+            InputStatusClear('#divQuickParse');
+
+            EditedInvoiceID = 0;
+            $('#inputQuickParse').val('');
+            $('#inputCompany').val('');
+            $('#inputFrom').val('');
+            $('#inputTo').val('');
+            $('#inputDate').val('');
+            $('#inputDateBack').val('');
+            $('#inputPersonAvia').val('');
+            $('#inputResponsibleAvia').val('');
+            $('#inputAmountAvia').val('');
+            document.getElementById("radioOneWay").checked = true;
+            UpdateTripTypeRadioButton();
+            $('#selectStatusAvia').val('offer').change();
+            document.getElementById("newaviaticketlabel").innerText = "New avia ticket";
+        }
+    </script>
+</div>
+
+<!--Hotel-->
+<div class="modal fade" id="newhotel" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">New hotel</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="City">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Hotel name">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="From">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Till">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Persons">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select class="form-control">
+                                <option>Offer</option>
+                                <option>Booked</option>
+                                <option>Sold</option>
+                                <option>Void</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Insurance-->
+<div class="modal fade" id="newinsurance" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">New insurance</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Train-->
+<div class="modal fade" id="newtrainticket" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">New train ticket</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
