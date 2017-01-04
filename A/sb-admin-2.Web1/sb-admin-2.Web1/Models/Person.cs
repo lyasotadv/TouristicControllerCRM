@@ -91,4 +91,69 @@ namespace sb_admin_2.Web1.Models
             ContactList = new List<Contact>();
         }
     }
+
+    public class Company : PersonGeneral
+    {
+        public enum CompanyType { air, isurance, provider }
+
+        protected CompanyType companyType;
+
+        public string Kod { get; set; }
+
+        public string OfficialName { get; set; }
+
+        private string _FullName;
+
+        public override string FullName
+        {
+            get { return _FullName; }
+        }
+
+        static public Company Create(CompanyType companyType)
+        {
+            switch (companyType)
+            {
+                case CompanyType.air:
+                    {
+                        return new AirCompany();
+                    }
+                case CompanyType.isurance:
+                    {
+                        return new Insurance();
+                    }
+                case CompanyType.provider:
+                    {
+                        return new Provider();
+                    }
+                default:
+                    {
+                        throw new ArgumentException("Unhandled company type");
+                    }
+            }
+        }
+    }
+
+    public class AirCompany : Company
+    {
+        public AirCompany()
+        {
+            companyType = CompanyType.air;
+        }
+    }
+
+    public class Insurance : Company
+    {
+        public Insurance()
+        {
+            companyType = CompanyType.isurance;
+        }
+    }
+
+    public class Provider : Company
+    {
+        public Provider()
+        {
+            companyType = CompanyType.provider;
+        }
+    }
 }
