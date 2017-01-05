@@ -221,10 +221,10 @@ namespace sb_admin_2.Web1.Controllers
         [HttpPost]
         public ActionResult FindPassport(int PersonID, int id)
         {
-            Person person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
-            if (person != null)
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
             {
-                Passport passport = person.PassportList.Find((item) => { return item.ID == id; });
+                Passport passport = (person as Person).PassportList.Find((item) => { return item.ID == id; });
                 return Json(passport);
             }
             else
@@ -236,17 +236,20 @@ namespace sb_admin_2.Web1.Controllers
         [HttpPost]
         public ActionResult GetPersonalData(int PersonID)
         {
-            Person person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
-            return Json(person);
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person is Person)
+                return Json(person as Person);
+            else
+                return Json("");
         }
 
         [HttpPost]
         public ActionResult FindContact(int PersonID, int id)
         {
-            Person person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
-            if (person != null)
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
             {
-                Contact contact = person.ContactList.Find((item) => { return item.ID == id; });
+                Contact contact = (person as Person).ContactList.Find((item) => { return item.ID == id; });
                 return Json(contact);
             }
             else
@@ -258,10 +261,10 @@ namespace sb_admin_2.Web1.Controllers
         public ActionResult FindViza(int PersonID, int id, string PassportSerial)
         {
             Viza viza = null;
-            Person person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
-            if (person != null)
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
             {
-                Passport passport = person.PassportList.Find((item) => { return item.SerialNumber == PassportSerial; });
+                Passport passport = (person as Person).PassportList.Find((item) => { return item.SerialNumber == PassportSerial; });
                 if (passport != null)
                     viza = passport.VizaList.Find((item) => { return item.ID == id; });
             }

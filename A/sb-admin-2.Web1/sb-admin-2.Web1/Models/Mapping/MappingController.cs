@@ -27,7 +27,6 @@ namespace sb_admin_2.Web1.Models.Mapping
 
             TestDataInit();
 
-            personListData.personList.Add(new Person() { ID = 2 });
             orderListData.orderList.Add(new Order() { ID = 2 });
         }
 
@@ -48,10 +47,10 @@ namespace sb_admin_2.Web1.Models.Mapping
 
         public PersonData ConstructPersonData(int ID)
         {
-            Person person = personListData.personList.Find(item => item.ID == ID);
-            if (person != null)
+            PersonGeneral person = personListData.personList.Find(item => item.ID == ID);
+            if ((person != null) && (person is Person))
             {
-                PersonData data = new PersonData(person);
+                PersonData data = new PersonData(person as Person);
                 data.catalog = personListData.catalog;
                 return data;
             }
@@ -74,6 +73,7 @@ namespace sb_admin_2.Web1.Models.Mapping
 
             TestDataInitInvoice(order);
             TestDataInitPerson();
+            TestDataInitCompany();
         }
 
         private void TestDataInitInvoice(Order order)
@@ -284,6 +284,23 @@ namespace sb_admin_2.Web1.Models.Mapping
 
             person.ContactList.Add(contactA);
             person.ContactList.Add(contactB);
+        }
+
+        private void TestDataInitCompany()
+        {
+            Company company = new Company();
+            personListData.personList.Add(company);
+            company.ID = 2;
+
+            company.FullName = "Roga and copita";
+
+            foreach(var p in personListData.personList)
+            {
+                if (p != company)
+                {
+                    p.Parent = company;
+                }
+            }
         }
     }
 }

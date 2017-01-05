@@ -31,16 +31,16 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Birth</th>
-                                <th>Gender</th>
+                                <th>Type</th>
+                                <th>Owner</th>
                                 <th>Edit</th>
                             </tr>
                         </thead>
                         <tfoot>
                             <tr>
                                 <th>Name</th>
-                                <th>Birth</th>
-                                <th>Gender</th>
+                                <th>Type</th>
+                                <th>Owner</th>
                                 <th>Edit</th>
                             </tr>
                         </tfoot>
@@ -49,8 +49,8 @@
                             {
                                 <tr>
                                     <td>@Html.DisplayFor(model => item.FullName)</td>
-                                    <td>@Html.DisplayFor(model => item.BirthStr)</td>
-                                    <td>@Html.DisplayFor(model => item.Gender)</td>
+                                    <td>@Html.DisplayFor(model => item.PersonTypeStr)</td>
+                                    <td>@Html.DisplayFor(model => item.Parent.FullName)</td>
                                     <td><a class="btn btn-default" href='@Url.Action("Person", "Home", new { id = item.ID})'><i class="glyphicon glyphicon-pencil"></i></a></td>
                                 </tr>
                             }

@@ -7,20 +7,98 @@ using sb_admin_2.Web1.Models.Mapping;
 
 namespace sb_admin_2.Web1.Models
 {
-    public class PersonList : List<Person>
+    public class PersonList : List<PersonGeneral>
     {
         
     }
 
+    public class PersonType
+    {
+        private PersonGeneral _Owner;
+
+        public PersonGeneral Owner 
+        { 
+            get
+            {
+                return _Owner;
+            }
+            private set
+            {
+                if (value != _Owner)
+                {
+                    _Owner = value;
+                    Update();
+                }
+            }
+        }
+
+        public PersonType(PersonGeneral Owner)
+        {
+            this.Owner = Owner;
+        }
+
+        private void Update()
+        {
+            if (Owner != null)
+            {
+                if (Owner is Person)
+                {
+                    Desciption = "Person";
+                }
+                else if (Owner is AirCompany)
+                {
+                    Desciption = "Air company";
+                }
+                else if (Owner is Insurance)
+                {
+                    Desciption = "Insurance company";
+                }
+                else if (Owner is Provider)
+                {
+                    Desciption = "Provider";
+                }
+                else if (Owner is Company)
+                {
+                    Desciption = "Company";
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unknown person type");
+                }
+            }
+            else
+            {
+                Desciption = string.Empty;
+            }
+        }
+        
+        public string Desciption { get; private set; }
+    }
+
     public abstract class PersonGeneral
     {
+        private PersonType personType;
+
+        public string PersonTypeStr
+        {
+            get
+            {
+                return personType.Desciption;
+            }
+        }
+
         public int ID { get; set; }
 
-        public abstract string FullName { get; }
+        public abstract string FullName { get; set; }
 
         public string Description { get; set; }
 
         public PersonGeneral Parent { get; set; }
+
+        protected PersonGeneral()
+        {
+            personType = new PersonType(this);
+        }
     }
 
     public class Person : PersonGeneral
@@ -76,7 +154,8 @@ namespace sb_admin_2.Web1.Models
 
         public override string FullName
         {
-            get { return FirstName + " " + MiddleName + " " + SecondName; }   
+            get { return FirstName + " " + MiddleName + " " + SecondName; }
+            set { throw new NotImplementedException("There is no parser of full name for person"); }
         }
 
         public List<Passport> PassportList { get; private set; }
@@ -107,6 +186,7 @@ namespace sb_admin_2.Web1.Models
         public override string FullName
         {
             get { return _FullName; }
+            set { _FullName = value; }
         }
 
         static public Company Create(CompanyType companyType)
