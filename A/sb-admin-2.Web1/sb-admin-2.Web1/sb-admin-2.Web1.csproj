@@ -115,6 +115,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\NavbarController.cs" />
     <Compile Include="Domain\ActionData.cs" />
+    <Compile Include="Domain\CompanyData.cs" />
     <Compile Include="Domain\Data.cs" />
     <Compile Include="Domain\MainData.cs" />
     <Compile Include="Domain\OrderData.cs" />
@@ -933,6 +934,7 @@
     <Content Include="Views\Home\Actions.cshtml" />
     <Content Include="Views\Home\PersonList.cshtml" />
     <Content Include="Views\Home\OrderList.cshtml" />
+    <Content Include="Views\Home\Company.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

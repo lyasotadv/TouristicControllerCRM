@@ -98,10 +98,20 @@ namespace sb_admin_2.Web1.Controllers
                     throw new ArgumentException("Person ID is not convertable to valid type");
                 }
 
-                PersonData data = mappingController.ConstructPersonData(ID);
-                return View("Person", data);
+                PageData data = mappingController.ConstructPersonData(ID);
+                if (data is PersonData)
+                    return View("Person", data);
+                else if (data is CompanyData)
+                    return View("Company", data);
+                else
+                    throw new NotImplementedException("View for current person type have not been created");
             }
             return View("PersonList", mappingController.personListData);
+        }
+
+        public ActionResult Company()
+        {
+            return RedirectToAction("Person");
         }
 
         public ActionResult PersonList()
@@ -247,9 +257,9 @@ namespace sb_admin_2.Web1.Controllers
         public ActionResult FindContact(int PersonID, int id)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
-            if ((person != null) && (person is Person))
+            if (person != null)
             {
-                Contact contact = (person as Person).ContactList.Find((item) => { return item.ID == id; });
+                Contact contact = person.ContactList.Find((item) => { return item.ID == id; });
                 return Json(contact);
             }
             else

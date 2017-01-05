@@ -45,14 +45,27 @@ namespace sb_admin_2.Web1.Models.Mapping
             }
         }
 
-        public PersonData ConstructPersonData(int ID)
+        public PageData ConstructPersonData(int ID)
         {
             PersonGeneral person = personListData.personList.Find(item => item.ID == ID);
-            if ((person != null) && (person is Person))
+            if (person != null)
             {
-                PersonData data = new PersonData(person as Person);
-                data.catalog = personListData.catalog;
-                return data;
+                if (person is Person)
+                {
+                    PersonData data = new PersonData(person as Person);
+                    data.catalog = personListData.catalog;
+                    return data;
+                }
+                else if (person is Company)
+                {
+                    CompanyData data = new CompanyData(person as Company);
+                    data.catalog = personListData.catalog;
+                    return data;
+                }
+                else
+                {
+                    throw new NotImplementedException("Unhandled person type");
+                }
             }
             else
             {
@@ -293,6 +306,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             company.ID = 2;
 
             company.FullName = "Roga and copita";
+            company.Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
             foreach(var p in personListData.personList)
             {
@@ -301,6 +315,13 @@ namespace sb_admin_2.Web1.Models.Mapping
                     p.Parent = company;
                 }
             }
+
+            Contact adress = Contact.Create("adress");
+            adress.Description = "Head office physical adress";
+            adress.Content = "Ukraine, Kiev, Peremogi, 25";
+            adress.ID = 1;
+
+            company.ContactList.Add(adress);
         }
     }
 }

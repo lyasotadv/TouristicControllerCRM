@@ -98,7 +98,10 @@ namespace sb_admin_2.Web1.Models
         protected PersonGeneral()
         {
             personType = new PersonType(this);
+            ContactList = new List<Contact>();
         }
+
+        public List<Contact> ContactList { get; private set; }
     }
 
     public class Person : PersonGeneral
@@ -162,12 +165,9 @@ namespace sb_admin_2.Web1.Models
 
         public Country Citizen { get; set; }
 
-        public List<Contact> ContactList { get; private set; }
-
         public Person()
         {
             PassportList = new List<Passport>();
-            ContactList = new List<Contact>();
         }
     }
 
