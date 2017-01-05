@@ -150,12 +150,6 @@ namespace sb_admin_2.Web1.Controllers
             return View("Main", data);
         }
 
-        public ActionResult Actions()
-        {
-            ActionData data = new ActionData();
-            return View("Actions", data);
-        }
-
         [HttpPost]
         public ActionResult SaveButtonAvia(int OrderID, int id, string Status)
         {
