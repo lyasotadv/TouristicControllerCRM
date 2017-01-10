@@ -114,6 +114,82 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
         }
     }
 
+    public interface IDBObject
+    {
+        event EventHandler Updated;
+
+        void Load();
+
+        void Save();
+
+        bool Changed { get; }
+    }
+
+    public abstract class DBObjectList<T> : List<T>
+        where T : IDBObject
+    {
+        protected virtual void OnItemUpdated(object sender, EventArgs args)
+        {
+            if (args is DBEventArgs)
+            {
+                DBEventArgs a = args as DBEventArgs;
+                if (a.ForceUpdate)
+                {
+                    Load();
+                }
+            }
+        }
+
+        public abstract void Load();
+
+        public void Save()
+        {
+            foreach(var item in this)
+            {
+                if (item.Changed)
+                {
+                    item.Save();
+                }
+            }
+        }
+
+        public new void Add(T item)
+        {
+            base.Add(item);
+            item.Updated += OnItemUpdated;
+        }
+
+        public new void Remove(T item)
+        {
+            base.Remove(item);
+            item.Updated -= OnItemUpdated;
+        }
+
+        ~DBObjectList()
+        {
+            Clear();
+        }
+
+        public new void Clear()
+        {
+            foreach (var item in this)
+            {
+                item.Updated -= OnItemUpdated;
+            }
+            base.Clear();
+        }
+
+        protected virtual void Init(T item)
+        {
+            item.Updated += OnItemUpdated;
+        }
+    }
+
+    public class DBEventArgs : EventArgs
+    {
+        public bool ForceUpdate { get; set; }
+    }
+
     public class InsertRow
     {
         private Dictionary<string, object> parameterValue;

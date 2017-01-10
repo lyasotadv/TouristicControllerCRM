@@ -14,7 +14,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             get
             {
                 if (_countryList.Count == 0)
-                    _countryList.Update();
+                    _countryList.Load();
                 return _countryList;
             }
             private set

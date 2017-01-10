@@ -156,6 +156,11 @@ namespace sb_admin_2.Web1.Controllers
             return View("Actions", data);
         }
 
+        public ActionResult Settings()
+        {
+            return View("Settings", mappingController.settingsData);
+        }
+
         [HttpPost]
         public ActionResult SaveButtonAvia(int OrderID, int id, string Status)
         {
@@ -249,6 +254,8 @@ namespace sb_admin_2.Web1.Controllers
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if (person is Person)
                 return Json(person as Person);
+            else if (person is Company)
+                return Json(person as Company);
             else
                 return Json("");
         }
@@ -268,6 +275,25 @@ namespace sb_admin_2.Web1.Controllers
             }
         }
 
+        [HttpPost]
+        public ActionResult SaveContact(int PersonID, int id, string content, string description, string contactType)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                Contact contact = person.ContactList.Find((item) => { return item.ID == id; });
+                if (contact == null)
+                {
+                    contact = person.ContactList.Create(contactType);
+                }
+
+                contact.Content = content;
+                contact.Description = description;
+                contact.Save();
+            }
+            return Json("");
+        }
+
         public ActionResult FindViza(int PersonID, int id, string PassportSerial)
         {
             Viza viza = null;
@@ -279,6 +305,29 @@ namespace sb_admin_2.Web1.Controllers
                     viza = passport.VizaList.Find((item) => { return item.ID == id; });
             }
             return Json(viza);
+        }
+
+        [HttpPost]
+        public ActionResult FindCountry(int id)
+        {
+            Country country = mappingController.settingsData.catalog.countryList.Find(item => item.ID == id);
+            return Json(country);
+        }
+
+        [HttpPost]
+        public ActionResult SaveCountry(int id, string Name, string ISO)
+        {
+            Country country = mappingController.settingsData.catalog.countryList.Find(item => item.ID == id);
+            if (country == null)
+            {
+                country = mappingController.settingsData.catalog.countryList.Create();
+            }
+
+            country.Name = Name;
+            country.ISO = ISO;
+            country.Save();
+
+            return Json("");
         }
     }
 }

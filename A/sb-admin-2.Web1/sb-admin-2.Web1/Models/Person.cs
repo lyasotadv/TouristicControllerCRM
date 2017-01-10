@@ -3,13 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
+using System.Data;
+
 using sb_admin_2.Web1.Models.Mapping;
+using sb_admin_2.Web1.Models.Mapping.DBUtils;
 
 namespace sb_admin_2.Web1.Models
 {
-    public class PersonList : List<PersonGeneral>
+    public class PersonList : DBObjectList<PersonGeneral>
     {
-        
+        public override void Load()
+        {
+            Clear();
+            throw new NotImplementedException("Waiting for stored procedure");
+        }
+
+        public PersonGeneral Create(string companyType)
+        {
+            PersonGeneral person = null;
+            switch (companyType)
+            {
+                case "people":
+                {
+                    person = new Person();
+                    break;
+                }
+            }
+
+            if (person == null)
+                throw new NotImplementedException("Unhandled company type description");
+            Init(person);
+            return person;
+        }
     }
 
     public class PersonType
@@ -75,7 +100,7 @@ namespace sb_admin_2.Web1.Models
         public string Desciption { get; private set; }
     }
 
-    public abstract class PersonGeneral
+    public abstract class PersonGeneral : IDBObject
     {
         private PersonType personType;
 
@@ -98,10 +123,38 @@ namespace sb_admin_2.Web1.Models
         protected PersonGeneral()
         {
             personType = new PersonType(this);
-            ContactList = new List<Contact>();
+            ContactList = new ContactList();
+            ContactList.person = this;
+
+            Changed = false;
+            ID = -1;
         }
 
-        public List<Contact> ContactList { get; private set; }
+        public ContactList ContactList { get; private set; }
+
+
+        public event EventHandler Updated;
+
+        public virtual void Load()
+        {
+            
+        }
+
+        public virtual void Save()
+        {
+            
+        }
+
+        public bool Changed { get; protected set; }
+
+
+        protected void RaiseUpdated(bool ForceUpdate)
+        {
+            if (Updated != null)
+            {
+                Updated(this, new DBEventArgs() { ForceUpdate = ForceUpdate });
+            }
+        }
     }
 
     public class Person : PersonGeneral
@@ -168,6 +221,61 @@ namespace sb_admin_2.Web1.Models
         public Person()
         {
             PassportList = new List<Passport>();
+        }
+
+
+        public override void Load()
+        {
+            DBInterface.CommandText = "SELECT `people`.`idPeople`," + 
+                                        "`people`.`idPerson`," +
+                                        "`people`.`firstName`," + 
+                                        "`people`.`middleName`," + 
+                                        "`people`.`lastName`," + 
+                                        "`people`.`birthDate`," +
+                                        "`people`.`Note`," +
+                                        "`people`.`itn`" +
+                                        "FROM `sellcontroller`.`people` WHERE `idPeople` = @id;";
+
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            if (tab.Rows.Count == 1)
+            {
+                FirstName = Convert.ToString(tab.Rows[0]["firstName"]);
+                SecondName = Convert.ToString(tab.Rows[0]["lastName"]);
+                MiddleName = Convert.ToString(tab.Rows[0]["middleName"]);
+                Birth = Convert.ToDateTime(tab.Rows[0]["birthDate"]);
+                Description = Convert.ToString(tab.Rows[0]["Note"]);
+            }
+            else if (tab.Rows.Count > 1)
+            {
+                throw new DuplicateNameException("People table has rows with same id");
+            }
+
+            ContactList.Load();
+
+            Changed = false;
+        }
+
+        public override void Save()
+        {
+            throw new NotImplementedException("Waiting for new person store stucture");
+
+            if (Changed)
+            {
+                if (ID >= 0)
+                {
+                    //To Do
+                    RaiseUpdated(false);
+                }
+                else
+                {
+                    //To Do
+                    RaiseUpdated(true);
+                }
+
+                Changed = false;
+            }
         }
     }
 

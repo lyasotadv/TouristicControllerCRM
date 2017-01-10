@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
+using System.Data;
+
 using sb_admin_2.Web1.Models.Mapping;
+using sb_admin_2.Web1.Models.Mapping.DBUtils;
 
 namespace sb_admin_2.Web1.Models
 {
@@ -68,7 +71,22 @@ namespace sb_admin_2.Web1.Models
         public int ID { get; set; }
     }
 
-    public class Passport : Document
+    public class PassportList : DBObjectList<Passport>
+    {
+        public override void Load()
+        {
+            throw new NotImplementedException("Load method for passport list");
+        }
+
+        public Passport Create()
+        {
+            Passport passport = new Passport();
+            Init(passport);
+            return passport;
+        }
+    }
+
+    public class Passport : Document, IDBObject
     {
         public string SerialNumber { get; set; }
 
@@ -84,6 +102,9 @@ namespace sb_admin_2.Web1.Models
         {
             documentType = "Passport";
             VizaList = new List<Viza>();
+
+            Changed = false;
+            ID = -1;
         }
 
         public string VizaListStr 
@@ -113,17 +134,89 @@ namespace sb_admin_2.Web1.Models
             viza.PassportSerial = SerialNumber;
             viza.ID = ID;
         }
+
+
+        public event EventHandler Updated;
+
+        public void Load()
+        {
+            throw new NotImplementedException("Load methd for passport have not been implemented");
+
+            Changed = false;
+        }
+
+        public void Save()
+        {
+            throw new NotImplementedException("Save method for passport have not been implemented");
+
+            if (Changed)
+            {
+                if (ID >= 0)
+                { 
+                    //To Do
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = false });
+                    }
+                }
+                else
+                {
+                    //To Do
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = true });
+                    }
+                }
+
+                Changed = false;
+            }
+        }
+
+        public bool Changed { get; private set; }
     }
 
-    public class Viza : Document
+    public class VizaList : DBObjectList<Viza>
+    {
+        public override void Load()
+        {
+            throw new NotImplementedException("Load method for viza not implementted unitil respective table has not been created");
+        }
+    }
+
+    public class Viza : Document, IDBObject
     {
         public string PassportSerial { get; set; }
 
         public Country CountryOfInvintation { get; set; }
 
+        public int ID { get; set; }
+
         public Viza()
         {
             documentType = "Viza";
+
+            Changed = false;
+            ID = -1;
         }
+
+
+        public event EventHandler Updated;
+
+        public void Load()
+        {
+            throw new NotImplementedException("Load method for viza is not implemented");
+            Changed = false;
+        }
+
+        public void Save()
+        {
+            throw new NotImplementedException("Save method for viza not implemented");
+            if (Changed)
+            {
+                Changed = false;
+            }
+        }
+
+        public bool Changed { get; private set; }
     }
 }

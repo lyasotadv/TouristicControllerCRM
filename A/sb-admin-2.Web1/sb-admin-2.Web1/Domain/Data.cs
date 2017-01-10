@@ -36,7 +36,8 @@ namespace sb_admin_2.Web1.Domain
             //menu.Add(new Navbar { Id = 19, nameOption = "Main", controller = "Home", action = "Main", status = true, isParent = false, parentId = 0, imageClass = "fa fa-book fa-fw" });
             menu.Add(new Navbar { Id = 20, nameOption = "Person", controller = "Home", action = "Person", status = true, isParent = false, parentId = 0, imageClass = "fa fa-users fa-fw" });
             menu.Add(new Navbar { Id = 21, nameOption = "Order", controller = "Home", action = "Order", status = true, isParent = false, parentId = 0, imageClass = "fa fa-space-shuttle  fa-fw" });
-            
+            menu.Add(new Navbar { Id = 22, nameOption = "Settings", controller = "Home", action = "Settings", status = true, isParent = false, parentId = 0, imageClass = "fa fa-gears  fa-fw" });
+
             //menu.Add(new Navbar { Id = 22, nameOption = "Login Page", controller = "Home", action = "Login", status = true, isParent = false, parentId = 0 });
             //menu.Add(new Navbar { Id = 22, nameOption = "Actions", controller = "Home", action = "Actions", status = true, isParent = false, parentId = 0 });
 

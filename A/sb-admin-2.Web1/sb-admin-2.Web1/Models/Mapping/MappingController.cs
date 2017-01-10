@@ -15,15 +15,19 @@ namespace sb_admin_2.Web1.Models.Mapping
 
         public PersonListData personListData { get; set; }
 
+        public SettingsData settingsData { get; set; }
+
         public MappingController()
         {
             Catalog catalog = new Catalog();
 
             orderListData = new OrderListData();
             personListData = new PersonListData();
+            settingsData = new SettingsData();
 
             orderListData.catalog = catalog;
             personListData.catalog = catalog;
+            settingsData.catalog = catalog;
 
             TestDataInit();
 

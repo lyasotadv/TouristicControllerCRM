@@ -9,34 +9,108 @@ using sb_admin_2.Web1.Models.Mapping.DBUtils;
 
 namespace sb_admin_2.Web1.Models
 {
-    public class CountryList : List<Country>
+    public class CountryList : DBObjectList<Country>
     {
-        public void Update()
+        public override void Load()
         {
             Clear();
             DBInterface.CommandText = "SELECT * FROM sellcontroller.country";
             DataTable tab = DBInterface.ExecuteSelection();
             foreach (DataRow row in tab.Rows)
             {
-                Country item = new Country() { Name = Convert.ToString(row["nameCountry"]) };
+                Country item = new Country() { ID = Convert.ToInt32(row["idCountry"]), Name = Convert.ToString(row["nameCountry"]) };
                 Add(item);
             }
         }
 
-        public void AddData(string Name)
+        public Country Create()
         {
-            InsertRow insertRow = new InsertRow("country", "idCountry");
-            insertRow.Add("nameCountry", MySql.Data.MySqlClient.MySqlDbType.String, Name);
-            insertRow.Execute();
-
-            Update();
+            Country country = new Country();
+            Init(country);
+            return country;
         }
     }
 
-    public class Country
+    public class Country : IDBObject
     {
-        public string Name { get; set; }
+        public int ID { get; set; }
+
+        private string _Name;
+
+        public string Name 
+        {
+            get { return _Name; }
+            set
+            {
+                if ((value != _Name) & (value != null) & (value != string.Empty))
+                {
+                    _Name = value;
+                    Changed = true;
+                }
+            }
+        }
 
         public string ISO { get; set; }
+
+        public Country()
+        {
+            ID = -1;
+            Changed = false;
+        }
+
+
+        public event EventHandler Updated;
+
+        public void Load()
+        {
+            DBInterface.CommandText = "SELECT `country`.`idCountry`, `country`.`nameCountry` FROM `sellcontroller`.`country` WHERE `idCountry` = @id;";
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DataTable tab = DBInterface.ExecuteSelection();
+            
+            if (tab.Rows.Count == 1)
+            {
+                Name = Convert.ToString(tab.Rows[0]["nameCountry"]);
+            }
+            else if (tab.Rows.Count > 1)
+            {
+                throw new DuplicateNameException("Country table has rows with same id");
+            }
+
+            Changed = false;
+        }
+
+        public void Save()
+        {
+            if (Changed)
+            {
+                if (ID >= 0)
+                {
+                    DBInterface.CommandText = "UPDATE `sellcontroller`.`country` SET `nameCountry` = @name WHERE `idCountry` = @id;";
+                    DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                    DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                    DBInterface.ExecuteTransaction();
+
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = false });
+                    }
+                }
+                else
+                {
+                    InsertRow insertRow = new InsertRow("country", "idCountry");
+                    insertRow.Add("nameCountry", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                    insertRow.Execute();
+
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = true });
+                    }
+                }
+
+                Changed = false;
+            }
+        }
+
+        public bool Changed { get; private set; }
     }
 }

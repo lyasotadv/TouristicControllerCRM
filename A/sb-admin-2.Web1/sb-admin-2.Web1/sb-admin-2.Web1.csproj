@@ -123,6 +123,7 @@
     <Compile Include="Domain\PageData.cs" />
     <Compile Include="Domain\PersonData.cs" />
     <Compile Include="Domain\PersonListData.cs" />
+    <Compile Include="Domain\SettingsData.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -935,6 +936,7 @@
     <Content Include="Views\Home\PersonList.cshtml" />
     <Content Include="Views\Home\OrderList.cshtml" />
     <Content Include="Views\Home\Company.cshtml" />
+    <Content Include="Views\Home\Settings.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
