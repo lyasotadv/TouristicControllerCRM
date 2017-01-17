@@ -4,6 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
+using System.IO;
+
 using sb_admin_2.Web1.Domain;
 using sb_admin_2.Web1.Models.Mapping;
 using sb_admin_2.Web1.Models;
@@ -328,6 +330,59 @@ namespace sb_admin_2.Web1.Controllers
             country.Save();
 
             return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteCountry(int id)
+        {
+            Country country = mappingController.settingsData.catalog.countryList.Find(item => item.ID == id);
+            if (country != null)
+            {
+                country.Delete();
+            }
+            return Json("");
+        }
+
+        public void UploadFileAndSave(HttpPostedFileBase file)
+        {
+            if (file.ContentLength > 0)
+            {
+                string fileName = Path.GetFileName(file.FileName);
+                string fileFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/temp"), fileName);
+                file.SaveAs(fileFullName);
+                
+                string newName = Guid.NewGuid().ToString();
+                string newFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/data"), newName);
+                System.IO.File.Move(fileFullName, newFullName);
+            }
+        }
+
+        public void UploadFileAndParse(HttpPostedFileBase file, Func<string, bool> Parser)
+        {
+            if (file.ContentLength > 0)
+            {
+                string fileName = Path.GetFileName(file.FileName);
+                string fileFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/temp"), fileName);
+                file.SaveAs(fileFullName);
+                
+                try
+                {
+                    if (!Parser(fileFullName)) 
+                        throw new FileLoadException("File structure is incorrect");
+                }
+                finally
+                {
+                    System.IO.File.Delete(fileFullName);
+                }
+            }
+        }
+
+        [HttpPost]
+        public ActionResult UploadCountry(HttpPostedFileBase file)
+        {
+            UploadFileAndParse(file, mappingController.settingsData.catalog.countryList.Export);
+
+            return RedirectToAction("Settings");
         }
     }
 }

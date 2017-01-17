@@ -134,6 +134,11 @@ namespace sb_admin_2.Web1.Models
             Changed = false;
         }
 
+        public void Delete()
+        {
+
+        }
+
         public void Save()
         {
             if (Changed)

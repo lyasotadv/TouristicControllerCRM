@@ -172,6 +172,11 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
+        public void Delete()
+        {
+
+        }
+
         public bool Changed { get; private set; }
     }
 
@@ -215,6 +220,11 @@ namespace sb_admin_2.Web1.Models
             {
                 Changed = false;
             }
+        }
+
+        public void Delete()
+        {
+
         }
 
         public bool Changed { get; private set; }

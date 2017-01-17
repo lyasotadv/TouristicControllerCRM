@@ -6,6 +6,7 @@ using System.Web;
 using System.Data;
 
 using sb_admin_2.Web1.Models.Mapping.DBUtils;
+using sb_admin_2.Web1.Models.Mapping.ExpImpUtils;
 
 namespace sb_admin_2.Web1.Models
 {
@@ -28,6 +29,38 @@ namespace sb_admin_2.Web1.Models
             Country country = new Country();
             Init(country);
             return country;
+        }
+
+        public bool Export(string fileName)
+        {
+            ExcelEI comp = null;
+            try
+            {
+                comp = new ExcelEI(fileName);
+                comp.startrange = "A2";
+                comp.w = 1;
+                comp.AutoRange("A2", ExcelEI.Direction.down);
+                comp.Read();
+            }
+            finally
+            {
+                if (comp != null)
+                {
+                    comp.Close();
+                }
+            }
+            
+
+            for (int n = 0; n < comp.h; n++ )
+            {
+                if (this.Find(item => item.Name == comp.Data[n, 0]) == null)
+                {
+                    Country country = Create();
+                    country.Name = comp.Data[n, 0];
+                    country.Save();
+                }
+            }
+            return true;
         }
     }
 
@@ -108,6 +141,21 @@ namespace sb_admin_2.Web1.Models
                 }
 
                 Changed = false;
+            }
+        }
+
+        public void Delete()
+        {
+            if (ID >= 0)
+            {
+                DBInterface.CommandText = "DELETE FROM `sellcontroller`.`country` WHERE `idCountry` = @id;";
+                DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                DBInterface.ExecuteTransaction();
+
+                if (Updated != null)
+                {
+                    Updated(this, new DBEventArgs() { ForceUpdate = true });
+                }
             }
         }
 
