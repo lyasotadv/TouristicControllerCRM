@@ -4,6 +4,9 @@
     ViewBag.Title = "Person";
 }
 
+@if (Session["UserID"] != null)
+{
+
 <script>
     $(document).ready(function () {
         $('#tableContact').DataTable({
@@ -584,3 +587,4 @@
         </div>
     </div>
 </div>
+}

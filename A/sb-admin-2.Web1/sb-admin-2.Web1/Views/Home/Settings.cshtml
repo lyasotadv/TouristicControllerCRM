@@ -8,6 +8,8 @@
     <h2>Settings</h2>
 </div>
 
+@if (Session["UserID"] != null)
+{
 <div class="row">
     <div class="col-lg-6">
         <div class="panel panel-default">
@@ -211,3 +213,4 @@
         </div>
     </div>
 </div>
+}

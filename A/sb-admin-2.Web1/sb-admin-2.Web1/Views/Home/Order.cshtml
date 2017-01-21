@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
+@if (Session["UserID"] != null)
+{
 <!--Title-->
 <div class="row">
     <h2>Order</h2>
@@ -910,3 +912,4 @@
         </div>
     </div>
 </div>
+}

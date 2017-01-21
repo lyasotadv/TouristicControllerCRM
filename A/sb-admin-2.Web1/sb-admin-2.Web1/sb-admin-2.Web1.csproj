@@ -122,6 +122,7 @@
     <Compile Include="Domain\ActionData.cs" />
     <Compile Include="Domain\CompanyData.cs" />
     <Compile Include="Domain\Data.cs" />
+    <Compile Include="Domain\LoginData.cs" />
     <Compile Include="Domain\MainData.cs" />
     <Compile Include="Domain\OrderData.cs" />
     <Compile Include="Domain\OrderListData.cs" />

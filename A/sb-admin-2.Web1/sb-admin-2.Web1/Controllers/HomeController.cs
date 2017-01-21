@@ -74,9 +74,27 @@ namespace sb_admin_2.Web1.Controllers
             return View("Blank");
         }
 
+        //[HttpGet]
         public ActionResult Login()
         {
-            return View("Login");
+            LoginData data = new LoginData();
+            return View("Login", data);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Login(LoginData data)
+        {
+            if (ModelState.IsValid)
+            {
+                if ((data != null) && (data.Check()))
+                {
+                    Session["UserID"] = data.ID;
+                    Session["UserName"] = data.Name;
+                    return RedirectToAction("PersonList");
+                }
+            }
+            return View("Login", data);
         }
 
         static HomeController()
@@ -88,62 +106,97 @@ namespace sb_admin_2.Web1.Controllers
 
         public ActionResult Person(string id)
         {
-            if (id != null)
+            if (Session["UserID"] != null)
             {
-                int ID = 0;
-                try
+                if (id != null)
                 {
-                    ID = Convert.ToInt32(id);
-                }
-                catch
-                {
-                    throw new ArgumentException("Person ID is not convertable to valid type");
-                }
+                    int ID = 0;
+                    try
+                    {
+                        ID = Convert.ToInt32(id);
+                    }
+                    catch
+                    {
+                        throw new ArgumentException("Person ID is not convertable to valid type");
+                    }
 
-                PageData data = mappingController.ConstructPersonData(ID);
-                if (data is PersonData)
-                    return View("Person", data);
-                else if (data is CompanyData)
-                    return View("Company", data);
-                else
-                    throw new NotImplementedException("View for current person type have not been created");
+                    PageData data = mappingController.ConstructPersonData(ID);
+                    if (data is PersonData)
+                        return View("Person", data);
+                    else if (data is CompanyData)
+                        return View("Company", data);
+                    else
+                        throw new NotImplementedException("View for current person type have not been created");
+                }
+                return RedirectToAction("PersonList");
             }
-            return View("PersonList", mappingController.personListData);
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         public ActionResult Company()
         {
-            return RedirectToAction("Person");
+            if (Session["UserID"] != null)
+            {
+                return View("PersonList", mappingController.personListData);
+            }
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         public ActionResult PersonList()
         {
-            return RedirectToAction("Person");
+            if (Session["UserID"] != null)
+            {
+                return View("PersonList", mappingController.personListData);
+            }
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         public ActionResult Order(string id)
         {
-            if (id != null)
+            if (Session["UserID"] != null)
             {
-                int ID = 0;
-                try
+                if (id != null)
                 {
-                    ID = Convert.ToInt32(id);
-                }
-                catch
-                {
-                    throw new ArgumentException("Order ID is not convertable to valid type");
-                }
+                    int ID = 0;
+                    try
+                    {
+                        ID = Convert.ToInt32(id);
+                    }
+                    catch
+                    {
+                        throw new ArgumentException("Order ID is not convertable to valid type");
+                    }
 
-                OrderData data = mappingController.ConstructOrderData(ID);
-                return View("Order", data);
+                    OrderData data = mappingController.ConstructOrderData(ID);
+                    return View("Order", data);
+                }
+                return View("OrderList", mappingController.orderListData);
             }
-            return View("OrderList", mappingController.orderListData);
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         public ActionResult OrderList()
         {
-            return RedirectToAction("Order");
+            if (Session["UserID"] != null)
+            {
+                return View("OrderList", mappingController.orderListData);
+            }
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         public ActionResult Main()
@@ -160,7 +213,14 @@ namespace sb_admin_2.Web1.Controllers
 
         public ActionResult Settings()
         {
-            return View("Settings", mappingController.settingsData);
+            if (Session["UserID"] != null)
+            {
+                return View("Settings", mappingController.settingsData);
+            }
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         [HttpPost]
