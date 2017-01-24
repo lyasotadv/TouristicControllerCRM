@@ -18,7 +18,7 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
 
             public DBInterfaceObject()
             {
-                string connStr = "server=localhost;user=root;database=sellcontroller;port=3306;password=000000";
+                string connStr = "Server=MYSQL5015.SmarterASP.NET;Database=db_a17285_crmtest;Uid=a17285_crmtest;Pwd=000000zz";
                 conn = new MySqlConnection(connStr);
                 try
                 {
