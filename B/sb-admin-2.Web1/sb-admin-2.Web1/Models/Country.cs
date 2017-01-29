@@ -49,9 +49,9 @@ namespace sb_admin_2.Web1.Models
                     comp.Close();
                 }
             }
-            
 
-            for (int n = 0; n < comp.h; n++ )
+
+            for (int n = 0; n < comp.h; n++)
             {
                 if (this.Find(item => item.Name == comp.Data[n, 0]) == null)
                 {

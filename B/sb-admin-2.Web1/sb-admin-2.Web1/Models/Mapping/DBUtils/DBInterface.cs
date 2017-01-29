@@ -18,10 +18,15 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
 
             public DBInterfaceObject()
             {
-                string connStr = "Server=MYSQL5015.SmarterASP.NET;Database=db_a17285_crmtest;Uid=a17285_crmtest;Pwd=000000zz";
-                conn = new MySqlConnection(connStr);
+                //string connStr = "Server=MYSQL5015.SmarterASP.NET;Database=db_a17285_crmtest;Uid=a17285_crmtest;Pwd=000000zz";
+                //string connStr = "server=mysql4.gear.host;user=sellcontroller;database=sellcontroller;password=Dc5SWX?j~3bM";
+                System.Configuration.Configuration rootWebConfig =
+                    System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration("/wwwwroot");
+
+                string connStr = rootWebConfig.ConnectionStrings.ConnectionStrings["DBConnect"].ConnectionString;
                 try
                 {
+                    conn = new MySqlConnection(connStr);
                     conn.Open();
                 }
                 catch

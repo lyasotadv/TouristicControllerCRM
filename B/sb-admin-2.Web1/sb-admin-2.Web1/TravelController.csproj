@@ -16,10 +16,12 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort />
+    <IISExpressSSLPort>
+    </IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,6 +31,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,28 +41,31 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <FilesToIncludeForPublish>OnlyFilesToRunTheApp</FilesToIncludeForPublish>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-	<Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1000\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
+    <Reference Include="MySql.Data.Entity.EF6, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
+    <Reference Include="MySql.Web, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
@@ -99,6 +106,7 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="WebGrease">
       <Private>True</Private>
       <HintPath>..\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
@@ -121,14 +129,14 @@
     <Compile Include="Controllers\NavbarController.cs" />
     <Compile Include="Domain\CompanyData.cs" />
     <Compile Include="Domain\Data.cs" />
-	<Compile Include="Domain\LoginData.cs" />
+    <Compile Include="Domain\LoginData.cs" />
     <Compile Include="Domain\MainData.cs" />
     <Compile Include="Domain\OrderData.cs" />
     <Compile Include="Domain\OrderListData.cs" />
     <Compile Include="Domain\PageData.cs" />
     <Compile Include="Domain\PersonData.cs" />
     <Compile Include="Domain\PersonListData.cs" />
-	<Compile Include="Domain\SettingsData.cs" />
+    <Compile Include="Domain\SettingsData.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -141,7 +149,9 @@
     <Compile Include="Models\Invoice.cs" />
     <Compile Include="Models\Mapping\Catalog.cs" />
     <Compile Include="Models\Mapping\DBUtils\DBInterface.cs" />
-	<Compile Include="Models\Mapping\ExpImpUtils\ExcelEI.cs" />
+    <Compile Include="Models\Mapping\ExpImpUtils\ExcelEI.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Models\Mapping\MappingController.cs" />
     <Compile Include="Models\Mapping\Preferences.cs" />
     <Compile Include="Models\Money.cs" />
@@ -356,7 +366,7 @@
     <Content Include="bower_components\datatables\media\images\sort_both.png" />
     <Content Include="bower_components\datatables\media\images\sort_desc.png" />
     <Content Include="bower_components\datatables\media\images\sort_desc_disabled.png" />
-    <Content Include="bower_components\datatables\media\js\jquery-1.12.3.js" />
+    <Content Include="bower_components\datatables\media\js\jquery.js" />
     <Content Include="bower_components\datatables\media\js\jquery.dataTables.js" />
     <Content Include="bower_components\datatables\media\js\jquery.dataTables.min.js" />
     <Content Include="bower_components\flot.tooltip\js\excanvas.min.js" />
@@ -751,12 +761,9 @@
     <Content Include="bower_components\datatables-plugins\integration\jqueryui\dataTables.jqueryui.scss" />
     <Content Include="bower_components\datatables-plugins\make.sh" />
     <Content Include="bower_components\datatables-plugins\README.md" />
-    <Content Include="bower_components\datatables-plugins\sorting\.DS_Store" />
     <Content Include="bower_components\datatables-responsive\.bower.json" />
     <Content Include="bower_components\datatables-responsive\bower.json" />
     <Content Include="bower_components\datatables-responsive\css\dataTables.responsive.scss" />
-    <Content Include="bower_components\datatables-responsive\examples\.DS_Store" />
-    <Content Include="bower_components\datatables-responsive\examples\initialisation\.DS_Store" />
     <Content Include="bower_components\datatables-responsive\make.sh" />
     <Content Include="bower_components\datatables-responsive\Readme.md" />
     <Content Include="bower_components\datatables\.bower.json" />
@@ -894,6 +901,11 @@
     <Content Include="Content\less\mixins.less" />
     <Content Include="Content\less\sb-admin-2.less" />
     <Content Include="Content\less\variables.less" />
+    <None Include="Properties\PublishProfiles\c313f3c0-0ee0-4-231-b9ee - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\c313f3c0-0ee0-4-231-b9ee - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\Default Settings.pubxml" />
+    <None Include="Properties\PublishProfiles\tccrmtest - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\tccrmtest - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\flot-data.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -909,7 +921,9 @@
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\sb-admin-2.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -928,7 +942,7 @@
     <Content Include="Views\Home\PersonList.cshtml" />
     <Content Include="Views\Home\OrderList.cshtml" />
     <Content Include="Views\Home\Company.cshtml" />
-	<Content Include="Views\Home\Settings.cshtml" />
+    <Content Include="Views\Home\Settings.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\uploads\data\" />
