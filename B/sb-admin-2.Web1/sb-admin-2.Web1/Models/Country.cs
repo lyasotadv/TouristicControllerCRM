@@ -130,7 +130,7 @@ namespace sb_admin_2.Web1.Models
                 }
                 else
                 {
-                    InsertRow insertRow = new InsertRow("country", "idCountry");
+                    InsertRow insertRow = new InsertRow("country");
                     insertRow.Add("nameCountry", MySql.Data.MySqlClient.MySqlDbType.String, Name);
                     insertRow.Execute();
 

@@ -205,25 +205,11 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
 
         private string tableName;
 
-        private string idName;
-
-        public InsertRow(string tableName, string idName)
+        public InsertRow(string tableName)
         {
             this.tableName = tableName;
-            this.idName = idName;
             parameterValue = new Dictionary<string, object>();
             parameterType = new Dictionary<string, MySqlDbType>();
-
-            Add(idName, MySqlDbType.Int32, PrimaryID());
-        }
-
-        private int PrimaryID()
-        {
-            DBInterface.CommandText = "SELECT MAX(" + idName + ") FROM " + tableName;
-            DataTable tab = DBInterface.ExecuteSelection();
-            if (tab.Rows.Count == 0)
-                return 0;
-            return Convert.ToInt32(tab.Rows[0][0]) + 1;
         }
 
         public void Add(string Name, MySqlDbType DBType, object Value)

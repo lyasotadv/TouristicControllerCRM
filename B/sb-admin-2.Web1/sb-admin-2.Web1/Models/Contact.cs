@@ -157,7 +157,7 @@ namespace sb_admin_2.Web1.Models
                 }
                 else
                 {
-                    InsertRow insertRow = new InsertRow("contact", "idContact");
+                    InsertRow insertRow = new InsertRow("contact");
                     insertRow.Add("value", MySql.Data.MySqlClient.MySqlDbType.String, Content);
                     insertRow.Execute();
 
