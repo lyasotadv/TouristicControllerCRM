@@ -15,7 +15,48 @@ namespace sb_admin_2.Web1.Models
         public override void Load()
         {
             Clear();
-            throw new NotImplementedException("Waiting for stored procedure");
+            DBInterface.CommandText = "select " +
+                                        "person.idPerson, " +
+                                        "people.idPeople, " +
+                                        "company.idCompany, " +
+                                        "people.firstName, " +
+                                        "people.lastName, " +
+                                        "people.middleName, " +
+                                        "company.officialCompanyName, " +
+                                        "person.isPeople " +
+                                        "from person " +
+                                        "left join people " +
+                                        "on people.idPerson = person.idPerson " +
+                                        "left join company " +
+                                        "on company.idPerson = person.idPerson;";
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach(DataRow row in tab.Rows)
+            {
+                if (row["isPeople"].ToString() == "1")
+                {
+                    Person person = new Person();
+
+                    person.ID = Convert.ToInt32(row["idPerson"]);
+                    person.PersonID = Convert.ToInt32(row["idPeople"]);
+                    person.FirstName = row["firstName"].ToString();
+                    person.SecondName = row["lastName"].ToString();
+                    person.MiddleName = row["middleName"].ToString();
+
+                    this.Add(person);
+                }
+                else
+                {
+                    Company company = new Company();
+
+                    company.ID = Convert.ToInt32(row["idPerson"]);
+                    company.CompanyID = Convert.ToInt32(row["idCompany"]);
+                    company.FullName = row["officialCompanyName"].ToString();
+
+                    this.Add(company);
+                }
+            }
         }
 
         public PersonGeneral Create(string companyType)
@@ -164,6 +205,8 @@ namespace sb_admin_2.Web1.Models
 
     public class Person : PersonGeneral
     {
+        public int PersonID { get; set; }
+
         private enum Sex { male, female };
 
         private Sex _sex;
@@ -241,7 +284,7 @@ namespace sb_admin_2.Web1.Models
                                         "`people`.`itn`" +
                                         "FROM `sellcontroller`.`people` WHERE `idPeople` = @id;";
 
-            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, PersonID);
             DataTable tab = DBInterface.ExecuteSelection();
 
             if (tab.Rows.Count == 1)
@@ -286,6 +329,8 @@ namespace sb_admin_2.Web1.Models
 
     public class Company : PersonGeneral
     {
+        public int CompanyID { get; set; }
+
         public enum CompanyType { air, isurance, provider }
 
         protected CompanyType companyType;

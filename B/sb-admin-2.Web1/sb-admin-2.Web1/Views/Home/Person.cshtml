@@ -46,7 +46,7 @@
             url: '@Url.Action("FindPassport", "Home")',
             dataType: 'json',
             data: {
-                PersonID : '@Model.person.ID',
+                PersonID: '@Model.person.ID',
                 id: id
             },
             success: function (data) {
@@ -71,7 +71,7 @@
             url: '@Url.Action("GetPersonalData", "Home")',
             dataType: 'json',
             data: {
-                PersonID : '@Model.person.ID'
+                PersonID: '@Model.person.ID'
             },
             success: function (data) {
                 if (data != null) {
@@ -163,6 +163,26 @@
         })
     }
 
+    function DeleteContact() {
+        if (confirm("Are you sure to delete the contact?")) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("DeleteContact", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.person.ID',
+                    id: EditedConatctID
+                },
+                success: function (data) {
+                    $('#contactdetails').modal('toggle');
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
+    }
 
     EditedVizaID = 0;
 
@@ -532,8 +552,18 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveContactDetails()">Save</button>
+                <div class="row">
+                    <div class="col-lg-6" style="text-align: left">
+                        <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeleteContact()">
+                            <i class="glyphicon glyphicon-remove fa-1x"></i>
+                        </button>
+                    </div>
+                    <div class="col-lg-6" style="text-align: right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="SaveContactDetails()">Save</button>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>

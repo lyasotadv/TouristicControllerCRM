@@ -16,16 +16,29 @@ namespace sb_admin_2.Web1.Models
         public override void Load()
         {
             Clear();
-            throw new NotImplementedException("Waiting for stored procedure");
 
-            DBInterface.CommandText = "";
+            DBInterface.CommandText = "select " +
+                                        "contact.idContact, " +
+                                        "typecontact.nameContact, " +
+                                        "contact.value, " +
+                                        "contact.description " +
+                                        "from contact " +
+                                        "left join person " +
+                                        "on contact.idPerson = person.idPerson " +
+                                        "left join typecontact " +
+                                        "on contact.idTypeContact = typecontact.idTypeContact " +
+                                        "where " +
+                                        "person.idPerson = @id;";
+
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, person.ID);
+
             DataTable tab = DBInterface.ExecuteSelection();
             foreach (DataRow row in tab.Rows)
             {
                 Contact item = Contact.Create(Convert.ToString(row["nameContact"]));
                 item.ID = Convert.ToInt32(row["idContact"]);
                 item.Content = Convert.ToString(row["value"]);
-                item.Description = Convert.ToString(row["note"]);
+                item.Description = Convert.ToString(row["description"]);
                 Add(item);
             }
         }
@@ -56,9 +69,44 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public abstract string Content { get; set; }
+        protected abstract string GetContent();
 
-        public string Description { get; set; }
+        protected abstract void SetContent(string val);
+
+        public string Content 
+        { 
+            get
+            {
+                return GetContent();
+            }
+            set
+            {
+                if (value != GetContent())
+                {
+                    SetContent(value);
+                    Changed = true;
+                }
+
+            }
+        }
+
+        private string _Description;
+
+        public string Description 
+        { 
+            get
+            {
+                return _Description;
+            }
+            set
+            {
+                if (value != _Description)
+                {
+                    _Description = value;
+                    Changed = true;
+                }
+            }
+        }
 
         public int ID { get; set; }
 
@@ -113,7 +161,6 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-
         public event EventHandler Updated;
 
         public void Load()
@@ -136,7 +183,17 @@ namespace sb_admin_2.Web1.Models
 
         public void Delete()
         {
+            if (ID >= 0)
+            {
+                DBInterface.CommandText = "DELETE FROM `sellcontroller`.`contact` WHERE `idContact` = @id;";
+                DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                DBInterface.ExecuteTransaction();
 
+                if (Updated != null)
+                {
+                    Updated(this, new DBEventArgs() { ForceUpdate = true });
+                }
+            }
         }
 
         public void Save()
@@ -145,8 +202,9 @@ namespace sb_admin_2.Web1.Models
             {
                 if (ID >= 0)
                 {
-                    DBInterface.CommandText = "UPDATE `sellcontroller`.`contact` SET `value` = @content WHERE `idContact` = @id;";
+                    DBInterface.CommandText = "UPDATE sellcontroller.contact SET value = @content, description = @desc WHERE idContact = @id;";
                     DBInterface.AddParameter("@content", MySql.Data.MySqlClient.MySqlDbType.String, Content);
+                    DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
                     DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
                     DBInterface.ExecuteTransaction();
 
@@ -158,7 +216,10 @@ namespace sb_admin_2.Web1.Models
                 else
                 {
                     InsertRow insertRow = new InsertRow("contact");
+                    insertRow.Add("idTypeContact", MySql.Data.MySqlClient.MySqlDbType.Int32, ContactTypeID());
+                    insertRow.Add("idPerson", MySql.Data.MySqlClient.MySqlDbType.String, person.ID);
                     insertRow.Add("value", MySql.Data.MySqlClient.MySqlDbType.String, Content);
+                    insertRow.Add("description", MySql.Data.MySqlClient.MySqlDbType.String, Description);
                     insertRow.Execute();
 
                     if (Updated != null)
@@ -168,6 +229,21 @@ namespace sb_admin_2.Web1.Models
                 }
 
                 Changed = false;
+            }
+        }
+
+        private int ContactTypeID()
+        {
+            DBInterface.CommandText = "select idTypeContact from typecontact where nameContact = @name";
+            DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, contactType);
+            DataTable tab = DBInterface.ExecuteSelection();
+            if ((tab != null)||(tab.Rows.Count == 1))
+            {
+                return Convert.ToInt32(tab.Rows[0]["idTypeContact"]);
+            }
+            else
+            {
+                throw new ArgumentException("Unhandled contacy type");
             }
         }
 
@@ -185,22 +261,20 @@ namespace sb_admin_2.Web1.Models
 
         public string Domen { get; set; }
 
-        public override string Content
+        protected override string GetContent()
         {
-            get
+            return MainPart + "@" + Domen;
+        }
+
+        protected override void SetContent(string val)
+        {
+            if (val != string.Empty)
             {
-                return MainPart + "@" + Domen;
-            }
-            set
-            {
-                if (value != string.Empty)
-                {
-                    string[] str = value.Split('@');
-                    if (str.Length != 2)
-                        throw new ArgumentException("Email has incorrect format");
-                    MainPart = str[0];
-                    Domen = str[1];
-                }
+                string[] str = val.Split('@');
+                if (str.Length != 2)
+                    throw new ArgumentException("Email has incorrect format");
+                MainPart = str[0];
+                Domen = str[1];
             }
         }
     }
@@ -218,30 +292,28 @@ namespace sb_admin_2.Web1.Models
 
         public string PrivateNumber { get; set; }
 
-        public override string Content
+        protected override string GetContent()
         {
-            get
-            {
-                return "+" + CountryCode + OperatorCode + PrivateNumber;
-            }
-            set
-            {
-                if (value != string.Empty)
-                {
-                    string str = value;
-                    if (value.StartsWith("+"))
-                        str = str.Remove(0, 1);
+            return "+" + CountryCode + OperatorCode + PrivateNumber;
+        }
 
-                    try
-                    {
-                        CountryCode = str.Substring(0, 3);
-                        OperatorCode = str.Substring(3, 2);
-                        PrivateNumber = str.Substring(5);
-                    }
-                    catch
-                    {
-                        throw new ArgumentException("Mobile phone has incorrect format");
-                    }
+        protected override void SetContent(string val)
+        {
+            if (val != string.Empty)
+            {
+                string str = val;
+                if (val.StartsWith("+"))
+                    str = str.Remove(0, 1);
+
+                try
+                {
+                    CountryCode = str.Substring(0, 3);
+                    OperatorCode = str.Substring(3, 2);
+                    PrivateNumber = str.Substring(5);
+                }
+                catch
+                {
+                    throw new ArgumentException("Mobile phone has incorrect format");
                 }
             }
         }
@@ -257,16 +329,14 @@ namespace sb_admin_2.Web1.Models
 
         private string _Content;
 
-        public override string Content
+        protected override string GetContent()
         {
-            get
-            {
-                return _Content;
-            }
-            set
-            {
-                _Content = value;
-            }
+            return _Content;
+        }
+
+        protected override void SetContent(string val)
+        {
+            _Content = val;
         }
     }
 }

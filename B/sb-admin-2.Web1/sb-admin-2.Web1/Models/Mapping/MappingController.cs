@@ -29,7 +29,8 @@ namespace sb_admin_2.Web1.Models.Mapping
             personListData.catalog = catalog;
             settingsData.catalog = catalog;
 
-            TestDataInit();
+            //TestDataInit();
+            personListData.personList.Load();
 
             orderListData.orderList.Add(new Order() { ID = 2 });
         }
@@ -54,6 +55,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             PersonGeneral person = personListData.personList.Find(item => item.ID == ID);
             if (person != null)
             {
+                person.Load();
                 if (person is Person)
                 {
                     PersonData data = new PersonData(person as Person);

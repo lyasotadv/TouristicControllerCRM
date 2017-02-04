@@ -37,12 +37,19 @@ namespace sb_admin_2.Web1.Controllers
             return View("Login", data);
         }
 
-        static HomeController()
-        {
-            mappingController = new MappingController();
-        }
+        private MappingController _mappingController;
 
-        static private MappingController mappingController { get; set; }
+        private MappingController mappingController 
+        { 
+            get
+            {
+                if (_mappingController == null)
+                {
+                    _mappingController = new MappingController();
+                }
+                return _mappingController;
+            }
+        }
 
         public ActionResult Person(string id)
         {
@@ -248,10 +255,16 @@ namespace sb_admin_2.Web1.Controllers
         public ActionResult GetPersonalData(int PersonID)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
-            if (person is Person)
-                return Json(person as Person);
-            else if (person is Company)
-                return Json(person as Company);
+            if (person != null)
+            {
+                person.Load();
+                if (person is Person)
+                    return Json(person as Person);
+                else if (person is Company)
+                    return Json(person as Company);
+                else
+                    return Json("");
+            }
             else
                 return Json("");
         }
@@ -262,7 +275,12 @@ namespace sb_admin_2.Web1.Controllers
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if (person != null)
             {
+                person.Load();
                 Contact contact = person.ContactList.Find((item) => { return item.ID == id; });
+                if (contact != null)
+                {
+                    contact.Load();
+                }
                 return Json(contact);
             }
             else
@@ -277,15 +295,36 @@ namespace sb_admin_2.Web1.Controllers
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if (person != null)
             {
+                person.Load();
                 Contact contact = person.ContactList.Find((item) => { return item.ID == id; });
                 if (contact == null)
                 {
                     contact = person.ContactList.Create(contactType);
                 }
+                else
+                {
+                    contact.Load();
+                }
 
                 contact.Content = content;
                 contact.Description = description;
                 contact.Save();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteContact(int PersonID, int id)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.Load();
+                Contact contact = person.ContactList.Find((item) => { return item.ID == id; });
+                if (contact != null)
+                {
+                    contact.Delete();
+                }
             }
             return Json("");
         }
