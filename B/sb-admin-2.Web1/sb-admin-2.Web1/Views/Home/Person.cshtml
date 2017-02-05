@@ -83,10 +83,10 @@
 
                     switch (data.Gender) {
                         case "male":
-                            $('#selectGender').val('Male').change();
+                            $('#selectGender').val('male').change();
                             break;
                         case "female":
-                            $('#selectGender').val('Female').change();
+                            $('#selectGender').val('female').change();
                             break;
                     }
                 }
@@ -95,6 +95,30 @@
                 alert('error');
             }
         });
+    }
+
+    function SavePersonDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SavePersonDetails", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                FirstName : document.getElementById("inputFirstName").value,
+                MiddleName : document.getElementById("inputMiddleName").value,
+                SecondName : document.getElementById("inputSecondName").value,
+                BirthDay : document.getElementById("inputBirthDay").value,
+                Description : document.getElementById("textpersondescription").value,
+                Gender: document.getElementById("selectGender").value
+            },
+            success: function (data) {
+                $('#personaldata').modal('toggle');
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
     }
 
     EditedConatctID = 0;
@@ -186,7 +210,7 @@
 
     EditedVizaID = 0;
 
-    function ClearVizaDetails(){
+    function ClearVizaDetails() {
         EditedVizaID = 0;
 
         $('#inputVizaExpired').val('');
@@ -194,7 +218,7 @@
 
     }
 
-    function FillVizaDetails(id, PassportSerial){
+    function FillVizaDetails(id, PassportSerial) {
         EditedVizaID = 0;
         $.ajax({
             type: 'POST',
@@ -491,8 +515,8 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <select class="form-control" id="selectGender">
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
+                                <option value="male">male</option>
+                                <option value="female">female</option>
                             </select>
                         </div>
                     </div>
@@ -512,7 +536,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-primary" onclick="SavePersonDetails()">Save</button>
             </div>
         </div>
     </div>

@@ -237,7 +237,7 @@ namespace sb_admin_2.Web1.Models
             DBInterface.CommandText = "select idTypeContact from typecontact where nameContact = @name";
             DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, contactType);
             DataTable tab = DBInterface.ExecuteSelection();
-            if ((tab != null)||(tab.Rows.Count == 1))
+            if ((tab != null) && (tab.Rows.Count == 1))
             {
                 return Convert.ToInt32(tab.Rows[0]["idTypeContact"]);
             }

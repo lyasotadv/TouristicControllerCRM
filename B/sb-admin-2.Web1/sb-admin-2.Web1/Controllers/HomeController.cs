@@ -270,6 +270,25 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
+        public ActionResult SavePersonDetails(int PersonID, string FirstName, string MiddleName, string SecondName, 
+            string BirthDay, string Description, string Gender)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
+            {
+                (person as Person).FirstName = FirstName;
+                (person as Person).MiddleName = MiddleName;
+                (person as Person).SecondName = SecondName;
+                (person as Person).BirthStr = BirthDay;
+                (person as Person).Description = Description;
+                (person as Person).Gender = Gender;
+
+                person.Save();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
         public ActionResult FindContact(int PersonID, int id)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);

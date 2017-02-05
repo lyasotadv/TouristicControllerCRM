@@ -140,15 +140,13 @@ namespace sb_admin_2.Web1.Models
 
         public void Load()
         {
-            throw new NotImplementedException("Load methd for passport have not been implemented");
-
             Changed = false;
+
+            throw new NotImplementedException("Load methd for passport have not been implemented");
         }
 
         public void Save()
-        {
-            throw new NotImplementedException("Save method for passport have not been implemented");
-
+        {   
             if (Changed)
             {
                 if (ID >= 0)
@@ -170,6 +168,8 @@ namespace sb_admin_2.Web1.Models
 
                 Changed = false;
             }
+
+            throw new NotImplementedException("Save method for passport have not been implemented");
         }
 
         public void Delete()
@@ -194,8 +194,6 @@ namespace sb_admin_2.Web1.Models
 
         public Country CountryOfInvintation { get; set; }
 
-        public int ID { get; set; }
-
         public Viza()
         {
             documentType = "Viza";
@@ -209,17 +207,22 @@ namespace sb_admin_2.Web1.Models
 
         public void Load()
         {
-            throw new NotImplementedException("Load method for viza is not implemented");
             Changed = false;
+            throw new NotImplementedException("Load method for viza is not implemented");
         }
 
         public void Save()
         {
-            throw new NotImplementedException("Save method for viza not implemented");
             if (Changed)
             {
                 Changed = false;
+
+                if (Updated != null)
+                {
+                    Updated(this, new DBEventArgs() { ForceUpdate = true });
+                }
             }
+            throw new NotImplementedException("Save method for viza not implemented");
         }
 
         public void Delete()

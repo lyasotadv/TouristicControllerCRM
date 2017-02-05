@@ -157,9 +157,41 @@ namespace sb_admin_2.Web1.Models
 
         public abstract string FullName { get; set; }
 
-        public string Description { get; set; }
+        private string _Description;
 
-        public PersonGeneral Parent { get; set; }
+        public string Description 
+        { 
+            get
+            {
+                return _Description;
+            }
+            set
+            {
+                if (value != _Description)
+                {
+                    _Description = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private PersonGeneral _Parent;
+
+        public PersonGeneral Parent 
+        { 
+            get
+            {
+                return _Parent;
+            }
+            set
+            {
+                if ((value != null) && ((_Parent == null) || (value.ID != _Parent.ID)))
+                {
+                    _Parent = value;
+                    Changed = true;
+                }
+            }
+        }
 
         protected PersonGeneral()
         {
@@ -211,11 +243,59 @@ namespace sb_admin_2.Web1.Models
 
         private Sex _sex;
 
-        public string FirstName { get; set; }
-        
-        public string SecondName { get; set; }
+        private string _FirstName;
 
-        public string MiddleName { get; set; }
+        public string FirstName 
+        { 
+            get
+            {
+                return _FirstName;
+            }
+            set
+            {
+                if (value != _FirstName)
+                {
+                    _FirstName = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _SecondName;
+
+        public string SecondName
+        {
+            get
+            {
+                return _SecondName;
+            }
+            set
+            {
+                if (value != _SecondName)
+                {
+                    _SecondName = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _MiddleName;
+
+        public string MiddleName
+        {
+            get
+            {
+                return _MiddleName;
+            }
+            set
+            {
+                if (value != _MiddleName)
+                {
+                    _MiddleName = value;
+                    Changed = true;
+                }
+            }
+        }
 
         public string Gender 
         { 
@@ -228,22 +308,26 @@ namespace sb_admin_2.Web1.Models
             }
             set
             {
-                switch (value)
+                if (value != Gender)
                 {
-                    case "male": 
-                        { 
-                            _sex = Person.Sex.male;
-                            break;
-                        };
-                    case "female":
-                        {
-                            _sex = Person.Sex.female;
-                            break;
-                        }
-                    default:
-                        {
-                            throw new ArgumentException("Input gender in incorrect");
-                        }
+                    switch (value)
+                    {
+                        case "male":
+                            {
+                                _sex = Person.Sex.male;
+                                break;
+                            };
+                        case "female":
+                            {
+                                _sex = Person.Sex.female;
+                                break;
+                            }
+                        default:
+                            {
+                                throw new ArgumentException("Input gender in incorrect");
+                            }
+                    }
+                    Changed = true;
                 }
             }
         }
@@ -253,7 +337,21 @@ namespace sb_admin_2.Web1.Models
         public string BirthStr
         {
             get { return Birth.ToString("ddMMMyy", Preferences.cultureInfo); }
-            set { throw new NotImplementedException("Setter for BirthStr havnt been implemented"); }
+            set 
+            {
+                if (value != BirthStr)
+                {
+                    try
+                    {
+                        Birth = DateTime.ParseExact(value, "ddMMMyy", Preferences.cultureInfo);
+                    }
+                    catch
+                    {
+                        throw new FormatException("Incorrect input date format");
+                    }
+                    Changed = true;
+                }
+            }
         }
 
         public override string FullName
@@ -264,7 +362,23 @@ namespace sb_admin_2.Web1.Models
 
         public List<Passport> PassportList { get; private set; }
 
-        public Country Citizen { get; set; }
+        public Country _Citizen;
+
+        public Country Citizen 
+        { 
+            get
+            {
+                return _Citizen;
+            }
+            set
+            {
+                if ((value != null) && ((_Citizen == null) || (value.ID != _Citizen.ID)))
+                {
+                    _Citizen = value;
+                    Changed = true;
+                }
+            }
+        }
 
         public Person()
         {
@@ -274,14 +388,15 @@ namespace sb_admin_2.Web1.Models
 
         public override void Load()
         {
-            DBInterface.CommandText = "SELECT `people`.`idPeople`," + 
-                                        "`people`.`idPerson`," +
-                                        "`people`.`firstName`," + 
-                                        "`people`.`middleName`," + 
-                                        "`people`.`lastName`," + 
-                                        "`people`.`birthDate`," +
-                                        "`people`.`Note`," +
-                                        "`people`.`itn`" +
+            DBInterface.CommandText = "SELECT `people`.`idPeople`, " + 
+                                        "`people`.`idPerson`, " +
+                                        "`people`.`firstName`, " + 
+                                        "`people`.`middleName`, " + 
+                                        "`people`.`lastName`, " + 
+                                        "`people`.`birthDate`, " +
+                                        "`people`.`Note`, " +
+                                        "`people`.`itn`, " +
+                                        "`people`.`gender` " +
                                         "FROM `sellcontroller`.`people` WHERE `idPeople` = @id;";
 
             DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, PersonID);
@@ -294,6 +409,11 @@ namespace sb_admin_2.Web1.Models
                 MiddleName = Convert.ToString(tab.Rows[0]["middleName"]);
                 Birth = Convert.ToDateTime(tab.Rows[0]["birthDate"]);
                 Description = Convert.ToString(tab.Rows[0]["Note"]);
+
+                if (Convert.ToInt32(tab.Rows[0]["gender"]) == 0)
+                    _sex = Sex.male;
+                else
+                    _sex = Sex.female;
             }
             else if (tab.Rows.Count > 1)
             {
@@ -307,13 +427,37 @@ namespace sb_admin_2.Web1.Models
 
         public override void Save()
         {
-            throw new NotImplementedException("Waiting for new person store stucture");
-
             if (Changed)
             {
                 if (ID >= 0)
                 {
-                    //To Do
+                    DBInterface.CommandText = "UPDATE `sellcontroller`.`people` " +
+                                                "SET " +
+                                                "`firstName` =@firstName, " +
+                                                "`middleName` = @middleName, " +
+                                                "`lastName` = @lastName, " +
+                                                "`birthDate` = @birthDate, " +
+                                                "`Note` = @desc, " +
+                                                "`gender` = @gender " +
+                                                "WHERE `idPeople` = @id;";
+
+                    DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, PersonID);
+                    DBInterface.AddParameter("@firstName", MySql.Data.MySqlClient.MySqlDbType.String, FirstName);
+                    DBInterface.AddParameter("@middleName", MySql.Data.MySqlClient.MySqlDbType.String, MiddleName);
+                    DBInterface.AddParameter("@lastName", MySql.Data.MySqlClient.MySqlDbType.String, SecondName);
+                    DBInterface.AddParameter("@birthDate", MySql.Data.MySqlClient.MySqlDbType.DateTime, Birth);
+                    DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+
+                    int genderID = 0;
+                    if (_sex == Sex.male)
+                        genderID = 0;
+                    else
+                        genderID = 1;
+
+                    DBInterface.AddParameter("@gender", MySql.Data.MySqlClient.MySqlDbType.Int32, genderID);
+
+                    DBInterface.ExecuteTransaction();
+
                     RaiseUpdated(false);
                 }
                 else
