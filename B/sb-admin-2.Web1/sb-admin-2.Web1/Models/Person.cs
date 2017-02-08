@@ -201,6 +201,16 @@ namespace sb_admin_2.Web1.Models
 
             Changed = false;
             ID = -1;
+
+            Updated += OnUpdated;
+        }
+
+        private void OnUpdated(object sender, EventArgs arg)
+        {
+            if ((arg is DBEventArgs) && ((arg as DBEventArgs).ForceUpdate))
+            {
+                Load();
+            }
         }
 
         public ContactList ContactList { get; private set; }
@@ -218,9 +228,11 @@ namespace sb_admin_2.Web1.Models
             
         }
 
-        public void Delete()
+        public virtual void Delete()
         {
-
+            DBInterface.CommandText = "delete from person where idPerson = @id";
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DBInterface.ExecuteTransaction();
         }
 
         public bool Changed { get; protected set; }
@@ -242,6 +254,14 @@ namespace sb_admin_2.Web1.Models
         private enum Sex { male, female };
 
         private Sex _sex;
+
+        private int GenderID()
+        {
+            if (_sex == Sex.male)
+                return 0;
+            else
+                return 1;
+        }
 
         private string _FirstName;
 
@@ -385,6 +405,12 @@ namespace sb_admin_2.Web1.Models
             PassportList = new List<Passport>();
         }
 
+        static public Person CreatePerson()
+        {
+            Person person = new Person();
+            person.Changed = true;
+            return person;
+        }
 
         public override void Load()
         {
@@ -433,7 +459,7 @@ namespace sb_admin_2.Web1.Models
                 {
                     DBInterface.CommandText = "UPDATE `sellcontroller`.`people` " +
                                                 "SET " +
-                                                "`firstName` =@firstName, " +
+                                                "`firstName` = @firstName, " +
                                                 "`middleName` = @middleName, " +
                                                 "`lastName` = @lastName, " +
                                                 "`birthDate` = @birthDate, " +
@@ -447,14 +473,7 @@ namespace sb_admin_2.Web1.Models
                     DBInterface.AddParameter("@lastName", MySql.Data.MySqlClient.MySqlDbType.String, SecondName);
                     DBInterface.AddParameter("@birthDate", MySql.Data.MySqlClient.MySqlDbType.DateTime, Birth);
                     DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
-
-                    int genderID = 0;
-                    if (_sex == Sex.male)
-                        genderID = 0;
-                    else
-                        genderID = 1;
-
-                    DBInterface.AddParameter("@gender", MySql.Data.MySqlClient.MySqlDbType.Int32, genderID);
+                    DBInterface.AddParameter("@gender", MySql.Data.MySqlClient.MySqlDbType.Int32, GenderID());
 
                     DBInterface.ExecuteTransaction();
 
@@ -462,12 +481,39 @@ namespace sb_admin_2.Web1.Models
                 }
                 else
                 {
-                    //To Do
+                    DBInterface.CommandText = "insert into person (isPeople) values (1); " +
+                                                "insert into people (idPerson, firstName, middleName, lastName, Note, birthDate, gender) " +
+                                                "values (LAST_INSERT_ID(), @firstName, @middleName, @lastName, @desc, @birthDate, @gender);";
+
+                    DBInterface.AddParameter("@firstName", MySql.Data.MySqlClient.MySqlDbType.String, FirstName);
+                    DBInterface.AddParameter("@middleName", MySql.Data.MySqlClient.MySqlDbType.String, MiddleName);
+                    DBInterface.AddParameter("@lastName", MySql.Data.MySqlClient.MySqlDbType.String, SecondName);
+                    DBInterface.AddParameter("@birthDate", MySql.Data.MySqlClient.MySqlDbType.DateTime, Birth);
+                    DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+                    DBInterface.AddParameter("@gender", MySql.Data.MySqlClient.MySqlDbType.Int32, GenderID());
+
+                    PersonID = Convert.ToInt32(DBInterface.ExecuteTransaction());
+
+                    DBInterface.CommandText = "select idPerson from people where idPeople = @id";
+                    DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, PersonID);
+
+                    DataTable tab = DBInterface.ExecuteSelection();
+                    ID = Convert.ToInt32(tab.Rows[0]["idPerson"]);
+
                     RaiseUpdated(true);
                 }
 
                 Changed = false;
             }
+        }
+
+        public override void Delete()
+        {
+            DBInterface.CommandText = "delete from people where idPeople = @id";
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, PersonID);
+            DBInterface.ExecuteTransaction();
+
+            base.Delete();
         }
     }
 

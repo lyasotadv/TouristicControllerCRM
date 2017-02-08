@@ -32,7 +32,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             //TestDataInit();
             personListData.personList.Load();
 
-            orderListData.orderList.Add(new Order() { ID = 2 });
+            //orderListData.orderList.Add(new Order() { ID = 2 });
         }
 
         public OrderData ConstructOrderData(int ID)
@@ -77,6 +77,13 @@ namespace sb_admin_2.Web1.Models.Mapping
             {
                 throw new ArgumentException("Person with current id can not be found");
             }
+        }
+
+        public int CreatePerson()
+        {
+            Person person = Person.CreatePerson();
+            person.Save();
+            return person.ID;
         }
 
         private void TestDataInit()

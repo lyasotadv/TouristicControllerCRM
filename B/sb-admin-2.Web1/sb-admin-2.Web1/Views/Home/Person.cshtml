@@ -241,10 +241,37 @@
             }
         });
     }
+
+    function DeletePerson() {
+        if (confirm("Are you sure to delete the person and all attached contacts and documents?")) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("DeletePerson", "Home")',
+                dataType: 'json',
+                data : {
+                    PersonID : '@Model.person.ID'
+                },
+                success: function (data) {
+                    if (data != null) {
+                        var url = '@Url.Action("PersonList", "Home")/';
+                        window.location.href = url;
+                    }
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        };
+    }
 </script>
 
 <div class="row">
-    <h2>Person</h2>
+    <div class="col-lg-6">
+        <h2>Person</h2>
+    </div>
+    <div class="col-lg-6" style="text-align: right">
+        <button type="button" title="Delete person" onclick="DeletePerson()"><i class="glyphicon glyphicon-remove"></i></button>
+    </div>
 </div>
 
 <div class="row">

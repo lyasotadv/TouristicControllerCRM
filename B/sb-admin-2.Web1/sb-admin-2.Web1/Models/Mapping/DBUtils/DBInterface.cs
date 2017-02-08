@@ -60,12 +60,14 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
                 return tab;
             }
 
-            public void ExecuteTransaction()
+            public long ExecuteTransaction()
             {
                 MySqlTransaction trans = conn.BeginTransaction();
                 command.Transaction = trans;
                 command.ExecuteNonQuery();
+                long id = command.LastInsertedId;
                 trans.Commit();
+                return id;
             }
         }
 
@@ -113,9 +115,9 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
             return obj.ExecuteSelection();
         }
 
-        static public void ExecuteTransaction()
+        static public long ExecuteTransaction()
         {
-            obj.ExecuteTransaction();
+            return obj.ExecuteTransaction();
         }
     }
 

@@ -289,6 +289,23 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
+        public ActionResult CreatePerson()
+        {
+            return Json(mappingController.CreatePerson());
+        }
+
+        [HttpPost]
+        public ActionResult DeletePerson(int PersonID)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.Delete();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
         public ActionResult FindContact(int PersonID, int id)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
