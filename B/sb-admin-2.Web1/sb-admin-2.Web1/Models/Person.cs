@@ -380,7 +380,7 @@ namespace sb_admin_2.Web1.Models
             set { throw new NotImplementedException("There is no parser of full name for person"); }
         }
 
-        public List<Passport> PassportList { get; private set; }
+        public PassportList PassportList { get; private set; }
 
         public Country _Citizen;
 
@@ -402,7 +402,8 @@ namespace sb_admin_2.Web1.Models
 
         public Person()
         {
-            PassportList = new List<Passport>();
+            PassportList = new PassportList();
+            PassportList.person = this;
         }
 
         static public Person CreatePerson()
@@ -447,6 +448,7 @@ namespace sb_admin_2.Web1.Models
             }
 
             ContactList.Load();
+            PassportList.Load();
 
             Changed = false;
         }

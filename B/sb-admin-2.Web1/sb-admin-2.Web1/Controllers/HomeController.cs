@@ -242,6 +242,7 @@ namespace sb_admin_2.Web1.Controllers
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if ((person != null) && (person is Person))
             {
+                person.Load();
                 Passport passport = (person as Person).PassportList.Find((item) => { return item.ID == id; });
                 return Json(passport);
             }
@@ -249,6 +250,54 @@ namespace sb_admin_2.Web1.Controllers
             {
                 return Json("");
             }
+        }
+
+        [HttpPost]
+        public ActionResult SavePassport(int PersonID, int id, string passportSerial, string expireDate,
+            string personName, string countryOfEmitation, string countryOfCitizen, string description)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
+            {
+                person.Load();
+                Passport passport = (person as Person).PassportList.Find((item) => { return item.ID == id; });
+                if (passport == null)
+                {
+                    passport = (person as Person).PassportList.Create();
+                }
+                else
+                {
+                    passport.Load();
+                }
+
+                passport.SerialNumber = passportSerial;
+                passport.ValidTillStr = expireDate;
+                passport.PersonName = personName;
+                passport.Description = description;
+
+                mappingController.settingsData.catalog.countryList.Load();
+                passport.CountryOfEmmitation = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfCitizen);
+                passport.Citizen = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfCitizen);
+
+                passport.Save();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeletePassport(int PersonID, int id)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
+            {
+                person.Load();
+                Passport passport = (person as Person).PassportList.Find((item) => { return item.ID == id; });
+                if (passport != null)
+                {
+                    passport.Delete();
+                }
+            }
+            return Json("");
         }
 
         [HttpPost]

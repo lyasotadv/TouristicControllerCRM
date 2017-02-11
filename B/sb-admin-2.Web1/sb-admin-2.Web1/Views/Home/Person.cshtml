@@ -65,6 +65,52 @@
         });
     }
 
+    function SavePassportDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SavePassport", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: EditedPassportID,
+                passportSerial: document.getElementById("inputPassportSerial").value,
+                expireDate: document.getElementById("inputExpireDate").value,
+                personName: document.getElementById("inputPersonName").value,
+                countryOfEmitation: document.getElementById("inputCountryOfEmitation").value,
+                countryOfCitizen: document.getElementById("inputCountryOfCitizen").value,
+                description: document.getElementById("textpassportdescription").value
+            },
+            success: function (data) {
+                $('#passportdetails').modal('toggle');
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
+
+    function DeletePassport() {
+        if (confirm("Are you sure to delete the passport?")) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("DeletePassport", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.person.ID',
+                    id: EditedPassportID
+                },
+                success: function (data) {
+                    $('#passportdetails').modal('toggle');
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
+    }
+
     function FillPersonDetails() {
         $.ajax({
             type: 'POST',
@@ -104,11 +150,11 @@
             dataType: 'json',
             data: {
                 PersonID: '@Model.person.ID',
-                FirstName : document.getElementById("inputFirstName").value,
-                MiddleName : document.getElementById("inputMiddleName").value,
-                SecondName : document.getElementById("inputSecondName").value,
-                BirthDay : document.getElementById("inputBirthDay").value,
-                Description : document.getElementById("textpersondescription").value,
+                FirstName: document.getElementById("inputFirstName").value,
+                MiddleName: document.getElementById("inputMiddleName").value,
+                SecondName: document.getElementById("inputSecondName").value,
+                BirthDay: document.getElementById("inputBirthDay").value,
+                Description: document.getElementById("textpersondescription").value,
                 Gender: document.getElementById("selectGender").value
             },
             success: function (data) {
@@ -248,8 +294,8 @@
                 type: 'POST',
                 url: '@Url.Action("DeletePerson", "Home")',
                 dataType: 'json',
-                data : {
-                    PersonID : '@Model.person.ID'
+                data: {
+                    PersonID: '@Model.person.ID'
                 },
                 success: function (data) {
                     if (data != null) {
@@ -505,8 +551,17 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save</button>
+                <div class="row">
+                    <div class="col-lg-6" style="text-align: left">
+                        <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeletePassport()">
+                            <i class="glyphicon glyphicon-remove fa-1x"></i>
+                        </button>
+                    </div>
+                    <div class="col-lg-6" style="text-align: right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="SavePassportDetails()">Save</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -614,7 +669,6 @@
                         <button type="button" class="btn btn-primary" onclick="SaveContactDetails()">Save</button>
                     </div>
                 </div>
-                
             </div>
         </div>
     </div>
