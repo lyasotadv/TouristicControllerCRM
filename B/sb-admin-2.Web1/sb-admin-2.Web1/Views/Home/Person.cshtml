@@ -81,8 +81,13 @@
                 description: document.getElementById("textpassportdescription").value
             },
             success: function (data) {
-                $('#passportdetails').modal('toggle');
-                location.reload();
+                if (data != '') {
+                    alert(data);
+                }
+                else {
+                    $('#passportdetails').modal('toggle');
+                    location.reload();
+                }
             },
             error: function () {
                 alert('error');
@@ -158,8 +163,13 @@
                 Gender: document.getElementById("selectGender").value
             },
             success: function (data) {
-                $('#personaldata').modal('toggle');
-                location.reload();
+                if (data != ''){
+                    alert(data);
+                }
+                else {
+                    $('#personaldata').modal('toggle');
+                    location.reload();
+                }
             },
             error: function () {
                 alert('error');
@@ -428,13 +438,36 @@
                                 <tbody>
                                     @foreach (var item in Model.person.PassportList)
                                     {
-                                        <tr class="odd gradeX">
-                                            <td>@Html.DisplayFor(model => item.SerialNumber)</td>
-                                            <td>@Html.DisplayFor(model => item.Description)</td>
-                                            <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
-                                            <td>@Html.DisplayFor(model => item.VizaListStr)</td>
-                                            <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                                        </tr>
+                                        if (item.Status == sb_admin_2.Web1.Models.Document.DocumentStatus.green)
+                                        {
+                                            <tr class="odd gradeX">
+                                                <td>@Html.DisplayFor(model => item.SerialNumber)</td>
+                                                <td>@Html.DisplayFor(model => item.Description)</td>
+                                                <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
+                                                <td>@Html.DisplayFor(model => item.VizaListStr)</td>
+                                                <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                            </tr>
+                                        }
+                                        else if (item.Status == sb_admin_2.Web1.Models.Document.DocumentStatus.yellow)
+                                        {
+                                            <tr class="warning text-warning">
+                                                <td>@Html.DisplayFor(model => item.SerialNumber)</td>
+                                                <td>@Html.DisplayFor(model => item.Description)</td>
+                                                <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
+                                                <td>@Html.DisplayFor(model => item.VizaListStr)</td>
+                                                <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                            </tr>
+                                        }
+                                        else if (item.Status == sb_admin_2.Web1.Models.Document.DocumentStatus.red)
+                                        {
+                                            <tr class="danger text-danger">
+                                                <td>@Html.DisplayFor(model => item.SerialNumber)</td>
+                                                <td>@Html.DisplayFor(model => item.Description)</td>
+                                                <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
+                                                <td>@Html.DisplayFor(model => item.VizaListStr)</td>
+                                                <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                            </tr>
+                                        }
                                     }
                                 </tbody>
                             </table>

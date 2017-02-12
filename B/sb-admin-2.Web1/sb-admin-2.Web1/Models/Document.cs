@@ -12,6 +12,10 @@ namespace sb_admin_2.Web1.Models
 {
     public abstract class Document
     {
+        public enum DocumentStatus { green = 0, yellow = 1, red = 2 }
+
+        public DocumentStatus Status { get; protected set; }
+
         private enum DocumentType { passport, viza }
 
         private DocumentType _documentType;
@@ -58,7 +62,22 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public bool Changed { get; protected set; }
+        private bool _Changed;
+
+        public bool Changed 
+        { 
+            get
+            {
+                return _Changed;
+            }
+            protected set
+            {
+                _Changed = value;
+                Validate();
+            }
+        }
+
+        protected abstract void Validate();
 
         private DateTime _ValidTill;
 
@@ -91,7 +110,7 @@ namespace sb_admin_2.Web1.Models
                     }
                     catch
                     {
-                        throw new FormatException("Incorrect input date format");
+                        throw new FormatException("Incorrect input date format. Please use: ddMMMyy. Example: 13Jun31");
                     }
                     Changed = true;
                 } 
@@ -117,6 +136,11 @@ namespace sb_admin_2.Web1.Models
         }
 
         public int ID { get; set; }
+
+        protected Document()
+        {
+            Status = DocumentStatus.green;
+        }
     }
 
     public class PassportList : DBObjectList<Passport>
@@ -263,6 +287,24 @@ namespace sb_admin_2.Web1.Models
             viza.ValidTill = expired;
             viza.PassportSerial = SerialNumber;
             viza.ID = ID;
+        }
+
+        protected override void Validate()
+        {
+            bool IsYellow = false;
+            IsYellow = IsYellow || (ValidTill - DateTime.Now < Preferences.PassportExpiredYellow);
+
+            bool IsRed = false;
+            IsRed = IsRed || (ValidTill - DateTime.Now < Preferences.PassportExpiredRed);
+
+            if (IsYellow)
+                Status = DocumentStatus.yellow;
+
+            if (IsRed)
+                Status = DocumentStatus.red;
+
+            if (!(IsYellow | IsRed))
+                Status = DocumentStatus.green;
         }
 
 

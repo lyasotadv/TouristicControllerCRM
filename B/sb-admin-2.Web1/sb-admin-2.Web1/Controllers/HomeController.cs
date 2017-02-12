@@ -270,15 +270,22 @@ namespace sb_admin_2.Web1.Controllers
                     passport.Load();
                 }
 
-                passport.SerialNumber = passportSerial;
-                passport.ValidTillStr = expireDate;
-                passport.PersonName = personName;
-                passport.Description = description;
+                try
+                {
+                    passport.SerialNumber = passportSerial;
+                    passport.ValidTillStr = expireDate;
+                    passport.PersonName = personName;
+                    passport.Description = description;
 
-                mappingController.settingsData.catalog.countryList.Load();
-                passport.CountryOfEmmitation = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfCitizen);
-                passport.Citizen = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfCitizen);
-
+                    mappingController.settingsData.catalog.countryList.Load();
+                    passport.CountryOfEmmitation = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfCitizen);
+                    passport.Citizen = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfCitizen);
+                }
+                catch (FormatException e)
+                {
+                    return Json(e.Message);
+                }
+                
                 passport.Save();
             }
             return Json("");
@@ -325,12 +332,19 @@ namespace sb_admin_2.Web1.Controllers
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if ((person != null) && (person is Person))
             {
-                (person as Person).FirstName = FirstName;
-                (person as Person).MiddleName = MiddleName;
-                (person as Person).SecondName = SecondName;
-                (person as Person).BirthStr = BirthDay;
-                (person as Person).Description = Description;
-                (person as Person).Gender = Gender;
+                try
+                {
+                    (person as Person).FirstName = FirstName;
+                    (person as Person).MiddleName = MiddleName;
+                    (person as Person).SecondName = SecondName;
+                    (person as Person).BirthStr = BirthDay;
+                    (person as Person).Description = Description;
+                    (person as Person).Gender = Gender;
+                }
+                catch (FormatException e)
+                {
+                    return Json(e.Message);
+                }
 
                 person.Save();
             }

@@ -367,7 +367,7 @@ namespace sb_admin_2.Web1.Models
                     }
                     catch
                     {
-                        throw new FormatException("Incorrect input date format");
+                        throw new FormatException("Incorrect input date format. Please use: ddMMMyy. Example: 13Jun31");
                     }
                     Changed = true;
                 }
