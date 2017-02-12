@@ -358,12 +358,40 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
+        public ActionResult CreateCompany()
+        {
+            return Json(mappingController.CreateCompany());
+        }
+
+        [HttpPost]
         public ActionResult DeletePerson(int PersonID)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if (person != null)
             {
                 person.Delete();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult SaveCompanyDetails(int PersonID, string Name, string Kod, string Description)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Company))
+            {
+                try
+                {
+                    (person as Company).FullName = Name;
+                    (person as Company).Kod = Kod;
+                    (person as Company).Description = Description;
+                }
+                catch (FormatException e)
+                {
+                    return Json(e.Message);
+                }
+
+                person.Save();
             }
             return Json("");
         }

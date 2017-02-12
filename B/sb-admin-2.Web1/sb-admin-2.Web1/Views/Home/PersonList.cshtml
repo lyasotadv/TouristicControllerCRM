@@ -16,10 +16,19 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="row">
-                    <div class="col-lg-9">
+                    <div class="col-lg-10">
                         <h3>Person</h3>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-1">
+                        <div class="row">
+                            <div class="col-lg-12" style="text-align: right">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add company" onclick="CreateCompany()">
+                                    <i class="fa fa-users"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-1">
                         <div class="row">
                             <div class="col-lg-12" style="text-align: right">
                                 <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add person" onclick="CreatePerson()">
@@ -95,6 +104,23 @@
                                 success: function (data){
                                     if (data != null) {
                                         var url = '@Url.Action("Person", "Home")/'+data;
+                                        window.location.href = url;
+                                    }
+                                },
+                                error: function () {
+                                    alert('error');
+                                }
+                            });
+                        }
+
+                        function CreateCompany() {
+                            $.ajax({
+                                type: 'POST',
+                                url: '@Url.Action("CreateCompany", "Home")',
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data != null) {
+                                        var url = '@Url.Action("Person", "Home")/' + data;
                                         window.location.href = url;
                                     }
                                 },

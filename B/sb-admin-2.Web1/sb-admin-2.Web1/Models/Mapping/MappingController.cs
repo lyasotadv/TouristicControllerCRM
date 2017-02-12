@@ -86,6 +86,13 @@ namespace sb_admin_2.Web1.Models.Mapping
             return person.ID;
         }
 
+        public int CreateCompany()
+        {
+            Company company = Company.Create();
+            company.Save();
+            return company.ID;
+        }
+
         private void TestDataInit()
         {
             Order order = new Order();

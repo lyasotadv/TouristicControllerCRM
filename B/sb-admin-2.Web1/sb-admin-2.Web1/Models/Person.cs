@@ -529,14 +529,19 @@ namespace sb_admin_2.Web1.Models
 
         public string Kod { get; set; }
 
-        public string OfficialName { get; set; }
-
         private string _FullName;
 
         public override string FullName
         {
             get { return _FullName; }
             set { _FullName = value; }
+        }
+
+        static public Company Create()
+        {
+            Company company = new Company();
+            company.Changed = true;
+            return company;
         }
 
         static public Company Create(CompanyType companyType)
@@ -560,6 +565,84 @@ namespace sb_admin_2.Web1.Models
                         throw new ArgumentException("Unhandled company type");
                     }
             }
+        }
+
+        public override void Load()
+        {
+            DBInterface.CommandText = "select kod, officialCompanyName, address, note from company where idCompany = @id;";
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, CompanyID);
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            if ((tab != null) && (tab.Rows.Count == 1))
+            {
+                FullName = tab.Rows[0]["officialCompanyName"].ToString();
+                Kod = tab.Rows[0]["kod"].ToString();
+                Description = tab.Rows[0]["note"].ToString();
+            } 
+            else if (tab.Rows.Count > 1)
+            {
+                throw new DuplicateNameException("Company table has rows with same id");
+            }
+
+            ContactList.Load();
+
+            Changed = false;
+        }
+
+        public override void Save()
+        {
+            if (Changed)
+            {
+                if (ID >= 0)
+                {
+                    DBInterface.CommandText = "UPDATE `sellcontroller`.`company` " +
+                                                "SET " +
+                                                "`kod` = @kod, " +
+                                                "`officialCompanyName` = @name, " +
+                                                "`note` = @desc " +
+                                                "WHERE `idCompany` = @id;";
+
+                    DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, CompanyID);
+                    DBInterface.AddParameter("@kod", MySql.Data.MySqlClient.MySqlDbType.String, Kod);
+                    DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, FullName);
+                    DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+
+                    DBInterface.ExecuteTransaction();
+
+                    RaiseUpdated(false);
+                }
+                else
+                {
+                    DBInterface.CommandText = "insert into person (isPeople) values (0); " +
+                                                "insert into company (idPerson, kod, officialCompanyName, note) " +
+                                                "values (LAST_INSERT_ID(), @kod, @name, @desc);";
+
+                    DBInterface.AddParameter("@kod", MySql.Data.MySqlClient.MySqlDbType.String, Kod);
+                    DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, FullName);
+                    DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+
+                    CompanyID = Convert.ToInt32(DBInterface.ExecuteTransaction());
+
+                    DBInterface.CommandText = "select idPerson from company where idCompany = @id";
+                    DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, CompanyID);
+
+                    DataTable tab = DBInterface.ExecuteSelection();
+                    ID = Convert.ToInt32(tab.Rows[0]["idPerson"]);
+
+                    RaiseUpdated(true);
+                }
+
+                Changed = false;
+            }
+        }
+
+        public override void Delete()
+        {
+            DBInterface.CommandText = "delete from company where idCompany = @id";
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, CompanyID);
+            DBInterface.ExecuteTransaction();
+
+            base.Delete();
         }
     }
 
