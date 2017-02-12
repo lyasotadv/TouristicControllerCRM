@@ -77,7 +77,10 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        protected abstract void Validate();
+        protected virtual void Validate()
+        {
+
+        }
 
         private DateTime _ValidTill;
 
