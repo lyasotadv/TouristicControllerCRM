@@ -129,7 +129,9 @@
                     document.getElementById("inputFirstName").value = data.FirstName;
                     document.getElementById("inputMiddleName").value = data.MiddleName;
                     document.getElementById("inputSecondName").value = data.SecondName;
+                    document.getElementById("inputNameUA").value = data.FullNameUA;
                     document.getElementById("inputBirthDay").value = data.BirthStr;
+                    document.getElementById("inputITN").value = data.itn;
                     document.getElementById("textpersondescription").value = data.Description;
 
                     switch (data.Gender) {
@@ -158,9 +160,11 @@
                 FirstName: document.getElementById("inputFirstName").value,
                 MiddleName: document.getElementById("inputMiddleName").value,
                 SecondName: document.getElementById("inputSecondName").value,
+                NameUA : document.getElementById("inputNameUA").value,
                 BirthDay: document.getElementById("inputBirthDay").value,
                 Description: document.getElementById("textpersondescription").value,
-                Gender: document.getElementById("selectGender").value
+                Gender: document.getElementById("selectGender").value,
+                itn: document.getElementById("inputITN").value
             },
             success: function (data) {
                 if (data != ''){
@@ -638,6 +642,18 @@
                     <div class="col-lg-6">
                         <div class="form-group" id="divBirth">
                             <input class="form-control" placeholder="Birth day" id="inputBirthDay">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divFirstNameUA">
+                            <input class="form-control" placeholder="Name UA: Ivanov Ivan Ivanovich" id="inputNameUA">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divITN">
+                            <input class="form-control" placeholder="Individual tax-payer number" id="inputITN">
                         </div>
                     </div>
                 </div>

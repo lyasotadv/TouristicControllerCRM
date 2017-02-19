@@ -218,15 +218,9 @@ namespace sb_admin_2.Web1.Models
 
         public event EventHandler Updated;
 
-        public virtual void Load()
-        {
-            
-        }
+        public abstract void Load();
 
-        public virtual void Save()
-        {
-            
-        }
+        public abstract void Save();
 
         public virtual void Delete()
         {
@@ -244,6 +238,25 @@ namespace sb_admin_2.Web1.Models
             {
                 Updated(this, new DBEventArgs() { ForceUpdate = ForceUpdate });
             }
+        }
+
+        protected string IntToStr(long numb, int Length)
+        {
+            if (numb == 0)
+                return string.Empty;
+
+            string str = numb.ToString();
+
+            if ((str.Length > Length) | (numb < 0))
+            {
+                throw new FormatException("Number is too long");
+            }
+
+            while (str.Length < Length)
+            {
+                str = " " + str;
+            }
+            return str;
         }
     }
 
@@ -317,6 +330,60 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
+        private string _FirstNameUA;
+
+        public string FirstNameUA
+        {
+            get
+            {
+                return _FirstNameUA;
+            }
+            set
+            {
+                if (value != _FirstNameUA)
+                {
+                    _FirstNameUA = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _SecondNameUA;
+
+        public string SecondNameUA
+        {
+            get
+            {
+                return _SecondNameUA;
+            }
+            set
+            {
+                if (value != _SecondNameUA)
+                {
+                    _SecondNameUA = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _MiddleNameUA;
+
+        public string MiddleNameUA
+        {
+            get
+            {
+                return _MiddleNameUA;
+            }
+            set
+            {
+                if (value != _MiddleNameUA)
+                {
+                    _MiddleNameUA = value;
+                    Changed = true;
+                }
+            }
+        }
+
         public string Gender 
         { 
             get
@@ -380,9 +447,38 @@ namespace sb_admin_2.Web1.Models
             set { throw new NotImplementedException("There is no parser of full name for person"); }
         }
 
+        public string FullNameUA
+        {
+            get
+            {
+                return SecondNameUA + " " + FirstNameUA + " " + MiddleNameUA;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    string[] str = value.Split(' ');
+                    int iter = 0;
+                    foreach(var s in str)
+                    {
+                        if ((s == null) || (s == string.Empty))
+                            continue;
+
+                        switch (iter)
+                        {
+                            case 0: SecondNameUA = s; break;
+                            case 1: FirstNameUA = s; break;
+                            case 2: MiddleNameUA = s; break;
+                        }
+                        iter++;
+                    }
+                }
+            }
+        }
+
         public PassportList PassportList { get; private set; }
 
-        public Country _Citizen;
+        private Country _Citizen;
 
         public Country Citizen 
         { 
@@ -395,6 +491,33 @@ namespace sb_admin_2.Web1.Models
                 if ((value != null) && ((_Citizen == null) || (value.ID != _Citizen.ID)))
                 {
                     _Citizen = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private int _itn;
+
+        public string itn
+        {
+            get
+            {
+                return IntToStr(_itn, 10);
+            }
+            set
+            {
+                if ((value != itn) && (value != null) && (value != string.Empty))
+                {
+                    try
+                    {
+                        if (value.Length != 10)
+                            throw new FormatException("ITN must contains 10 digits");
+                        _itn = Convert.ToInt32(value);
+                    }
+                    catch
+                    {
+                        throw new FormatException("ITN must contains 10 digits");
+                    }
                     Changed = true;
                 }
             }
@@ -419,7 +542,10 @@ namespace sb_admin_2.Web1.Models
                                         "`people`.`idPerson`, " +
                                         "`people`.`firstName`, " + 
                                         "`people`.`middleName`, " + 
-                                        "`people`.`lastName`, " + 
+                                        "`people`.`lastName`, " +
+                                        "`people`.`firstNameUA`, " +
+                                        "`people`.`middleNameUA`, " +
+                                        "`people`.`lastNameUA`, " + 
                                         "`people`.`birthDate`, " +
                                         "`people`.`Note`, " +
                                         "`people`.`itn`, " +
@@ -434,6 +560,10 @@ namespace sb_admin_2.Web1.Models
                 FirstName = Convert.ToString(tab.Rows[0]["firstName"]);
                 SecondName = Convert.ToString(tab.Rows[0]["lastName"]);
                 MiddleName = Convert.ToString(tab.Rows[0]["middleName"]);
+                FirstNameUA = Convert.ToString(tab.Rows[0]["firstNameUA"]);
+                SecondNameUA = Convert.ToString(tab.Rows[0]["lastNameUA"]);
+                MiddleNameUA = Convert.ToString(tab.Rows[0]["middleNameUA"]);
+                itn = Convert.ToString(tab.Rows[0]["itn"]);
                 Birth = Convert.ToDateTime(tab.Rows[0]["birthDate"]);
                 Description = Convert.ToString(tab.Rows[0]["Note"]);
 
@@ -464,8 +594,12 @@ namespace sb_admin_2.Web1.Models
                                                 "`firstName` = @firstName, " +
                                                 "`middleName` = @middleName, " +
                                                 "`lastName` = @lastName, " +
+                                                "`firstNameUA` = @firstNameUA, " +
+                                                "`middleNameUA` = @middleNameUA, " +
+                                                "`lastNameUA` = @lastNameUA, " +
                                                 "`birthDate` = @birthDate, " +
                                                 "`Note` = @desc, " +
+                                                "`itn` = @itn, " +
                                                 "`gender` = @gender " +
                                                 "WHERE `idPeople` = @id;";
 
@@ -473,6 +607,10 @@ namespace sb_admin_2.Web1.Models
                     DBInterface.AddParameter("@firstName", MySql.Data.MySqlClient.MySqlDbType.String, FirstName);
                     DBInterface.AddParameter("@middleName", MySql.Data.MySqlClient.MySqlDbType.String, MiddleName);
                     DBInterface.AddParameter("@lastName", MySql.Data.MySqlClient.MySqlDbType.String, SecondName);
+                    DBInterface.AddParameter("@firstNameUA", MySql.Data.MySqlClient.MySqlDbType.String, FirstNameUA);
+                    DBInterface.AddParameter("@middleNameUA", MySql.Data.MySqlClient.MySqlDbType.String, MiddleNameUA);
+                    DBInterface.AddParameter("@lastNameUA", MySql.Data.MySqlClient.MySqlDbType.String, SecondNameUA);
+                    DBInterface.AddParameter("@itn", MySql.Data.MySqlClient.MySqlDbType.String, itn);
                     DBInterface.AddParameter("@birthDate", MySql.Data.MySqlClient.MySqlDbType.DateTime, Birth);
                     DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
                     DBInterface.AddParameter("@gender", MySql.Data.MySqlClient.MySqlDbType.Int32, GenderID());
@@ -484,12 +622,16 @@ namespace sb_admin_2.Web1.Models
                 else
                 {
                     DBInterface.CommandText = "insert into person (isPeople) values (1); " +
-                                                "insert into people (idPerson, firstName, middleName, lastName, Note, birthDate, gender) " +
-                                                "values (LAST_INSERT_ID(), @firstName, @middleName, @lastName, @desc, @birthDate, @gender);";
+                                                "insert into people (idPerson, firstName, middleName, lastName, firstNameUA, middleNameUA, lastNameUA, Note, birthDate, gender, itn) " +
+                                                "values (LAST_INSERT_ID(), @firstName, @middleName, @lastName, @firstNameUA, @middleNameUA, @lastNameUA, @desc, @birthDate, @gender, @itn);";
 
                     DBInterface.AddParameter("@firstName", MySql.Data.MySqlClient.MySqlDbType.String, FirstName);
                     DBInterface.AddParameter("@middleName", MySql.Data.MySqlClient.MySqlDbType.String, MiddleName);
                     DBInterface.AddParameter("@lastName", MySql.Data.MySqlClient.MySqlDbType.String, SecondName);
+                    DBInterface.AddParameter("@firstNameUA", MySql.Data.MySqlClient.MySqlDbType.String, FirstNameUA);
+                    DBInterface.AddParameter("@middleNameUA", MySql.Data.MySqlClient.MySqlDbType.String, MiddleNameUA);
+                    DBInterface.AddParameter("@lastNameUA", MySql.Data.MySqlClient.MySqlDbType.String, SecondNameUA);
+                    DBInterface.AddParameter("@itn", MySql.Data.MySqlClient.MySqlDbType.String, itn);
                     DBInterface.AddParameter("@birthDate", MySql.Data.MySqlClient.MySqlDbType.DateTime, Birth);
                     DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
                     DBInterface.AddParameter("@gender", MySql.Data.MySqlClient.MySqlDbType.Int32, GenderID());
@@ -527,14 +669,180 @@ namespace sb_admin_2.Web1.Models
 
         protected CompanyType companyType;
 
-        public string Kod { get; set; }
-
         private string _FullName;
 
         public override string FullName
         {
             get { return _FullName; }
             set { _FullName = value; }
+        }
+
+        private int _MFO;
+
+        public string MFO
+        {
+            get
+            {
+                return IntToStr(_MFO, 6);
+            }
+            set
+            {
+                if ((value != MFO) && (value != null) && (value != string.Empty) && (value != "0"))
+                {
+                    try
+                    {
+                        if ((value == null) || (value.Length != 6))
+                        {
+                            throw new FormatException("MFO must contains 6 digits");
+                        }
+                        _MFO = Convert.ToInt32(value.Replace(" ", ""));
+                    }
+                    catch
+                    {
+                        throw new FormatException("MFO must contains 6 digits");
+                    }
+                    Changed = true;
+                }
+            }
+        }
+
+        private int _EDRPOU;
+
+        // 32855961
+        private bool CheckEDRPOU(string val)
+        {
+            if (val.Length == 8)
+            {
+                int[] x = new int[8];
+                for (int n = 0; n<8; n++)
+                {
+                    x[n] = Convert.ToInt32(val.Substring(n, 1));
+                }
+                int valInt = Convert.ToInt32(val);
+
+                int[] m = new int[7];
+
+                if ((valInt > 30000000) & (valInt < 60000000))
+                {
+                    m[0] = 7;
+                    m[1] = 1;
+                    m[2] = 2;
+                    m[3] = 3;
+                    m[4] = 4;
+                    m[5] = 5;
+                    m[6] = 6;
+                }
+                else
+                {
+                    m[0] = 1;
+                    m[1] = 2;
+                    m[2] = 3;
+                    m[3] = 4;
+                    m[4] = 5;
+                    m[5] = 6;
+                    m[6] = 7;
+                }
+
+                int S = 0;
+                for (int n = 0; n<7; n++)
+                {
+                    S += m[n] * x[n];
+                }
+                int p = S % 11;
+
+                if (p >= 10)
+                {
+                    for (int n = 0; n<7; n++)
+                    {
+                        m[n] += 2;
+                    }
+                    S = 0;
+                    for (int n = 0; n < 7; n++)
+                    {
+                        S += m[n] * x[n];
+                    }
+                    p = S % 11;
+                }
+                return p == x[7];
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public string EDRPOU
+        {
+            get
+            {
+                return IntToStr(_EDRPOU, 8);
+            }
+            set
+            {
+                if ((value != EDRPOU) && (value != null) && (value != string.Empty))
+                {
+                    try
+                    {
+                        if ((value == null) || (value.Length != 8) || (!CheckEDRPOU(value)))
+                        {
+                            throw new FormatException("EDRPOU must contains 8 digits");
+                        }
+                        _EDRPOU = Convert.ToInt32(value.Replace(" ", ""));
+                    }
+                    catch
+                    {
+                        throw new FormatException("EDRPOU must contains 8 digits");
+                    }
+                    Changed = true;
+                }
+            }
+        }
+
+        private long _Account;
+
+        public string Account
+        {
+            get
+            {
+                return IntToStr(_Account, 14);
+            }
+            set
+            {
+                if ((value != Account) && (value != null) && (value != string.Empty))
+                {
+                    try
+                    {
+                        if ((value == null) || (value.Length != 14))
+                        {
+                            throw new FormatException("Account must contains 14 digits");
+                        }
+                        _Account = Convert.ToInt64(value.Replace(" ", ""));
+                    }
+                    catch
+                    {
+                        throw new FormatException("Account must contains 14 digits");
+                    }
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _BankName;
+
+        public string BankName
+        {
+            get
+            {
+                return _BankName;
+            }
+            set
+            {
+                if (value != _BankName)
+                {
+                    _BankName = value;
+                    Changed = true;
+                }
+            }
         }
 
         static public Company Create()
@@ -569,14 +877,17 @@ namespace sb_admin_2.Web1.Models
 
         public override void Load()
         {
-            DBInterface.CommandText = "select kod, officialCompanyName, address, note from company where idCompany = @id;";
+            DBInterface.CommandText = "select officialCompanyName, note, edrpou, MFO, account, bankName from company where idCompany = @id;";
             DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, CompanyID);
             DataTable tab = DBInterface.ExecuteSelection();
 
             if ((tab != null) && (tab.Rows.Count == 1))
             {
                 FullName = tab.Rows[0]["officialCompanyName"].ToString();
-                Kod = tab.Rows[0]["kod"].ToString();
+                MFO = tab.Rows[0]["MFO"].ToString();
+                EDRPOU = tab.Rows[0]["edrpou"].ToString();
+                Account = tab.Rows[0]["account"].ToString();
+                BankName = tab.Rows[0]["bankName"].ToString();
                 Description = tab.Rows[0]["note"].ToString();
             } 
             else if (tab.Rows.Count > 1)
@@ -597,15 +908,21 @@ namespace sb_admin_2.Web1.Models
                 {
                     DBInterface.CommandText = "UPDATE `sellcontroller`.`company` " +
                                                 "SET " +
-                                                "`kod` = @kod, " +
                                                 "`officialCompanyName` = @name, " +
+                                                "`MFO` = @mfo, " +
+                                                "`edrpou` = @edrpou, " +
+                                                "`account` = @account, " +
+                                                "`bankName` = @bankName, " +
                                                 "`note` = @desc " +
                                                 "WHERE `idCompany` = @id;";
 
                     DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, CompanyID);
-                    DBInterface.AddParameter("@kod", MySql.Data.MySqlClient.MySqlDbType.String, Kod);
                     DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, FullName);
                     DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+                    DBInterface.AddParameter("@mfo", MySql.Data.MySqlClient.MySqlDbType.String, MFO);
+                    DBInterface.AddParameter("@edrpou", MySql.Data.MySqlClient.MySqlDbType.String, EDRPOU);
+                    DBInterface.AddParameter("@account", MySql.Data.MySqlClient.MySqlDbType.String, Account);
+                    DBInterface.AddParameter("@bankName", MySql.Data.MySqlClient.MySqlDbType.String, BankName);
 
                     DBInterface.ExecuteTransaction();
 
@@ -614,12 +931,15 @@ namespace sb_admin_2.Web1.Models
                 else
                 {
                     DBInterface.CommandText = "insert into person (isPeople) values (0); " +
-                                                "insert into company (idPerson, kod, officialCompanyName, note) " +
-                                                "values (LAST_INSERT_ID(), @kod, @name, @desc);";
+                                                "insert into company (idPerson, officialCompanyName, note, MFO, edrpou, account, bankName) " +
+                                                "values (LAST_INSERT_ID(), @name, @desc, @mfo, @edrpou, @account, @bankName);";
 
-                    DBInterface.AddParameter("@kod", MySql.Data.MySqlClient.MySqlDbType.String, Kod);
                     DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, FullName);
                     DBInterface.AddParameter("@desc", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+                    DBInterface.AddParameter("@mfo", MySql.Data.MySqlClient.MySqlDbType.String, MFO);
+                    DBInterface.AddParameter("@edrpou", MySql.Data.MySqlClient.MySqlDbType.String, EDRPOU);
+                    DBInterface.AddParameter("@account", MySql.Data.MySqlClient.MySqlDbType.String, Account);
+                    DBInterface.AddParameter("@bankName", MySql.Data.MySqlClient.MySqlDbType.String, BankName);
 
                     CompanyID = Convert.ToInt32(DBInterface.ExecuteTransaction());
 

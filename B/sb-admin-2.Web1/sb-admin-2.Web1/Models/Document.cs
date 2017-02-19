@@ -229,6 +229,10 @@ namespace sb_admin_2.Web1.Models
             }
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("Country of passport emitation must be set");
+                }
                 if ((_CountryOfEmitation == null) || (value != null && (value.ID != _CountryOfEmitation.ID)))
                 {
                     _CountryOfEmitation = value;
@@ -273,6 +277,10 @@ namespace sb_admin_2.Web1.Models
             }
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("Please, set citizen field");
+                }
                 if ((_Citizen == null) || (value != null && (value.ID != _Citizen.ID)))
                 {
                     _Citizen = value;

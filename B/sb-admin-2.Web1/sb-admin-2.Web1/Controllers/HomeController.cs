@@ -278,10 +278,14 @@ namespace sb_admin_2.Web1.Controllers
                     passport.Description = description;
 
                     mappingController.settingsData.catalog.countryList.Load();
-                    passport.CountryOfEmmitation = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfCitizen);
+                    passport.CountryOfEmmitation = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfEmitation);
                     passport.Citizen = mappingController.settingsData.catalog.countryList.Find(item => item.Name == countryOfCitizen);
                 }
                 catch (FormatException e)
+                {
+                    return Json(e.Message);
+                }
+                catch (ArgumentNullException e)
                 {
                     return Json(e.Message);
                 }
@@ -326,8 +330,8 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
-        public ActionResult SavePersonDetails(int PersonID, string FirstName, string MiddleName, string SecondName, 
-            string BirthDay, string Description, string Gender)
+        public ActionResult SavePersonDetails(int PersonID, string FirstName, string MiddleName, string SecondName, string NameUA,
+            string BirthDay, string Description, string Gender, string itn)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if ((person != null) && (person is Person))
@@ -337,9 +341,11 @@ namespace sb_admin_2.Web1.Controllers
                     (person as Person).FirstName = FirstName;
                     (person as Person).MiddleName = MiddleName;
                     (person as Person).SecondName = SecondName;
+                    (person as Person).FullNameUA = NameUA;
                     (person as Person).BirthStr = BirthDay;
                     (person as Person).Description = Description;
                     (person as Person).Gender = Gender;
+                    (person as Person).itn = itn;
                 }
                 catch (FormatException e)
                 {
@@ -375,7 +381,7 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveCompanyDetails(int PersonID, string Name, string Kod, string Description)
+        public ActionResult SaveCompanyDetails(int PersonID, string Name, string Description)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if ((person != null) && (person is Company))
@@ -383,8 +389,30 @@ namespace sb_admin_2.Web1.Controllers
                 try
                 {
                     (person as Company).FullName = Name;
-                    (person as Company).Kod = Kod;
                     (person as Company).Description = Description;
+                }
+                catch (FormatException e)
+                {
+                    return Json(e.Message);
+                }
+
+                person.Save();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult SavePaymentDetails(int PersonID, string MFO, string EDRPOU, string Account, string BankName)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Company))
+            {
+                try
+                {
+                    (person as Company).MFO = MFO;
+                    (person as Company).EDRPOU = EDRPOU;
+                    (person as Company).Account = Account;
+                    (person as Company).BankName = BankName;
                 }
                 catch (FormatException e)
                 {
