@@ -140,12 +140,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\ActionHistory.cs" />
-    <Compile Include="Models\ActionInform.cs" />
     <Compile Include="Models\Contact.cs" />
     <Compile Include="Models\Country.cs" />
     <Compile Include="Models\Document.cs" />
-    <Compile Include="Models\IDebugModel.cs" />
     <Compile Include="Models\Invoice.cs" />
     <Compile Include="Models\Mapping\Catalog.cs" />
     <Compile Include="Models\Mapping\DBUtils\DBInterface.cs" />
