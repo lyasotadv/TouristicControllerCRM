@@ -34,6 +34,7 @@
         $('#inputPassportSerial').val('');
         $('#inputExpireDate').val('');
         $('#inputPersonName').val('');
+        $('#inputPersonSurname').val('');
         $('#inputCountryOfEmitation').val('');
         $('#inputCountryOfCitizen').val('');
         $('#textpassportdescription').val('');
@@ -54,6 +55,7 @@
                     document.getElementById("inputPassportSerial").value = data.SerialNumber;
                     document.getElementById("inputExpireDate").value = data.ValidTillStr;
                     document.getElementById("inputPersonName").value = data.PersonName;
+                    document.getElementById("inputPersonSurname").value = data.PersonSurname;
                     document.getElementById("inputCountryOfEmitation").value = data.CountryOfEmmitation.Name;
                     document.getElementById("inputCountryOfCitizen").value = data.Citizen.Name;
                     document.getElementById("textpassportdescription").value = data.Description;
@@ -76,6 +78,7 @@
                 passportSerial: document.getElementById("inputPassportSerial").value,
                 expireDate: document.getElementById("inputExpireDate").value,
                 personName: document.getElementById("inputPersonName").value,
+                personSurname: document.getElementById("inputPersonSurname").value,
                 countryOfEmitation: document.getElementById("inputCountryOfEmitation").value,
                 countryOfCitizen: document.getElementById("inputCountryOfCitizen").value,
                 description: document.getElementById("textpassportdescription").value
@@ -323,6 +326,39 @@
             });
         };
     }
+
+    function ShowPassportDataString(id, syst) {
+        var str = '';
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindPassport", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: id
+            },
+            success: function (data) {
+                if (data != null) {
+                    str = '';
+                    if (syst == 'Amadeus') {
+                        str = data.AmadeusString;
+                    }
+                    if (syst == 'Galileo') {
+                        str = data.Galileo;
+                    }
+                    if (syst == 'Sabre') {
+                        str = data.Sabre;
+                    }
+                    if (str != '') {
+                        window.prompt("Copy to clipboard: Ctrl+C, Enter", str);
+                    }
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
 </script>
 
 <div class="row">
@@ -436,6 +472,7 @@
                                         <th>Description</th>
                                         <th>Expired</th>
                                         <th>Vizas</th>
+                                        <th>GDS</th>
                                         <th>Edit</th>
                                     </tr>
                                 </thead>
@@ -449,6 +486,11 @@
                                                 <td>@Html.DisplayFor(model => item.Description)</td>
                                                 <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
                                                 <td>@Html.DisplayFor(model => item.VizaListStr)</td>
+                                                <td>
+                                                    <button type="button" tittle="Amadeus" onclick="ShowPassportDataString('@item.ID', 'Amadeus')">A</button>
+                                                    <button type="button" tittle="Galileo" onclick="ShowPassportDataString('@item.ID', 'Galileo')">G</button>
+                                                    <button type="button" tittle="Sabre" onclick="ShowPassportDataString('@item.ID', 'Sabre')">S</button>
+                                                </td>
                                                 <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                             </tr>
                                         }
@@ -459,6 +501,11 @@
                                                 <td>@Html.DisplayFor(model => item.Description)</td>
                                                 <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
                                                 <td>@Html.DisplayFor(model => item.VizaListStr)</td>
+                                                <td>
+                                                    <button type="button" tittle="Amadeus" onclick="ShowPassportDataString('@item.ID', 'Amadeus')">A</button>
+                                                    <button type="button" tittle="Galileo" onclick="ShowPassportDataString('@item.ID', 'Galileo')">G</button>
+                                                    <button type="button" tittle="Sabre" onclick="ShowPassportDataString('@item.ID', 'Sabre')">S</button>
+                                                </td>
                                                 <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                             </tr>
                                         }
@@ -469,6 +516,11 @@
                                                 <td>@Html.DisplayFor(model => item.Description)</td>
                                                 <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
                                                 <td>@Html.DisplayFor(model => item.VizaListStr)</td>
+                                                <td>
+                                                    <button type="button" tittle="Amadeus" onclick="ShowPassportDataString('@item.ID', 'Amadeus')">A</button>
+                                                    <button type="button" tittle="Galileo" onclick="ShowPassportDataString('@item.ID', 'Galileo')">G</button>
+                                                    <button type="button" tittle="Sabre" onclick="ShowPassportDataString('@item.ID', 'Sabre')">S</button>
+                                                </td>
                                                 <td><button type="button" data-toggle="modal" data-target="#passportdetails" onclick="FillPassportDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                             </tr>
                                         }
@@ -561,9 +613,14 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-lg-12">
+                    <div class="col-lg-6">
                         <div class="form-group" id="divPersonName">
                             <input class="form-control" placeholder="Person name" id="inputPersonName">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group" id="divPersonSurname">
+                            <input class="form-control" placeholder="Person surname" id="inputPersonSurname">
                         </div>
                     </div>
                 </div>

@@ -35,14 +35,18 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>ISO</th>
+                                <th>ISO2</th>
+                                <th>ISO3</th>
+                                <th>Citizen</th>
                                 <th>Edit</th>
                             </tr>
                         </thead>
                         <tfoot>
                             <tr>
                                 <th>Name</th>
-                                <th>ISO</th>
+                                <th>ISO2</th>
+                                <th>ISO3</th>
+                                <th>Citizen</th>
                                 <th>Edit</th>
                             </tr>
                         </tfoot>
@@ -52,6 +56,8 @@
                                 <tr>
                                     <td>@Html.DisplayFor(model => item.Name)</td>
                                     <td>@Html.DisplayFor(model => item.ISO)</td>
+                                    <td>@Html.DisplayFor(model => item.ISO3)</td>
+                                    <td>@Html.DisplayFor(model => item.Nationality)</td>
                                     <td><button type="button" data-toggle="modal" data-target="#countrydetails" onclick="FillCountryDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                 </tr>
                             }
@@ -65,6 +71,8 @@
 
                             $('#inputCountryName').val('');
                             $('#inputCountryISO').val('');
+                            $('#inputCountryISO3').val('');
+                            $('#inputCountryCitizen').val('');
                         }
 
                         function FillCountryDetails(id) {
@@ -80,6 +88,8 @@
                                     if (data != null) {
                                         document.getElementById("inputCountryName").value = data.Name;
                                         document.getElementById("inputCountryISO").value = data.ISO;
+                                        document.getElementById("inputCountryISO3").value = data.ISO3;
+                                        document.getElementById("inputCountryCitizen").value = data.Nationality;
                                     }
                                 },
                                 error: function () {
@@ -96,7 +106,9 @@
                                 data: {
                                     id: EditedCountryID,
                                     Name: document.getElementById("inputCountryName").value,
-                                    ISO: document.getElementById("inputCountryISO").value
+                                    ISO: document.getElementById("inputCountryISO").value,
+                                    ISO3: document.getElementById("inputCountryISO3").value,
+                                    Citizen: document.getElementById("inputCountryCitizen").value
                                 },
                                 success: function (data) {
                                     $('#countrydetails').modal('toggle');
@@ -171,6 +183,7 @@
             </div>
         </div>
     </div>
+
     <!--Modal-->
     <!--Contacts-->
     <div class="modal fade" id="countrydetails" tabindex="-1" role="dialog" aria-hidden="true">
@@ -191,7 +204,21 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="form-group" id="divCountryISO">
-                                <input class="form-control" placeholder="ISO" id="inputCountryISO">
+                                <input class="form-control" placeholder="ISO2" id="inputCountryISO">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group" id="divCountryISO3">
+                                <input class="form-control" placeholder="ISO3" id="inputCountryISO3">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group" id="divCountryCitizen">
+                                <input class="form-control" placeholder="Citizen" id="inputCountryCitizen">
                             </div>
                         </div>
                     </div>

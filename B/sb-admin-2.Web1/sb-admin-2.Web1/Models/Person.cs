@@ -659,6 +659,21 @@ namespace sb_admin_2.Web1.Models
 
             base.Delete();
         }
+
+        public string AviaStatus()
+        {
+            string str = string.Empty;
+            if (_sex == Sex.male)
+                str += "M";
+            else
+                str += "F";
+
+            TimeSpan age = DateTime.Now - Birth;
+            if (age < TimeSpan.FromDays(365.0 * 2.0))
+                str += "I";
+
+            return str;
+        }
     }
 
     public class Company : PersonGeneral

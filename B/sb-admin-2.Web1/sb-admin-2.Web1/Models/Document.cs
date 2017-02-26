@@ -161,7 +161,7 @@ namespace sb_admin_2.Web1.Models
                 {
                     foreach (DataRow row in tab.Rows)
                     {
-                        Passport passport = new Passport();
+                        Passport passport = Create();
                         passport.ID = Convert.ToInt32(row["idPassport"]);
                         passport.Load();
                         Add(passport);
@@ -174,14 +174,19 @@ namespace sb_admin_2.Web1.Models
         {
             Passport passport = new Passport();
             Init(passport);
-            passport.person = person;
+            passport.SetPerson(person);
             return passport;
         }
     }
 
     public class Passport : Document, IDBObject
     {
-        public Person person { get; set; }
+        public void SetPerson(Person person)
+        {
+            this.person = person;
+        }
+
+        private Person person { get; set; }
 
         private string _SerialNumber;
 
@@ -214,6 +219,24 @@ namespace sb_admin_2.Web1.Models
                 if (value != _PersonName)
                 {
                     _PersonName = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _PersonSurname;
+
+        public string PersonSurname
+        {
+            get
+            {
+                return _PersonSurname;
+            }
+            set
+            {
+                if (value != _PersonSurname)
+                {
+                    _PersonSurname = value;
                     Changed = true;
                 }
             }
@@ -325,13 +348,14 @@ namespace sb_admin_2.Web1.Models
         {
             Changed = false;
 
-            DBInterface.CommandText = "select ownerName, number, idCitizen, idCountry, expireDate, note, isActive from passport where idPassport = @id;";
+            DBInterface.CommandText = "select ownerName, ownerSurname, number, idCitizen, idCountry, expireDate, note, isActive from passport where idPassport = @id;";
             DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
 
             DataTable tab = DBInterface.ExecuteSelection();
             if ((tab != null) && (tab.Rows.Count == 1))
             {
                 PersonName = tab.Rows[0]["ownerName"].ToString();
+                PersonSurname = tab.Rows[0]["ownerSurname"].ToString();
                 SerialNumber = tab.Rows[0]["number"].ToString();
                 ValidTill = Convert.ToDateTime(tab.Rows[0]["expireDate"]);
                 Description = tab.Rows[0]["note"].ToString();
@@ -356,6 +380,7 @@ namespace sb_admin_2.Web1.Models
                 {
                     DBInterface.CommandText = "update passport set " +
                         "ownerName = @name, " +
+                        "ownerSurname = @surname, " +
                         "number = @number, " + 
                         "expireDate = @date, " + 
                         "note = @note, " + 
@@ -365,6 +390,7 @@ namespace sb_admin_2.Web1.Models
 
                     DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
                     DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, PersonName);
+                    DBInterface.AddParameter("@surname", MySql.Data.MySqlClient.MySqlDbType.String, PersonSurname);
                     DBInterface.AddParameter("@number", MySql.Data.MySqlClient.MySqlDbType.String, SerialNumber);
                     DBInterface.AddParameter("@date", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidTill);
                     DBInterface.AddParameter("@note", MySql.Data.MySqlClient.MySqlDbType.String, Description);
@@ -387,6 +413,7 @@ namespace sb_admin_2.Web1.Models
                     InsertRow insertRow = new InsertRow("passport");
 
                     insertRow.Add("ownerName", MySql.Data.MySqlClient.MySqlDbType.String, PersonName);
+                    insertRow.Add("ownerSurname", MySql.Data.MySqlClient.MySqlDbType.String, PersonName);
                     insertRow.Add("number", MySql.Data.MySqlClient.MySqlDbType.String, SerialNumber);
                     insertRow.Add("expireDate", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidTill);
                     insertRow.Add("note", MySql.Data.MySqlClient.MySqlDbType.String, Description);
@@ -424,6 +451,72 @@ namespace sb_admin_2.Web1.Models
                 {
                     Updated(this, new DBEventArgs() { ForceUpdate = true });
                 }
+            }
+        }
+
+        // SRDOCS LO HK1-P-UKR-EH123456-UKR-30JUN73-M-14APR20-LYSENKO-MYKOLA
+        public string AmadeusString
+        {
+            get
+            {
+                string str = null;
+                if ((PersonName != null) & (PersonSurname != null) & (ValidTillStr != null) & (person.BirthStr != null))
+                {
+                    str = "SRDOCS LO HK1-P-";
+                    str += Citizen.ISO3 + "-";
+                    str += SerialNumber + "-";
+                    str += CountryOfEmmitation.ISO3 + "-";
+                    str += person.BirthStr.ToUpper() + "-";
+                    str += person.AviaStatus() + "-";
+                    str += ValidTillStr.ToUpper() + "-";
+                    str += PersonSurname.ToUpper() + "-";
+                    str += PersonName.ToUpper();
+                }
+                return str;
+            }
+        }
+
+        // SI.P1/DOCS*P/UA/EH123456/UA/30JUN73/M/14APR20/LYSENKO/MYKOLA
+        public string Galileo
+        {
+            get
+            {
+                string str = null;
+                if ((PersonName != null) & (PersonSurname != null) & (ValidTillStr != null) & (person.BirthStr != null))
+                {
+                    str = "SI.P1/DOCS*P/";
+                    str += Citizen.ISO + "/";
+                    str += SerialNumber + "/";
+                    str += CountryOfEmmitation.ISO + "/";
+                    str += person.BirthStr.ToUpper() + "/";
+                    str += person.AviaStatus() + "/";
+                    str += ValidTillStr.ToUpper() + "/";
+                    str += PersonSurname.ToUpper() + "/";
+                    str += PersonName.ToUpper();
+                }
+                return str;
+            }
+        }
+
+        // 3DOCS/P/UKR/EH123456/UKR/30JUN73/M/14APR20/LYSENKO/MYKOLA
+        public string Sabre
+        {
+            get
+            {
+                string str = null;
+                if ((PersonName != null) & (PersonSurname != null) & (ValidTillStr != null) & (person.BirthStr != null))
+                {
+                    str = "3DOCS/P/";
+                    str += Citizen.ISO3 + "/";
+                    str += SerialNumber + "/";
+                    str += CountryOfEmmitation.ISO3 + "/";
+                    str += person.BirthStr.ToUpper() + "/";
+                    str += person.AviaStatus() + "/";
+                    str += ValidTillStr.ToUpper() + "/";
+                    str += PersonSurname.ToUpper() + "/";
+                    str += PersonName.ToUpper();
+                }
+                return str;
             }
         }
     }

@@ -254,7 +254,7 @@ namespace sb_admin_2.Web1.Controllers
 
         [HttpPost]
         public ActionResult SavePassport(int PersonID, int id, string passportSerial, string expireDate,
-            string personName, string countryOfEmitation, string countryOfCitizen, string description)
+            string personName, string personSurname, string countryOfEmitation, string countryOfCitizen, string description)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if ((person != null) && (person is Person))
@@ -275,6 +275,7 @@ namespace sb_admin_2.Web1.Controllers
                     passport.SerialNumber = passportSerial;
                     passport.ValidTillStr = expireDate;
                     passport.PersonName = personName;
+                    passport.PersonSurname = personSurname;
                     passport.Description = description;
 
                     mappingController.settingsData.catalog.countryList.Load();
@@ -505,7 +506,7 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveCountry(int id, string Name, string ISO)
+        public ActionResult SaveCountry(int id, string Name, string ISO, string ISO3, string Citizen)
         {
             Country country = mappingController.settingsData.catalog.countryList.Find(item => item.ID == id);
             if (country == null)
@@ -515,6 +516,8 @@ namespace sb_admin_2.Web1.Controllers
 
             country.Name = Name;
             country.ISO = ISO;
+            country.ISO3 = ISO3;
+            country.Nationality = Citizen;
             country.Save();
 
             return Json("");

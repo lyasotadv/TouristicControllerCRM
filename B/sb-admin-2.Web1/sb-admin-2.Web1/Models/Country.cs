@@ -20,6 +20,9 @@ namespace sb_admin_2.Web1.Models
             foreach (DataRow row in tab.Rows)
             {
                 Country item = new Country() { ID = Convert.ToInt32(row["idCountry"]), Name = Convert.ToString(row["nameCountry"]) };
+                item.ISO = Convert.ToString(row["codeISO2"]);
+                item.ISO3 = Convert.ToString(row["codeISO3"]);
+                item.Nationality = Convert.ToString(row["codeCitizen"]);
                 Add(item);
             }
         }
@@ -83,7 +86,59 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public string ISO { get; set; }
+        private string _ISO;
+
+        public string ISO 
+        { 
+            get
+            {
+                return _ISO;
+            }
+            set
+            {
+                if ((value != _ISO) & (value != null) & (value != string.Empty))
+                {
+                    _ISO = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _ISO3;
+
+        public string ISO3
+        {
+            get
+            {
+                return _ISO3;
+            }
+            set
+            {
+                if ((value != _ISO3) & (value != null) & (value != string.Empty))
+                {
+                    _ISO3 = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _Nationality;
+
+        public string Nationality
+        {
+            get
+            {
+                return _Nationality;
+            }
+            set
+            {
+                if ((value != _Nationality) & (value != null) & (value != string.Empty))
+                {
+                    _Nationality = value;
+                    Changed = true;
+                }
+            }
+        }
 
         public Country()
         {
@@ -96,13 +151,16 @@ namespace sb_admin_2.Web1.Models
 
         public void Load()
         {
-            DBInterface.CommandText = "SELECT `country`.`idCountry`, `country`.`nameCountry` FROM `sellcontroller`.`country` WHERE `idCountry` = @id;";
+            DBInterface.CommandText = "SELECT nameCountry, codeISO2, codeISO3, codeCitizen FROM `sellcontroller`.`country` WHERE `idCountry` = @id;";
             DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
             DataTable tab = DBInterface.ExecuteSelection();
             
             if (tab.Rows.Count == 1)
             {
                 Name = Convert.ToString(tab.Rows[0]["nameCountry"]);
+                ISO = Convert.ToString(tab.Rows[0]["codeISO2"]);
+                ISO3 = Convert.ToString(tab.Rows[0]["codeISO3"]);
+                Nationality = Convert.ToString(tab.Rows[0]["codeCitizen"]);
             }
             else if (tab.Rows.Count > 1)
             {
@@ -118,9 +176,15 @@ namespace sb_admin_2.Web1.Models
             {
                 if (ID >= 0)
                 {
-                    DBInterface.CommandText = "UPDATE `sellcontroller`.`country` SET `nameCountry` = @name WHERE `idCountry` = @id;";
+                    DBInterface.CommandText = "UPDATE `sellcontroller`.`country` SET `nameCountry` = @name, " +
+                        "`codeISO2` = @iso2, `codeISO3` = @iso3, `codeCitizen` = @nat  WHERE `idCountry` = @id;";
+
                     DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                    DBInterface.AddParameter("@iso2", MySql.Data.MySqlClient.MySqlDbType.String, ISO);
+                    DBInterface.AddParameter("@iso3", MySql.Data.MySqlClient.MySqlDbType.String, ISO3);
+                    DBInterface.AddParameter("@nat", MySql.Data.MySqlClient.MySqlDbType.String, Nationality);
                     DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+
                     DBInterface.ExecuteTransaction();
 
                     if (Updated != null)
@@ -132,6 +196,9 @@ namespace sb_admin_2.Web1.Models
                 {
                     InsertRow insertRow = new InsertRow("country");
                     insertRow.Add("nameCountry", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                    insertRow.Add("codeISO2", MySql.Data.MySqlClient.MySqlDbType.String, ISO);
+                    insertRow.Add("codeISO3", MySql.Data.MySqlClient.MySqlDbType.String, ISO3);
+                    insertRow.Add("codeCitizen", MySql.Data.MySqlClient.MySqlDbType.String, Nationality);
                     insertRow.Execute();
 
                     if (Updated != null)
