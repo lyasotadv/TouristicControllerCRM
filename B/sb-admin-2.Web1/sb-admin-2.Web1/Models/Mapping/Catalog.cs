@@ -23,9 +23,26 @@ namespace sb_admin_2.Web1.Models.Mapping
             }
         }
 
+        private LabelList _labelList;
+
+        public LabelList labelList
+        {
+            get
+            {
+                if (_labelList.Count == 0)
+                    _labelList.Load();
+                return _labelList;
+            }
+            private set
+            {
+                _labelList = value;
+            }
+        }
+
         public Catalog()
         {
             countryList = new CountryList();
+            labelList = new LabelList();
         }
     }
 }

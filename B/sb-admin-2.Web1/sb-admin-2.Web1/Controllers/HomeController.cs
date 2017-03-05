@@ -534,6 +534,41 @@ namespace sb_admin_2.Web1.Controllers
             return Json("");
         }
 
+        [HttpPost]
+        public ActionResult FindLabel(int id)
+        {
+            Label label = mappingController.settingsData.catalog.labelList.Find(item => item.ID == id);
+            return Json(label);
+        }
+
+        [HttpPost]
+        public ActionResult SaveLabel(int id, string Name, string Comment, string ColorHTML, string ParentName)
+        {
+            Label label = mappingController.settingsData.catalog.labelList.Find(item => item.ID == id);
+            if (label == null)
+            {
+                label = mappingController.settingsData.catalog.labelList.Create();
+            }
+
+            label.Name = Name;
+            label.Comment = Comment;
+            label.ColorHtml = ColorHTML;
+            label.ParentName = ParentName;
+            label.Save();
+
+            return Json("");
+        }
+
+        public ActionResult DeleteLabel(int id)
+        {
+            Label label = mappingController.settingsData.catalog.labelList.Find(item => item.ID == id);
+            if (label != null)
+            {
+                label.Delete();
+            }
+            return Json("");
+        }
+
         public void UploadFileAndSave(HttpPostedFileBase file)
         {
             if (file.ContentLength > 0)

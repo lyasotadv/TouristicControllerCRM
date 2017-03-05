@@ -184,6 +184,173 @@
         </div>
     </div>
 
+    <div class="col-lg-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <h3>Label</h3>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="row">
+                            <div class="col-lg-12" style="text-align: right">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#labeldetails" onclick="ClearLabelDetails()">
+                                    <i class="fa fa-plus fa-1x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="dataTable_wrapper">
+                    <table class="table table-striped table-bordered table-hover" id="tableLabel">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Parent</th>
+                                <th>Edit</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Name</th>
+                                <th>Parent</th>
+                                <th>Edit</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @foreach (var item in Model.catalog.labelList)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="label label-default" style="background-color:@item.ColorHtml; color:@item.BlackOrWhite">
+                                            @Html.DisplayFor(model => item.Name)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (item.ParentID > -1)
+                                        {
+                                            <span class="label label-default" style="background-color:@item.ParentColorHTML; color:@item.ParentBlackOrWhite">
+                                                @Html.DisplayFor(model => item.ParentName)
+                                            </span>
+                                        }
+                                    </td>
+                                    <td><button type="button" data-toggle="modal" data-target="#labeldetails" onclick="FillLabelDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <script>
+                        EditedLabelID = 0;
+
+                        function ClearLabelDetails() {
+                            EditedLabelID = 0;
+
+                            $('#inputLabelName').val('');
+                            $('#inputLabelColor').val('#00FF00');
+                            $('#textlabeldescription').val('');
+                            $('#selectLabelParent').val('').change();
+                        }
+
+                        function FillLabelDetails(id) {
+                            EditedLabelID = id;
+                            $.ajax({
+                                type: 'POST',
+                                url: '@Url.Action("FindLabel", "Home")',
+                                dataType: 'json',
+                                data: {
+                                    id: id
+                                },
+                                success: function (data) {
+                                    if (data != null) {
+                                        document.getElementById("inputLabelName").value = data.Name;
+                                        document.getElementById("textlabeldescription").value = data.Comment;
+                                        document.getElementById("inputLabelColor").value = data.ColorHtml;
+                                        $('#selectLabelParent').val(data.ParentName).change();
+                                    }
+                                },
+                                error: function () {
+                                    alert('error');
+                                }
+                            });
+                        }
+
+                        function SaveLabelDetails() {
+                            $.ajax({
+                                type: 'POST',
+                                url: '@Url.Action("SaveLabel", "Home")',
+                                dataType: 'json',
+                                data: {
+                                    id: EditedLabelID,
+                                    Name: document.getElementById("inputLabelName").value,
+                                    Comment: document.getElementById("textlabeldescription").value,
+                                    ColorHTML: document.getElementById("inputLabelColor").value,
+                                    ParentName: document.getElementById("selectLabelParent").value
+                                },
+                                success: function (data) {
+                                    $('#labeldetails').modal('toggle');
+                                    location.reload();
+                                },
+                                error: function () {
+                                    alert('error');
+                                }
+                            });
+                        }
+
+                        $(document).ready(function () {
+                            $('#tableLabel').DataTable({
+                                initComplete: function () {
+                                    this.api().columns([]).every(function () {
+
+                                        var column = this;
+                                        var select = $('<select><option value=""></option></select>')
+                                            .appendTo($(column.footer()).empty())
+                                            .on('change', function () {
+                                                var val = $.fn.dataTable.util.escapeRegex(
+                                                    $(this).val()
+                                                );
+
+                                                column
+                                                    .search(val ? '^' + val + '$' : '', true, false)
+                                                    .draw();
+                                            });
+                                        column.data().unique().sort().each(function (d, j) {
+                                            select.append('<option value="' + d + '">' + d + '</option>')
+                                        });
+                                    });
+                                }
+                            });
+                        });
+
+                        function DeleteLabel() {
+                            if (confirm("Are you sure to delete the label?")) {
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("DeleteLabel", "Home")',
+                                    dataType: 'json',
+                                    data: {
+                                        id: EditedLabelID,
+                                    },
+                                    success: function (data) {
+                                        $('#labeldetails').modal('toggle');
+                                        location.reload();
+                                    },
+                                    error: function () {
+                                        alert('error');
+                                    }
+                                })
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
+            <div class="panel-footer">
+
+            </div>
+        </div>
+    </div>
+
     <!--Modal-->
     <!--Contacts-->
     <div class="modal fade" id="countrydetails" tabindex="-1" role="dialog" aria-hidden="true">
@@ -239,5 +406,65 @@
             </div>
         </div>
     </div>
+
+    <!--Labels-->
+    <div class="modal fade" id="labeldetails" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="labeldetailslabel">Label</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-10">
+                            <div class="form-group" id="divLabelName">
+                                <input class="form-control" placeholder="Name" id="inputLabelName">
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group" id="divLabelColor">
+                                <input type="color" id="inputLabelColor" value="#ff0000">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group" id="divLabelParent">
+                                <select class="form-control" id="selectLabelParent">
+                                    <option value=""></option>
+                                    @foreach (var item in Model.catalog.labelList)
+                                    {
+                                        <option value="@item.Name">@Html.DisplayFor(model => item.Name)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <textarea class="form-control" rows="3" id="textlabeldescription" placeholder="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-lg-6" style="text-align: left">
+                            <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeleteLabel()">
+                                <i class="glyphicon glyphicon-remove fa-1x"></i>
+                            </button>
+                        </div>
+                        <div class="col-lg-6" style="text-align: right">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="SaveLabelDetails()">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+    
 }
