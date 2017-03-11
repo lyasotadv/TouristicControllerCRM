@@ -46,7 +46,7 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Type</th>
-                                <th>Owner</th>
+                                <th>Label</th>
                                 <th>Edit</th>
                             </tr>
                         </thead>
@@ -54,7 +54,7 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Type</th>
-                                <th>Owner</th>
+                                <th>Label</th>
                                 <th>Edit</th>
                             </tr>
                         </tfoot>
@@ -64,7 +64,14 @@
                                 <tr>
                                     <td>@Html.DisplayFor(model => item.FullName)</td>
                                     <td>@Html.DisplayFor(model => item.PersonTypeStr)</td>
-                                    <td>@Html.DisplayFor(model => item.Parent.FullName)</td>
+                                    <td>
+                                        @foreach (var itemLab in item.labelList)
+                                        {
+                                            <span class="label label-default" style="background-color:@itemLab.ColorHtml; color:@itemLab.BlackOrWhite" title="@itemLab.Comment">
+                                                @Html.DisplayFor(model => itemLab.Name)
+                                            </span>
+                                        }
+                                    </td>
                                     <td><a class="btn btn-default" href='@Url.Action("Person", "Home", new { id = item.ID})'><i class="glyphicon glyphicon-pencil"></i></a></td>
                                 </tr>
                             }
@@ -74,7 +81,7 @@
                         $(document).ready(function () {
                             $('#tablePerson').DataTable({
                                 initComplete: function () {
-                                    this.api().columns([0,1,2]).every(function () {
+                                    this.api().columns([0,1]).every(function () {
 
                                         var column = this;
                                         var select = $('<select><option value=""></option></select>')

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web;
 
 using System.Data;
-//using System.Windows.Media;
 using System.Drawing;
 
 using sb_admin_2.Web1.Models.Mapping.DBUtils;
@@ -36,6 +35,87 @@ namespace sb_admin_2.Web1.Models
             Label label = new Label();
             Init(label);
             return label;
+        }
+    }
+
+    public class LabelListPerson : DBObjectList<LabelPerson>
+    {
+        private PersonGeneral person { get; set; }
+
+        public LabelListPerson(PersonGeneral person)
+        {
+            if (person == null)
+                throw new ArgumentNullException("Person cannot be null");
+            this.person = person;
+        }
+
+        public override void Load()
+        {
+            Clear();
+            DBInterface.CommandText = "select " +
+                                        "label.idLabel, " + 
+                                        "label.name, " + 
+                                        "label.color, " + 
+                                        "label.comment, " + 
+                                        "personlabel.note, " + 
+                                        "label.idParent " + 
+                                        "from personlabel " + 
+                                        "inner join label " + 
+                                        "on label.idLabel = personlabel.idLabel " + 
+                                        "where personlabel.idPerson = @idPerson;";
+
+            DBInterface.AddParameter("@idPerson", MySql.Data.MySqlClient.MySqlDbType.Int32, person.ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+            foreach (DataRow row in tab.Rows)
+            {
+                LabelPerson item = Create();
+                item.ID = Convert.ToInt32(row["idLabel"]);
+                item.Name = Convert.ToString(row["name"]);
+                item.Comment = Convert.ToString(row["comment"]);
+                item.SetColor(row["color"]);
+                if (!(row["idParent"] is DBNull))
+                    item.ParentID = Convert.ToInt32(row["idParent"]);
+                if (item is LabelPerson)
+                {
+                    (item as LabelPerson).Note = Convert.ToString(row["note"]);
+                }
+                Add(item);
+            }
+        }
+
+        public LabelPerson Create()
+        {
+            LabelPerson label = new LabelPerson(person);
+            Init(label);
+            return label;
+        }
+
+        public LabelPerson AttachLabelToPerson(Label label, string Note)
+        {
+            LabelPerson labelPerson = null; 
+            if ((label != null) && (Find(item => item.ID == label.ID) == null))
+            {
+                labelPerson = Create() as LabelPerson;
+                labelPerson.ID = label.ID;
+                labelPerson.Load();
+                labelPerson.Note = Note;
+                labelPerson.AttachToPerson();
+            }
+            return labelPerson;
+        }
+
+        public void ReAttachLabelFromPerson(Label label)
+        {
+            if (label != null)
+            {
+                Label labelTemp = Find(item => item.ID == label.ID);
+                if (labelTemp != null)
+                {
+                    LabelPerson labelPerson = labelTemp as LabelPerson;
+                    labelPerson.ReAttachFromPerson();
+                }
+            }
         }
     }
 
@@ -220,7 +300,7 @@ namespace sb_admin_2.Web1.Models
 
         public event EventHandler Updated;
 
-        public void Load()
+        public virtual void Load()
         {
             DBInterface.CommandText = "SELECT * FROM `sellcontroller`.`label` WHERE `idLabel` = @id;";
             DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
@@ -305,7 +385,7 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public bool Changed { get; private set; }
+        public bool Changed { get; protected set; }
 
 
         private void Load(string name)
@@ -327,6 +407,89 @@ namespace sb_admin_2.Web1.Models
             }
 
             Changed = false;
+        }
+    }
+
+    public class LabelPerson : Label
+    {
+        private PersonGeneral person { get; set; }
+
+        private string _Note;
+
+        public string Note
+        {
+            get
+            {
+                return _Note;
+            }
+            set
+            {
+                if (value != _Note)
+                {
+                    _Note = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        public LabelPerson(PersonGeneral person)
+        {
+            if (person == null)
+                throw new ArgumentNullException("Person must be not null");
+            this.person = person;
+        }
+
+        private bool LoadAttachedData(bool UpdateData)
+        {
+            DBInterface.CommandText = "SELECT * FROM `sellcontroller`.`personlabel` WHERE `idLabel` = @id and `idPerson` = @idPerson;";
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DBInterface.AddParameter("@idPerson", MySql.Data.MySqlClient.MySqlDbType.Int32, person.ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            if (tab.Rows.Count == 1)
+            {
+                if (UpdateData)
+                {
+                    Note = Convert.ToString(tab.Rows[0]["note"]);
+                }
+            }
+            else if (tab.Rows.Count > 1)
+            {
+                throw new DuplicateNameException("Label to person table has rows with same id");
+            }
+
+            return tab.Rows.Count == 1;
+        }
+
+        public override void Load()
+        {
+            base.Load();
+            LoadAttachedData(true);
+        }
+
+        public void AttachToPerson()
+        {
+            if (!LoadAttachedData(false))
+            {
+                InsertRow insertRow = new InsertRow("personlabel");
+                insertRow.Add("note", MySql.Data.MySqlClient.MySqlDbType.String, Note);
+                insertRow.Add("idPerson", MySql.Data.MySqlClient.MySqlDbType.Int32, person.ID);
+                insertRow.Add("idLabel", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                insertRow.Execute();
+            }
+            else
+            {
+                throw new DuplicateNameException("Its impossible to add the same label to person twice");
+            }
+        }
+
+        public void ReAttachFromPerson()
+        {
+            DBInterface.CommandText = "DELETE FROM `sellcontroller`.`personlabel` WHERE `idLabel` = @id and `idPerson` = @idPerson;";
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DBInterface.AddParameter("@idPerson", MySql.Data.MySqlClient.MySqlDbType.Int32, person.ID);
+            DBInterface.ExecuteTransaction();
         }
     }
 }

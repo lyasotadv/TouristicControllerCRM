@@ -163,14 +163,14 @@
                 FirstName: document.getElementById("inputFirstName").value,
                 MiddleName: document.getElementById("inputMiddleName").value,
                 SecondName: document.getElementById("inputSecondName").value,
-                NameUA : document.getElementById("inputNameUA").value,
+                NameUA: document.getElementById("inputNameUA").value,
                 BirthDay: document.getElementById("inputBirthDay").value,
                 Description: document.getElementById("textpersondescription").value,
                 Gender: document.getElementById("selectGender").value,
                 itn: document.getElementById("inputITN").value
             },
             success: function (data) {
-                if (data != ''){
+                if (data != '') {
                     alert(data);
                 }
                 else {
@@ -358,6 +358,43 @@
             }
         });
     }
+
+    function AddLabel() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("AddLabelPerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                Name: document.getElementById("inputLabelAdd").value,
+                Note: ''
+            },
+            success: function (data) {
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
+
+    function DeleteLabel(id) {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("DeleteLabelPerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                LabelID: id
+            },
+            success: function (data) {
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
 </script>
 
 <div class="row">
@@ -393,6 +430,16 @@
                             </div>
                             <div class="col-lg-4">
                                 <div><h3>@Html.DisplayFor(model => model.person.BirthStr)</h3></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                @foreach (var item in Model.person.labelList)
+                                {
+                                    <span class="label label-default" style="background-color:@item.ColorHtml; color:@item.BlackOrWhite" title="@item.Comment">
+                                        @Html.DisplayFor(model => item.Name)
+                                    </span>
+                                }
                             </div>
                         </div>
                         <div class="row">
@@ -447,7 +494,76 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <h3>
+                                    Label
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Comment</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.person.labelList)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <span class="label label-default" style="background-color:@item.ColorHtml; color:@item.BlackOrWhite">
+                                                        @Html.DisplayFor(model => item.Name)
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Comment)
+                                                </td>
+                                                <td>
+                                                    <div class="col-lg-12" style="text-align: right">
+                                                        <button type="button" title="Delete" onclick="DeleteLabel('@item.ID')"><i class="glyphicon glyphicon-remove"></i></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <div class="col-lg-10">
+                                        <div class="form-group" id="divLabelAdd">
+                                            <input class="form-control" placeholder="Label name" id="inputLabelAdd" list="listLabel">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <button type="button" class="btn btn-primary" title="Delete" onclick="AddLabel()">
+                                            <i class="glyphicon glyphicon-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
     <div class="col-lg-6">
         <div class="row">
             <div class="col-lg-12">
@@ -581,13 +697,18 @@
 
 
 <datalist id="listCountry">
-        @foreach(var item in Model.catalog.countryList)
-        {
-            <option value='@item.Name'/>
-        }
+    @foreach(var item in Model.catalog.countryList)
+    {
+        <option value='@item.Name'/>
+    }
 </datalist>
 
-
+<datalist id="listLabel">
+    @foreach(var item in Model.catalog.labelList)
+    {
+        <option value='@item.Name'/>
+    }
+</datalist>
 
 <!--Modal-->
 <!--Passport-->

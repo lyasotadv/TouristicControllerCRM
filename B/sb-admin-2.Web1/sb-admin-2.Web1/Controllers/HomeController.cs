@@ -569,6 +569,30 @@ namespace sb_admin_2.Web1.Controllers
             return Json("");
         }
 
+        public ActionResult AddLabelPerson(int PersonID, string Name, string Note)
+        {
+            Label label = mappingController.personListData.catalog.labelList.Find(item => item.Name == Name);
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((label != null) && (person != null))
+            {
+                person.labelList.Load();
+                person.labelList.AttachLabelToPerson(label, Note);
+            }
+            return Json("");
+        }
+
+        public ActionResult DeleteLabelPerson(int PersonID, int LabelID)
+        {
+            Label label = mappingController.personListData.catalog.labelList.Find(item => item.ID == LabelID);
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((label != null) && (person != null))
+            {
+                person.labelList.Load();
+                person.labelList.ReAttachLabelFromPerson(label);
+            }
+            return Json("");
+        }
+
         public void UploadFileAndSave(HttpPostedFileBase file)
         {
             if (file.ContentLength > 0)

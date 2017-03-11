@@ -43,6 +43,7 @@ namespace sb_admin_2.Web1.Models
                     person.FirstName = row["firstName"].ToString();
                     person.SecondName = row["lastName"].ToString();
                     person.MiddleName = row["middleName"].ToString();
+                    person.labelList.Load();
 
                     this.Add(person);
                 }
@@ -53,6 +54,7 @@ namespace sb_admin_2.Web1.Models
                     company.ID = Convert.ToInt32(row["idPerson"]);
                     company.CompanyID = Convert.ToInt32(row["idCompany"]);
                     company.FullName = row["officialCompanyName"].ToString();
+                    company.labelList.Load();
 
                     this.Add(company);
                 }
@@ -193,11 +195,14 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
+        public LabelListPerson labelList { get; private set; }
+
         protected PersonGeneral()
         {
             personType = new PersonType(this);
             ContactList = new ContactList();
             ContactList.person = this;
+            labelList = new LabelListPerson(this);
 
             Changed = false;
             ID = -1;
@@ -579,6 +584,7 @@ namespace sb_admin_2.Web1.Models
 
             ContactList.Load();
             PassportList.Load();
+            labelList.Load();
 
             Changed = false;
         }
@@ -911,6 +917,7 @@ namespace sb_admin_2.Web1.Models
             }
 
             ContactList.Load();
+            labelList.Load();
 
             Changed = false;
         }
