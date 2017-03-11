@@ -454,7 +454,7 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        // SRDOCS LO HK1-P-UKR-EH123456-UKR-30JUN73-M-14APR20-LYSENKO-MYKOLA
+        // SRDOCS HK1-P-UKR-EH123456-UKR-30JUN73-M-14APR20-LYSENKO-MYKOLA
         public string AmadeusString
         {
             get
@@ -462,7 +462,7 @@ namespace sb_admin_2.Web1.Models
                 string str = null;
                 if ((PersonName != null) & (PersonSurname != null) & (ValidTillStr != null) & (person.BirthStr != null))
                 {
-                    str = "SRDOCS LO HK1-P-";
+                    str = "SRDOCS HK1-P-";
                     str += Citizen.ISO3 + "-";
                     str += SerialNumber + "-";
                     str += CountryOfEmmitation.ISO3 + "-";
