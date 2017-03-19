@@ -197,12 +197,15 @@ namespace sb_admin_2.Web1.Models
 
         public LabelListPerson labelList { get; private set; }
 
+        public AttachFilePersonList attachFileList { get; private set; }
+
         protected PersonGeneral()
         {
             personType = new PersonType(this);
             ContactList = new ContactList();
             ContactList.person = this;
             labelList = new LabelListPerson(this);
+            attachFileList = new AttachFilePersonList(this);
 
             Changed = false;
             ID = -1;
@@ -585,6 +588,7 @@ namespace sb_admin_2.Web1.Models
             ContactList.Load();
             PassportList.Load();
             labelList.Load();
+            attachFileList.Load();
 
             Changed = false;
         }
@@ -918,6 +922,7 @@ namespace sb_admin_2.Web1.Models
 
             ContactList.Load();
             labelList.Load();
+            attachFileList.Load();
 
             Changed = false;
         }

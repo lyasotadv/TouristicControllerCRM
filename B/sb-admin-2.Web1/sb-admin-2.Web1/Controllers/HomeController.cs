@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 
 using System.IO;
+using System.Net;
 
 using sb_admin_2.Web1.Domain;
 using sb_admin_2.Web1.Models.Mapping;
@@ -593,7 +594,7 @@ namespace sb_admin_2.Web1.Controllers
             return Json("");
         }
 
-        public void UploadFileAndSave(HttpPostedFileBase file)
+        public AttachFileTransferData UploadFileAndSave(HttpPostedFileBase file)
         {
             if (file.ContentLength > 0)
             {
@@ -604,7 +605,21 @@ namespace sb_admin_2.Web1.Controllers
                 string newName = Guid.NewGuid().ToString();
                 string newFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/data"), newName);
                 System.IO.File.Move(fileFullName, newFullName);
+
+                AttachFileTransferData data = new AttachFileTransferData();
+                data.guid = newName;
+                data.Name = Path.GetFileNameWithoutExtension(fileName);
+                data.Extension = Path.GetExtension(fileName);
+                return data;
             }
+            return null;
+        }
+
+        public void DeleteFile(string guid)
+        {
+            string FullName = Path.Combine(Server.MapPath("~/App_Data/uploads/data"), guid);
+            if (System.IO.File.Exists(FullName))
+                System.IO.File.Delete(FullName);
         }
 
         public void UploadFileAndParse(HttpPostedFileBase file, Func<string, bool> Parser)
@@ -633,6 +648,99 @@ namespace sb_admin_2.Web1.Controllers
             UploadFileAndParse(file, mappingController.settingsData.catalog.countryList.Export);
 
             return RedirectToAction("Settings");
+        }
+
+        [HttpPost]
+        public ActionResult UploadFile()
+        {
+            List<AttachFileTransferData> data = new List<AttachFileTransferData>();
+            for (int n = 0; n < Request.Files.Count; n++ )
+            {
+                AttachFileTransferData atd = UploadFileAndSave(Request.Files[n]);
+                if (atd != null)
+                    data.Add(atd);
+            }
+            return Json(data);
+        }
+
+        [HttpPost]
+        public ActionResult UploadFileToPerson(int PersonID, List<AttachFileTransferData> data)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (data != null))
+            {
+                person.attachFileList.Load();
+                foreach(var item in data)
+                {
+                    AttachFilePerson atp = person.attachFileList.Create();
+                    item.FillData(atp);
+                    atp.Save();
+                }
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult FindFilePerson(int PersonID, int FileID)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.attachFileList.Load();
+                AttachFilePerson atp = person.attachFileList.Find(item => item.ID == FileID);
+                return Json(atp);
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteFilePerson(int PersonID, int FileID)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.attachFileList.Load();
+                AttachFilePerson atp = person.attachFileList.Find(item => item.ID == FileID);
+                if (atp != null)
+                {
+                    atp.Delete();
+                    DeleteFile(atp.guid);
+                }
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult SaveFilePerson(int PersonID, int FileID, string Description)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.attachFileList.Load();
+                AttachFilePerson atp = person.attachFileList.Find(item => item.ID == FileID);
+                if (atp != null)
+                {
+                    atp.Description = Description;
+                    atp.Save();
+                }
+            }
+            return Json("");
+        }
+
+        public FileResult DownloadFile(int PersonID, int FileID)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.attachFileList.Load();
+                AttachFilePerson atp = person.attachFileList.Find(item => item.ID == FileID);
+                if (atp != null)
+                {
+                    byte[] filebytes = System.IO.File.ReadAllBytes(Path.Combine(Server.MapPath("~/App_Data/uploads/data"), atp.guid));
+                    return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Octet, Path.ChangeExtension(atp.Name, atp.Extension));
+                }
+            }
+            return null;
         }
     }
 }

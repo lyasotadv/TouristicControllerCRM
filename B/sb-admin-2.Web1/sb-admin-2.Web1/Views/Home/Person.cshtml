@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Person";
+    ViewData["PersonID"] = Model.person.ID;
 }
 
 @if (Session["UserID"] != null)
@@ -395,13 +396,117 @@
             }
         })
     }
+
+    EditedFilePersonID = 0;
+
+    function AddFilePerson() {
+        var formData = new FormData();
+        var totalFiles = document.getElementById("fileUploadFile").files.length;
+        for (var i = 0; i < totalFiles; i++) {
+            var file = document.getElementById("fileUploadFile").files[i];
+            formData.append("FileUpload", file);
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("UploadFile", "Home")',
+            dataType: 'json',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                document.getElementById("fileUploadFile").value = "";
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("UploadFileToPerson", "Home")',
+                    dataType: 'json',
+                    data: {
+                        PersonID: '@Model.person.ID',
+                        data: data
+                    },
+                    success: function (data) {
+                        location.reload();
+                    },
+                    error: function () {
+                        alert('error');
+                    }
+                });
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    function DeleteFilePerson() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("DeleteFilePerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                FileID: EditedFilePersonID
+            },
+            success: function (data) {
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
+
+    function FillFilePersonDetails(id) {
+        EditedFilePersonID = id;
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindFilePerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                FileID: id
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("textfilepersondescription").value = data.Description;
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    function SaveFilePersonDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SaveFilePerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                FileID: EditedFilePersonID,
+                Description: document.getElementById("textfilepersondescription").value
+            },
+            success: function (data) {
+                $('#filepersondetails').modal('toggle');
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
 </script>
 
 <div class="row">
-    <div class="col-lg-6">
+    <div class="col-lg-2">
         <h2>Person</h2>
     </div>
-    <div class="col-lg-6" style="text-align: right">
+    <div class="col-lg-8">
+        
+    </div>
+    <div class="col-lg-2" style="text-align: right">
         <button type="button" title="Delete person" onclick="DeletePerson()"><i class="glyphicon glyphicon-remove"></i></button>
     </div>
 </div>
@@ -691,6 +796,79 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <h3>
+                                    Files
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Comment</th>
+                                            <th>Type</th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.person.attachFileList)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Name)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Description)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(model => item.Extension)
+                                                </td>
+                                                <td>
+                                                    <div class="col-lg-12" style="text-align: right">
+                                                        @Html.ActionLink("Download", "DownloadFile", new { PersonID = Model.person.ID, FileID = item.ID }, "Home")
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="col-lg-12" style="text-align: right">
+                                                        <button type="button" data-toggle="modal" data-target="#filepersondetails" onclick="FillFilePersonDetails('@item.ID')">
+                                                            <i class="glyphicon glyphicon-pencil"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <form method="post" enctype="multipart/form-data">
+                                        <div class="col-lg-6">
+                                            <input type="file" multiple name="UploadFile" id="fileUploadFile" onchange="AddFilePerson()" />
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -948,4 +1126,39 @@
         </div>
     </div>
 </div>
+
+
+    <!--AttachFile-->
+    <div class="modal fade" id="filepersondetails" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="filepersondetailslabel">Attached file</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <textarea class="form-control" rows="3" id="textfilepersondescription" placeholder="Comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-lg-6" style="text-align: left">
+                            <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeleteFilePerson()">
+                                <i class="glyphicon glyphicon-remove fa-1x"></i>
+                            </button>
+                        </div>
+                        <div class="col-lg-6" style="text-align: right">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="SaveFilePersonDetails()">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 }
