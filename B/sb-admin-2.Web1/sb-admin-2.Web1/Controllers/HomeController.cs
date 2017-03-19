@@ -29,6 +29,7 @@ namespace sb_admin_2.Web1.Controllers
             {
                 if ((data != null) && (data.Check()))
                 {
+                    data.Load();
                     Session["UserID"] = data.ID;
                     Session["UserName"] = data.Name;
                     Session["UserRole"] = data.role.RoleString;
@@ -77,6 +78,21 @@ namespace sb_admin_2.Web1.Controllers
             {
                 return RedirectToAction("Login");
             }
+        }
+
+        [HttpPost]
+        public ActionResult AddNewUser(string FullName, string Name, bool IsAdmin)
+        {
+            if (Session["UserID"] != null)
+            {
+                LoginData data = new LoginData();
+                data.ID = Convert.ToInt32(Session["UserID"]);
+                data.Name = Convert.ToString(Session["UserName"]);
+                data.role.RoleString = Convert.ToString(Session["UserRole"]);
+                data.Load();
+                data.AddNewUser(FullName, Name, IsAdmin);
+            }
+            return Json("");
         }
 
         private MappingController _mappingController;

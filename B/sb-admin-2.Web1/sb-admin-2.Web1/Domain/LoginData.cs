@@ -164,5 +164,25 @@ namespace sb_admin_2.Web1.Domain
                 DBInterface.ExecuteTransaction();
             }
         }
+
+        public void AddNewUser(string FullName, string Name, bool IsAdmin)
+        {
+            if ((role.RoleString == "admin") && (FullName != null) && (FullName != string.Empty) && (Name != null) && (Name != string.Empty))
+            {
+                string pass = "123321";
+
+                int IsAdminInt = 0;
+                if (IsAdmin)
+                    IsAdminInt = 1;
+
+                InsertRow insertRow = new InsertRow("user");
+                insertRow.Add("login", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                insertRow.Add("Name", MySql.Data.MySqlClient.MySqlDbType.String, FullName);
+                insertRow.Add("isAdminRole", MySql.Data.MySqlClient.MySqlDbType.Int32, IsAdminInt);
+                insertRow.Add("hashcode", MySql.Data.MySqlClient.MySqlDbType.String, PassHash(pass));
+
+                insertRow.Execute();
+            }
+        }
     }
 }

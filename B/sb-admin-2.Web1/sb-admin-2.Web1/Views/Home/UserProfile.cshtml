@@ -69,12 +69,57 @@
 
                     <div class="row">
                         <div class="col-lg-12">
-                            <input type="submit" value="Save" />
+                            <input type="submit" value="Save" class="btn btn-default" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        @if (Model.role.RoleString == "admin")
+        { 
+            <div class="col-lg-6" style="text-align: center">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Add new user</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="form-group" id="divNewUserName">
+                                    <input class="form-control" placeholder="Name" id="inputNewUserName">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group" id="divNewUserLogin">
+                                    <input class="form-control" placeholder="Login" id="inputNewUserLogin">
+                                </div>
+                            </div>
+                            <div class="col-lg-2" style="text-align:end">
+                                <div class="form-group" id="labelNewUserIsAdmin">
+                                    <h4>Is Admin:</h4>
+                                </div>
+                            </div>
+                            <div class="col-lg-2" style="text-align:start">
+                                <div class="form-group" id="divNewUserRole">
+                                    <input type="checkbox" class="form-control" id="chkNewUserIsAdmin">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                Note: default password is "123321"
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <button type="button" id="btnAddNewUser" class="btn btn-default" onclick="AddNewUser()">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 
     <script>
@@ -92,5 +137,26 @@
         $('#chkChangePassword').change(function () {
             UpdatePassChangeVisible();
         });
+
+        function AddNewUser() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AddNewUser", "Home")',
+                dataType: 'json',
+                data: {
+                    FullName: document.getElementById("inputNewUserName").value,
+                    Name: document.getElementById("inputNewUserLogin").value,
+                    IsAdmin: document.getElementById("chkNewUserIsAdmin").checked
+                },
+                success: function (data) {
+                    $('#inputNewUserName').val('');
+                    $('#inputNewUserLogin').val('');
+                    document.getElementById("chkNewUserIsAdmin").checked = false;
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
     </script>
 }
