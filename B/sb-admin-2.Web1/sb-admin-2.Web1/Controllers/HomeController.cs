@@ -15,7 +15,6 @@ namespace sb_admin_2.Web1.Controllers
 {
     public class HomeController : Controller
     {
-        //[HttpGet]
         public ActionResult Login()
         {
             LoginData data = new LoginData();
@@ -32,10 +31,52 @@ namespace sb_admin_2.Web1.Controllers
                 {
                     Session["UserID"] = data.ID;
                     Session["UserName"] = data.Name;
+                    Session["UserRole"] = data.role.RoleString;
                     return RedirectToAction("PersonList");
                 }
             }
             return View("Login", data);
+        }
+
+        public ActionResult UserProfile()
+        {
+            if (Session["UserID"] != null)
+            {
+                LoginData data = new LoginData();
+                data.ID = Convert.ToInt32(Session["UserID"]);
+                data.Name = Convert.ToString(Session["UserName"]);
+                data.role.RoleString = Convert.ToString(Session["UserRole"]);
+                data.NameNew = data.Name;
+                data.Load();
+                return View("UserProfile", data);
+            }
+            else
+            {
+                return RedirectToAction("Login");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult UserProfile(LoginData data)
+        {
+            if (Session["UserID"] != null)
+            {
+                if (ModelState.IsValid)
+                {
+                    if (data != null)
+                    {
+                        data.ID = Convert.ToInt32(Session["UserID"]);
+                        data.Name = Convert.ToString(Session["UserName"]);
+                        data.role.RoleString = Convert.ToString(Session["UserRole"]);
+                        data.Save();
+                    }
+                }
+                return View("UserProfile", data); 
+            }
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         private MappingController _mappingController;

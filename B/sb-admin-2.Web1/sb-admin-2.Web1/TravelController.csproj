@@ -946,6 +946,7 @@
     <Content Include="Views\Home\OrderList.cshtml" />
     <Content Include="Views\Home\Company.cshtml" />
     <Content Include="Views\Home\Settings.cshtml" />
+    <Content Include="Views\Home\UserProfile.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\uploads\data\" />

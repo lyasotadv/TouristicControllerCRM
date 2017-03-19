@@ -1,0 +1,96 @@
+﻿@model sb_admin_2.Web1.Domain.LoginData
+
+@{
+    ViewBag.Title = "User profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("UserProfile", "Home", FormMethod.Post))
+{
+    <div class="row">
+        <div class="col-lg-6" style="text-align: center">
+            <div class="login-panel panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Change user data</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            @Html.Label("Name:")
+                        </div>
+                        <div class="col-lg-6">
+                            @Html.TextBoxFor(a => a.FullName)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-8" style="text-align:center">
+                            @Html.Label("Change password and login:")
+                        </div>
+                        <div class="col-lg-4" style="text-align:start">
+                            @Html.CheckBoxFor(a => a.ChangePassword, new { id = "chkChangePassword" })
+                        </div>
+                    </div>
+
+                    <div id="divpasschange" style="visibility:hidden">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                @Html.Label("Current password:")
+                            </div>
+                            <div class="col-lg-6">
+                                @Html.PasswordFor(a => a.Password)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                @Html.Label("New login:")
+                            </div>
+                            <div class="col-lg-6">
+                                @Html.TextBoxFor(a => a.NameNew)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                @Html.Label("New password:")
+                            </div>
+                            <div class="col-lg-6">
+                                @Html.PasswordFor(a => a.PasswordNew)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                @Html.Label("Confirm:")
+                            </div>
+                            <div class="col-lg-6">
+                                @Html.PasswordFor(a => a.PasswordConfirm)
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <input type="submit" value="Save" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            UpdatePassChangeVisible();
+        });
+
+        function UpdatePassChangeVisible() {
+            if (document.getElementById("chkChangePassword").checked)
+                document.getElementById("divpasschange").style.visibility = "visible";
+            else
+                document.getElementById("divpasschange").style.visibility = "hidden";
+        }
+
+        $('#chkChangePassword').change(function () {
+            UpdatePassChangeVisible();
+        });
+    </script>
+}
