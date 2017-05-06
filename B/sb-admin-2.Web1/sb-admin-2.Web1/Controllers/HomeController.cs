@@ -632,6 +632,44 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
+        public ActionResult FindAviacompanyUnion(int id)
+        {
+            AviaCompanyUnion acu = mappingController.settingsData.aviaCompanyUnionList.Find(item => item.ID == id);
+            acu.Load();
+            return Json(acu);
+        }
+
+        [HttpPost]
+        public ActionResult SaveAviacompanyUnion(int id, string Name, string Note)
+        {
+            AviaCompanyUnion acu = mappingController.settingsData.aviaCompanyUnionList.Find(item => item.ID == id);
+
+            if (acu == null)
+            {
+                acu = mappingController.settingsData.aviaCompanyUnionList.Create();
+            }
+
+            acu.Name = Name;
+            acu.Note = Note;
+
+            acu.Save();
+
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteAviacompanyUnion(int id)
+        {
+            AviaCompanyUnion acu = mappingController.settingsData.aviaCompanyUnionList.Find(item => item.ID == id);
+            if (acu != null)
+            {
+                acu.Delete();
+            }
+
+            return Json("");
+        }
+
+        [HttpPost]
         public ActionResult FindLabel(int id)
         {
             Label label = mappingController.settingsData.catalog.labelList.Find(item => item.ID == id);

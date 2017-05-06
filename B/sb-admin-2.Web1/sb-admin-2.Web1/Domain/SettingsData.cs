@@ -12,8 +12,11 @@ namespace sb_admin_2.Web1.Domain
         public SettingsData()
         {
             aviaCompanyList = new AviaCompanyList();
+            aviaCompanyUnionList = new AviaCompanyUnionList();
         }
 
         public AviaCompanyList aviaCompanyList { get; private set; }
+
+        public AviaCompanyUnionList aviaCompanyUnionList { get; private set; }
     }
 }

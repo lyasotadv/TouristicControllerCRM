@@ -32,6 +32,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             personListData.personList.Load();
 
             settingsData.aviaCompanyList.Load();
+            settingsData.aviaCompanyUnionList.Load();
         }
 
         public OrderData ConstructOrderData(int ID)

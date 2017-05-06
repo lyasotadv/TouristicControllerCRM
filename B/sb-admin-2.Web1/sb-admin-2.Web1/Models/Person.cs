@@ -1107,9 +1107,7 @@ namespace sb_admin_2.Web1.Models
         public override void Delete()
         {
             DBInterface.StoredProcedure("avia_company_delete");
-
             DBInterface.AddParameter("@inIdAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
-
             DBInterface.ExecuteTransaction();
         }
     }
@@ -1128,5 +1126,152 @@ namespace sb_admin_2.Web1.Models
         {
             companyType = CompanyType.provider;
         }
+    }
+
+    public class AviaCompanyUnionList : DBObjectList<AviaCompanyUnion>
+    {
+        public override void Load()
+        {
+            Clear();
+            DBInterface.CommandText = "SELECT * FROM sellcontroller.aviacompanyunion;";
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach (DataRow row in tab.Rows)
+            {
+                AviaCompanyUnion acu = new AviaCompanyUnion();
+
+                acu.ID = Convert.ToInt32(row["idAviaCompanyUnion"]);
+                acu.Name = row["UnionName"].ToString();
+                acu.Note = row["note"].ToString();
+
+                this.Add(acu);
+            }
+        }
+
+        public AviaCompanyUnion Create()
+        {
+            AviaCompanyUnion acu = new AviaCompanyUnion();
+            Init(acu);
+            return acu;
+        }
+    }
+
+    public class AviaCompanyUnion : IDBObject
+    {
+        public int ID { get; set; }
+
+        private string _Name;
+
+        public string Name
+        {
+            get
+            {
+                return _Name;
+            }
+            set
+            {
+                if (value != Name)
+                {
+                    _Name = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _Note;
+
+        public string Note
+        {
+            get
+            {
+                return _Note;
+            }
+            set
+            {
+                if (value != _Note)
+                {
+                    _Note = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        public AviaCompanyUnion()
+        {
+            ID = -1;
+            Changed = false;
+        }
+
+        public void Load()
+        {
+            DBInterface.StoredProcedure("avia_company_union_select_by_id");
+            DBInterface.AddParameter("@inIdAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DBInterface.AddOutParameter("@outUnionName", MySql.Data.MySqlClient.MySqlDbType.String);
+            DBInterface.AddOutParameter("@outUnionShortName", MySql.Data.MySqlClient.MySqlDbType.String);
+            DBInterface.AddOutParameter("@outNote", MySql.Data.MySqlClient.MySqlDbType.String);
+
+            DBInterface.ExecuteTransaction();
+
+            Name = Convert.ToString(DBInterface.GetOutParameter("@outUnionName"));
+            Note = Convert.ToString(DBInterface.GetOutParameter("@outNote"));
+
+            Changed = false;
+        }
+
+        public void Save()
+        {
+            if (Changed)
+            {
+                if (ID >= 0)
+                {
+                    DBInterface.StoredProcedure("avia_company_union_update");
+
+                    DBInterface.AddParameter("@inIdAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                    DBInterface.AddParameter("@inUnionName", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                    DBInterface.AddParameter("@inUnionShortName", MySql.Data.MySqlClient.MySqlDbType.String, "");
+                    DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, Note);
+
+                    DBInterface.ExecuteTransaction();
+
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = false });
+                    }
+                }
+                else
+                {
+                    DBInterface.StoredProcedure("avia_company_union_insert");
+
+                    DBInterface.AddParameter("@inUnionName", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                    DBInterface.AddParameter("@inUnionShortName", MySql.Data.MySqlClient.MySqlDbType.String, "");
+                    DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, Note);
+
+                    DBInterface.AddOutParameter("@outIdAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32);
+
+                    DBInterface.ExecuteTransaction();
+
+                    ID = Convert.ToInt32(DBInterface.GetOutParameter("@outIdAviaCompanyUnion"));
+
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = true });
+                    }
+                }
+
+                Changed = false;
+            }
+        }
+
+        public void Delete()
+        {
+            DBInterface.StoredProcedure("avia_company_union_delete");
+            DBInterface.AddParameter("@inIdAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DBInterface.ExecuteTransaction();
+        }
+
+        public event EventHandler Updated;
+
+        public bool Changed { get; private set; }
     }
 }
