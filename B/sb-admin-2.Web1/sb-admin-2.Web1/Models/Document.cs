@@ -264,30 +264,15 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public List<Viza> VizaList { get; private set; }
+        public VizaList VizaList { get; private set; }
 
         public Passport()
         {
             documentType = "Passport";
-            VizaList = new List<Viza>();
+            VizaList = new VizaList(this);
 
             Changed = false;
             ID = -1;
-        }
-
-        public string VizaListStr 
-        {
-            get
-            {
-                string str = string.Empty;
-                foreach (var viza in VizaList)
-                {
-                    if (str != string.Empty)
-                        str += ", ";
-                    str += viza.CountryOfInvintation.ISO;
-                }
-                return str;
-            }
         }
 
         private Country _Citizen;
@@ -312,15 +297,13 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public void AddViza(Country country, DateTime expired, int ID)
+        public void AddViza(VizaFormation country, DateTime expired)
         {
-            Viza viza = new Viza();
-            VizaList.Add(viza);
+            Viza viza = VizaList.Create();
 
             viza.CountryOfInvintation = country;
             viza.ValidTill = expired;
             viza.PassportSerial = SerialNumber;
-            viza.ID = ID;
         }
 
         protected override void Validate()
@@ -523,9 +506,60 @@ namespace sb_admin_2.Web1.Models
 
     public class VizaList : DBObjectList<Viza>
     {
+        private Passport passport { get; set; }
+
+        public VizaList(Passport passport)
+        {
+            if (passport == null)
+                throw new ArgumentException("Passport must be not null in viza list");
+
+            this.passport = passport;
+        }
+
         public override void Load()
         {
             throw new NotImplementedException("Load method for viza not implementted unitil respective table has not been created");
+
+            Clear();
+            DBInterface.CommandText = "";
+
+            DBInterface.AddParameter("", MySql.Data.MySqlClient.MySqlDbType.Int32, null);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach(DataRow row in tab.Rows)
+            {
+                Viza viza = Create();
+            }
+        }
+
+        public Viza Create()
+        {
+            Viza viza = new Viza();
+            Init(viza);
+            Add(viza);
+            viza.PassportSerial = passport.SerialNumber;
+            return viza;
+        }
+
+        public override string ToString()
+        {
+            string str = string.Empty;
+            foreach (var viza in this)
+            {
+                if (str != string.Empty)
+                    str += ", ";
+                str += viza.CountryOfInvintation.ShortName;
+            }
+            return str;
+        }
+
+        public string StrFormat
+        {
+            get
+            {
+                return ToString();
+            }
         }
     }
 
@@ -533,7 +567,7 @@ namespace sb_admin_2.Web1.Models
     {
         public string PassportSerial { get; set; }
 
-        public Country CountryOfInvintation { get; set; }
+        public VizaFormation CountryOfInvintation { get; set; }
 
         public Viza()
         {
@@ -550,20 +584,55 @@ namespace sb_admin_2.Web1.Models
         {
             Changed = false;
             throw new NotImplementedException("Load method for viza is not implemented");
+
+            DBInterface.CommandText = "";
+            DBInterface.AddParameter("idViza", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            if (tab.Rows.Count == 1)
+            {
+                PassportSerial = Convert.ToString(tab.Rows[0][""]);
+            }
+            else
+            {
+                throw new ArgumentException("Viza with curreny ID have not been found in DataBase");
+            }
         }
 
         public void Save()
         {
+            throw new NotImplementedException("Save method for viza is not implemented");
+
             if (Changed)
             {
-                Changed = false;
-
-                if (Updated != null)
+                if (ID < 0)
                 {
-                    Updated(this, new DBEventArgs() { ForceUpdate = true });
+                    DBInterface.CommandText = "";
+
+                    DBInterface.AddParameter("idViza", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+
+                    DBInterface.ExecuteTransaction();
+
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = false });
+                    }
                 }
+                else
+                {
+                    InsertRow insertRow = new InsertRow("");
+
+                    insertRow.Add("", MySql.Data.MySqlClient.MySqlDbType.String, null);
+                    
+                    insertRow.Execute();
+
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = true });
+                    }
+                }
+                Changed = false;   
             }
-            throw new NotImplementedException("Save method for viza not implemented");
         }
 
         public void Delete()

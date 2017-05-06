@@ -151,7 +151,7 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
 
         public abstract void Load();
 
-        public void Save()
+        public virtual void Save()
         {
             foreach(var item in this)
             {

@@ -10,23 +10,8 @@ using sb_admin_2.Web1.Models.Mapping.ExpImpUtils;
 
 namespace sb_admin_2.Web1.Models
 {
-    public class CountryList : DBObjectList<Country>
+    public abstract class CountryListGeneral : DBObjectList<Country>
     {
-        public override void Load()
-        {
-            Clear();
-            DBInterface.CommandText = "SELECT * FROM sellcontroller.country";
-            DataTable tab = DBInterface.ExecuteSelection();
-            foreach (DataRow row in tab.Rows)
-            {
-                Country item = new Country() { ID = Convert.ToInt32(row["idCountry"]), Name = Convert.ToString(row["nameCountry"]) };
-                item.ISO = Convert.ToString(row["codeISO2"]);
-                item.ISO3 = Convert.ToString(row["codeISO3"]);
-                item.Nationality = Convert.ToString(row["codeCitizen"]);
-                Add(item);
-            }
-        }
-
         public Country Create()
         {
             Country country = new Country();
@@ -65,9 +50,38 @@ namespace sb_admin_2.Web1.Models
             }
             return true;
         }
+
+        protected void Append(DataTable tab)
+        {
+            if (tab != null)
+            {
+                foreach (DataRow row in tab.Rows)
+                {
+                    Country item = new Country() { ID = Convert.ToInt32(row["idCountry"]), Name = Convert.ToString(row["nameCountry"]) };
+                    item.ISO = Convert.ToString(row["codeISO2"]);
+                    item.ISO3 = Convert.ToString(row["codeISO3"]);
+                    item.Nationality = Convert.ToString(row["codeCitizen"]);
+                    Add(item);
+                }
+            }
+            else
+            {
+                throw new ArgumentNullException("DataTable must be not null");
+            }
+        }
     }
 
-    public class Country : IDBObject
+    public class CountryList : CountryListGeneral
+    {
+        public override void Load()
+        {
+            Clear();
+            DBInterface.CommandText = "SELECT * FROM sellcontroller.country";
+            Append(DBInterface.ExecuteSelection());
+        }
+    }
+
+    public class Country : IDBObject, VizaFormation
     {
         public int ID { get; set; }
 
@@ -122,6 +136,14 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
+        public string ShortName
+        {
+            get
+            {
+                return ISO;
+            }
+        }
+
         private string _Nationality;
 
         public string Nationality
@@ -140,10 +162,14 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
+        public CountryUnionList UnionList { get; private set; }
+
         public Country()
         {
             ID = -1;
             Changed = false;
+
+            UnionList = new CountryUnionList();
         }
 
 
@@ -227,5 +253,84 @@ namespace sb_admin_2.Web1.Models
         }
 
         public bool Changed { get; private set; }
+    }
+
+    public class CountryUnionList : DBObjectList<CountryUnion>
+    {
+        public override void Load()
+        {
+            throw new NotImplementedException();
+        }
+
+        public CountryUnion Create()
+        {
+            CountryUnion union = new CountryUnion();
+            Init(union);
+            return union;
+        }
+
+        public override string ToString()
+        {
+            string str = string.Empty;
+            foreach(var union in this)
+            {
+                if (str != string.Empty)
+                {
+                    str += ", ";
+                }
+                str += union.ShortName;
+            }
+            return str;
+        }
+
+        public string StrFormat
+        {
+            get
+            {
+                return ToString();
+            }
+        }
+    }
+
+    public class CountryUnion : CountryListGeneral, IDBObject, VizaFormation
+    {
+        public event EventHandler Updated;
+
+        public int ID { get; set; }
+
+        public string Name { get; set; }
+
+        public string ShortName { get; set; }
+
+        public override void Load()
+        {
+            throw new NotImplementedException("Country union is not implemented");
+
+            DBInterface.CommandText = "";
+            DBInterface.AddParameter("idUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            Append(DBInterface.ExecuteSelection());
+        }
+
+        public override void Save()
+        {
+            base.Save();
+            throw new NotImplementedException("Country union is not implemented");
+        }
+
+        public void Delete()
+        {
+            throw new NotImplementedException("Country union is not implemented");
+        }
+
+        public bool Changed { get; private set; }
+    }
+
+    public interface VizaFormation
+    {
+        int ID { get; set; }
+
+        string Name { get; }
+
+        string ShortName { get; }
     }
 }
