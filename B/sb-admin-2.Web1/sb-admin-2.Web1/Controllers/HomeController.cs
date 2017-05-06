@@ -593,6 +593,45 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
+        public ActionResult FindAviacompany(int id)
+        {
+            AviaCompany ac = mappingController.settingsData.aviaCompanyList.Find(item => item.ID == id);
+            ac.Load();
+            return Json(ac);
+        }
+
+        [HttpPost]
+        public ActionResult SaveAviacompany(int id, string Name, string ICAO, string Note)
+        {
+            AviaCompany ac = mappingController.settingsData.aviaCompanyList.Find(item => item.ID == id);
+            
+            if (ac == null)
+            {
+                ac = mappingController.settingsData.aviaCompanyList.Create(); 
+            }
+
+            ac.FullName = Name;
+            ac.ICAO = ICAO;
+            ac.Description = Note;
+
+            ac.Save();
+
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteAviacompany(int id)
+        {
+            AviaCompany ac = mappingController.settingsData.aviaCompanyList.Find(item => item.ID == id);
+            if (ac != null)
+            {
+                ac.Delete();
+            }
+
+            return Json("");
+        }
+
+        [HttpPost]
         public ActionResult FindLabel(int id)
         {
             Label label = mappingController.settingsData.catalog.labelList.Find(item => item.ID == id);

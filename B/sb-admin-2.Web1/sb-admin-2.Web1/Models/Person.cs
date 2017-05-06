@@ -60,24 +60,6 @@ namespace sb_admin_2.Web1.Models
                 }
             }
         }
-
-        public PersonGeneral Create(string companyType)
-        {
-            PersonGeneral person = null;
-            switch (companyType)
-            {
-                case "people":
-                {
-                    person = new Person();
-                    break;
-                }
-            }
-
-            if (person == null)
-                throw new NotImplementedException("Unhandled company type description");
-            Init(person);
-            return person;
-        }
     }
 
     public class PersonType
@@ -113,7 +95,7 @@ namespace sb_admin_2.Web1.Models
                 {
                     Desciption = "Person";
                 }
-                else if (Owner is AirCompany)
+                else if (Owner is AviaCompany)
                 {
                     Desciption = "Air company";
                 }
@@ -690,7 +672,7 @@ namespace sb_admin_2.Web1.Models
     {
         public int CompanyID { get; set; }
 
-        public enum CompanyType { air, isurance, provider }
+        public enum CompanyType { avia, isurance, provider }
 
         protected CompanyType companyType;
 
@@ -881,9 +863,9 @@ namespace sb_admin_2.Web1.Models
         {
             switch (companyType)
             {
-                case CompanyType.air:
+                case CompanyType.avia:
                     {
-                        return new AirCompany();
+                        return new AviaCompany();
                     }
                 case CompanyType.isurance:
                     {
@@ -993,11 +975,142 @@ namespace sb_admin_2.Web1.Models
         }
     }
 
-    public class AirCompany : Company
+    public class AviaCompanyList : DBObjectList<AviaCompany>
     {
-        public AirCompany()
+        public override void Load()
         {
-            companyType = CompanyType.air;
+            Clear();
+            DBInterface.CommandText = "SELECT * FROM sellcontroller.aviacompany;";
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach (DataRow row in tab.Rows)
+            { 
+                AviaCompany ac = new AviaCompany();
+
+                ac.ID = Convert.ToInt32(row["idAviaCompany"]);
+                ac.FullName = row["name"].ToString();
+                ac.ICAO = row["shortName"].ToString();
+                ac.Description = row["note"].ToString();
+
+                this.Add(ac);
+            }
+        }
+
+        public AviaCompany Create()
+        {
+            AviaCompany ac = new AviaCompany();
+            Init(ac);
+            return ac;
+        }
+    }
+
+    public class AviaCompany : Company
+    {
+        private string _IATA;
+
+        public string IATA
+        {
+            get
+            {
+                return _IATA;
+            }
+            set
+            {
+                if (value != IATA)
+                {
+                    _IATA = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _ICAO;
+
+        public string ICAO
+        {
+            get
+            {
+                return _ICAO;
+            }
+            set
+            {
+                if (value != ICAO)
+                {
+                    _ICAO = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        public AviaCompany()
+        {
+            companyType = CompanyType.avia;
+        }
+
+        public override void Load()
+        {
+            DBInterface.StoredProcedure("avia_company_select_by_id");
+            DBInterface.AddParameter("@inIdAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+
+            DBInterface.AddOutParameter("@outName", MySql.Data.MySqlClient.MySqlDbType.String);
+            DBInterface.AddOutParameter("@outShortName", MySql.Data.MySqlClient.MySqlDbType.String);
+            DBInterface.AddOutParameter("@outNote", MySql.Data.MySqlClient.MySqlDbType.String);
+
+            DBInterface.ExecuteTransaction();
+
+            FullName = Convert.ToString(DBInterface.GetOutParameter("@outName"));
+            ICAO = Convert.ToString(DBInterface.GetOutParameter("@outShortName"));
+            Description = Convert.ToString(DBInterface.GetOutParameter("@outNote"));
+
+            Changed = false;
+        }
+
+        public override void Save()
+        {
+            if (Changed)
+            {
+                if (ID >= 0)
+                {
+                    DBInterface.StoredProcedure("avia_company_update");
+
+                    DBInterface.AddParameter("@inIdAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                    DBInterface.AddParameter("@inName", MySql.Data.MySqlClient.MySqlDbType.String, FullName);
+                    DBInterface.AddParameter("@inShortName", MySql.Data.MySqlClient.MySqlDbType.String, ICAO);
+                    DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+
+                    DBInterface.ExecuteTransaction();
+
+                    RaiseUpdated(false);
+                }
+                else
+                {
+                    DBInterface.StoredProcedure("avia_company_insert");
+
+                    DBInterface.AddParameter("@inName", MySql.Data.MySqlClient.MySqlDbType.String, FullName);
+                    DBInterface.AddParameter("@inShortName", MySql.Data.MySqlClient.MySqlDbType.String, ICAO);
+                    DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+
+                    DBInterface.AddOutParameter("@outIdAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32);
+
+                    DBInterface.ExecuteTransaction();
+
+                    ID = Convert.ToInt32(DBInterface.GetOutParameter("@outIdAviaCompany"));
+
+                    RaiseUpdated(true);
+                }
+
+                Changed = false;
+            }
+        }
+
+        public override void Delete()
+        {
+            DBInterface.StoredProcedure("avia_company_delete");
+
+            DBInterface.AddParameter("@inIdAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+
+            DBInterface.ExecuteTransaction();
         }
     }
 

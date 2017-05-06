@@ -29,10 +29,9 @@ namespace sb_admin_2.Web1.Models.Mapping
             personListData.catalog = catalog;
             settingsData.catalog = catalog;
 
-            //TestDataInit();
             personListData.personList.Load();
 
-            //orderListData.orderList.Add(new Order() { ID = 2 });
+            settingsData.aviaCompanyList.Load();
         }
 
         public OrderData ConstructOrderData(int ID)

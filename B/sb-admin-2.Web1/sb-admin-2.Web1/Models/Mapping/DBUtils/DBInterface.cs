@@ -101,13 +101,34 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
             }
         }
 
+        static public void StoredProcedure(string ProcedureName)
+        {
+            obj.Clear();
+            obj.command.CommandText = ProcedureName;
+            obj.command.CommandType = CommandType.StoredProcedure;
+        }
+
         static public void AddParameter(string parameterName, MySqlDbType DBType, object Value)
         {
             if (obj.command == null)
-                throw new NullReferenceException("DB command have not be created. Set command text before add paramaters");
+                throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
             obj.command.Parameters.Add(parameterName, DBType);
             int cnt = obj.command.Parameters.Count;
             obj.command.Parameters[cnt - 1].Value = Value;
+        }
+
+        static public void AddOutParameter(string parameterName, MySqlDbType DBType)
+        {
+            if (obj.command == null)
+                throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+            obj.command.Parameters.Add(parameterName, DBType).Direction = ParameterDirection.Output;
+        }
+
+        static public object GetOutParameter(string parameterName)
+        {
+            if (obj.command == null)
+                throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+            return obj.command.Parameters[parameterName].Value;
         }
 
         static public DataTable ExecuteSelection()
