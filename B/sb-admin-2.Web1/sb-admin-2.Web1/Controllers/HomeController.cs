@@ -703,6 +703,64 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
+        public ActionResult FindMileCardStatus(int id)
+        {
+            MileCardStatus mcs = mappingController.settingsData.mileCardStatusList.Find(item => item.ID == id);
+            mcs.Load();
+            return Json(mcs);
+        }
+
+        [HttpPost]
+        public ActionResult SaveMileCardStatus(int id, string Name, int MinVal, int MaxVal, string nameAC, string nameACU, string Note)
+        {
+            MileCardStatus mcs = mappingController.settingsData.mileCardStatusList.Find(item => item.ID == id);
+            if (mcs == null)
+            {
+                mcs = mappingController.settingsData.mileCardStatusList.Create();
+            }
+
+            mcs.Name = Name;
+            mcs.MinVal = MinVal;
+            mcs.MaxVal = MaxVal;
+            mcs.Note = Note;
+
+            AviaCompany ac = mappingController.settingsData.aviaCompanyList.Find(item => item.FullName == nameAC);
+            if (ac != null)
+            {
+                mcs.AviaCompanyID = ac.ID;
+            }
+            else
+            {
+                mcs.AviaCompanyID = -1;
+            }
+
+            AviaCompanyUnion acu = mappingController.settingsData.aviaCompanyUnionList.Find(item => item.Name == nameACU);
+            if (acu != null)
+            {
+                mcs.AviaCompanyUnionID = acu.ID;
+            }
+            else
+            {
+                mcs.AviaCompanyUnionID = -1;
+            }
+
+            mcs.Save();
+
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteMileCardStatus(int id)
+        {
+            MileCardStatus mcs = mappingController.settingsData.mileCardStatusList.Find(item => item.ID == id);
+            if (mcs != null)
+            {
+                mcs.Delete();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
         public ActionResult FindLabel(int id)
         {
             Label label = mappingController.settingsData.catalog.labelList.Find(item => item.ID == id);

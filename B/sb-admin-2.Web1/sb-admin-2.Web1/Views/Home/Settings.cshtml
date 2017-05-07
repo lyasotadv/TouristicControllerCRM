@@ -375,6 +375,152 @@
                     </div>
                 </div>
             </div>
+
+            <!--AviacompanyUnion-->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-lg-9">
+                            <h3>Aviacompany allianace</h3>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="row">
+                                <div class="col-lg-12" style="text-align: right">
+                                    <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#aviacompanyuniondetails" onclick="ClearAviacompanyUnionDetails()">
+                                        <i class="fa fa-plus fa-1x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="dataTable_wrapper">
+                        <table class="table table-striped table-bordered table-hover" id="tableaviacompanyunion">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Note</th>
+                                    <th>Edit</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Note</th>
+                                    <th>Edit</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                @foreach (var item in Model.aviaCompanyUnionList)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(model => item.Name)</td>
+                                        <td>@Html.DisplayFor(model => item.Note)</td>
+                                        <td><button type="button" data-toggle="modal" data-target="#aviacompanyuniondetails" onclick="FillAviacompanyUnionDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <script>
+                            $(document).ready(function () {
+                                $('#tableaviacompanyunion').DataTable({
+                                    initComplete: function () {
+                                        this.api().columns([]).every(function () {
+
+                                            var column = this;
+                                            var select = $('<select><option value=""></option></select>')
+                                                .appendTo($(column.footer()).empty())
+                                                .on('change', function () {
+                                                    var val = $.fn.dataTable.util.escapeRegex(
+                                                        $(this).val()
+                                                    );
+
+                                                    column
+                                                        .search(val ? '^' + val + '$' : '', true, false)
+                                                        .draw();
+                                                });
+                                            column.data().unique().sort().each(function (d, j) {
+                                                select.append('<option value="' + d + '">' + d + '</option>')
+                                            });
+                                        });
+                                    }
+                                });
+                            });
+
+                            EditedAviacompanUnionID = 0;
+
+                            function ClearAviacompanyUnionDetails() {
+                                EditedAviacompanUnionID = 0;
+
+                                $('#inputAviacompanyUnionName').val('');
+                                $('#textaviacompanyuniondescription').val('');
+                            }
+
+                            function FillAviacompanyUnionDetails(id) {
+                                EditedAviacompanUnionID = id;
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("FindAviacompanyUnion", "Home")',
+                                    dataType: 'json',
+                                    data: {
+                                        id: id
+                                    },
+                                    success: function (data) {
+                                        if (data != null) {
+                                            document.getElementById("inputAviacompanyUnionName").value = data.Name;
+                                            document.getElementById("textaviacompanyuniondescription").value = data.Note;
+                                        }
+                                    },
+                                    error: function () {
+                                        alert('error');
+                                    }
+                                });
+                            }
+
+                            function SaveAviacompanyUnionDetails() {
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("SaveAviacompanyUnion", "Home")',
+                                    dataType: 'json',
+                                    data: {
+                                        id: EditedAviacompanUnionID,
+                                        Name: document.getElementById("inputAviacompanyUnionName").value,
+                                        Note: document.getElementById("textaviacompanyuniondescription").value
+                                    },
+                                    success: function (data) {
+                                        $('#aviacompanyuniondetails').modal('toggle');
+                                        location.reload();
+                                    },
+                                    error: function () {
+                                        alert('error');
+                                    }
+                                });
+                            }
+
+                            function DeleteAviacompanyUnion() {
+                                if (confirm("Are you sure to delete the Aviacompany alliance?")) {
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '@Url.Action("DeleteAviacompanyUnion", "Home")',
+                                        dataType: 'json',
+                                        data: {
+                                            id: EditedAviacompanUnionID,
+                                        },
+                                        success: function (data) {
+                                            $('#aviacompanyuniondetails').modal('toggle');
+                                            location.reload();
+                                        },
+                                        error: function () {
+                                            alert('error');
+                                        }
+                                    })
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="col-lg-6">
@@ -546,17 +692,32 @@
                 </div>
             </div>
 
-            <!--AviacompanyUnion-->
+            <!--Mile card status-->
+
+            <datalist id="listAviacompany">
+                @foreach (var item in Model.aviaCompanyList)
+                {
+                    <option value='@item.FullName' />
+                }
+            </datalist>
+
+            <datalist id="listAviacompanyUnion">
+                @foreach (var item in Model.aviaCompanyUnionList)
+                {
+                    <option value='@item.Name' />
+                }
+            </datalist>
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-lg-9">
-                            <h3>Aviacompany allianace</h3>
+                            <h3>Mile card status</h3>
                         </div>
                         <div class="col-lg-3">
                             <div class="row">
                                 <div class="col-lg-12" style="text-align: right">
-                                    <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#aviacompanyuniondetails" onclick="ClearAviacompanyUnionDetails()">
+                                    <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#milecardstatusdetails" onclick="ClearMilecardstatusDetails()">
                                         <i class="fa fa-plus fa-1x"></i>
                                     </button>
                                 </div>
@@ -566,10 +727,13 @@
                 </div>
                 <div class="panel-body">
                     <div class="dataTable_wrapper">
-                        <table class="table table-striped table-bordered table-hover" id="tableaviacompanyunion">
+                        <table class="table table-striped table-bordered table-hover" id="tableMilecardstatus">
                             <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Miles range</th>
+                                    <th>Aviacompany</th>
+                                    <th>Avia alliance</th>
                                     <th>Note</th>
                                     <th>Edit</th>
                                 </tr>
@@ -577,24 +741,30 @@
                             <tfoot>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Miles range</th>
+                                    <th>Aviacompany</th>
+                                    <th>Avia alliance</th>
                                     <th>Note</th>
                                     <th>Edit</th>
                                 </tr>
                             </tfoot>
                             <tbody>
-                                @foreach (var item in Model.aviaCompanyUnionList)
+                                @foreach (var item in Model.mileCardStatusList)
                                 {
                                     <tr>
                                         <td>@Html.DisplayFor(model => item.Name)</td>
+                                        <td>@Html.DisplayFor(model => item.RangeStr)</td>
+                                        <td>@Html.DisplayFor(model => item.aviacompany.ICAO)</td>
+                                        <td>@Html.DisplayFor(model => item.aviacompanyunion.Name)</td>
                                         <td>@Html.DisplayFor(model => item.Note)</td>
-                                        <td><button type="button" data-toggle="modal" data-target="#aviacompanyuniondetails" onclick="FillAviacompanyUnionDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                        <td><button type="button" data-toggle="modal" data-target="#milecardstatusdetails" onclick="FillMilecardstatusDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                         <script>
                             $(document).ready(function () {
-                                $('#tableaviacompanyunion').DataTable({
+                                $('#tableMilecardstatus').DataTable({
                                     initComplete: function () {
                                         this.api().columns([]).every(function () {
 
@@ -618,28 +788,45 @@
                                 });
                             });
 
-                            EditedAviacompanUnionID = 0;
+                            EditedMilecardstatusID = 0;
 
-                            function ClearAviacompanyUnionDetails() {
-                                EditedAviacompanUnionID = 0;
+                            function ClearMilecardstatusDetails() {
+                                EditedMilecardstatusID = 0;
 
-                                $('#inputAviacompanyUnionName').val('');
-                                $('#textaviacompanyuniondescription').val('');
+                                $('#inputMilecardstatusName').val('');
+                                $('#inputMilecardstatusMinVal').val('');
+                                $('#inputMilecardstatusMaxVal').val('');
+                                $('#inputMilecardstatusAviaCompany').val('');
+                                $('#inputMilecardstatusAviaUnion').val('');
+                                $('#textmilecardstatusdescription').val('');
                             }
 
-                            function FillAviacompanyUnionDetails(id) {
-                                EditedAviacompanUnionID = id;
+                            function FillMilecardstatusDetails(id) {
+                                EditedMilecardstatusID = id;
                                 $.ajax({
                                     type: 'POST',
-                                    url: '@Url.Action("FindAviacompanyUnion", "Home")',
+                                    url: '@Url.Action("FindMileCardStatus", "Home")',
                                     dataType: 'json',
                                     data: {
                                         id: id
                                     },
                                     success: function (data) {
                                         if (data != null) {
-                                            document.getElementById("inputAviacompanyUnionName").value = data.Name;
-                                            document.getElementById("textaviacompanyuniondescription").value = data.Note;
+                                            document.getElementById("inputMilecardstatusName").value = data.Name;
+
+                                            var MinVal = data.MinVal;
+                                            if (MinVal == 0)
+                                                MinVal = '';
+                                            document.getElementById("inputMilecardstatusMinVal").value = MinVal;
+
+                                            var MaxVal = data.MaxVal;
+                                            if (MaxVal == 0)
+                                                MaxVal = '';
+                                            document.getElementById("inputMilecardstatusMaxVal").value = MaxVal;
+
+                                            document.getElementById("inputMilecardstatusAviaCompany").value = data.aviacompany.FullName;
+                                            document.getElementById("inputMilecardstatusAviaUnion").value = data.aviacompanyunion.Name;
+                                            document.getElementById("textmilecardstatusdescription").value = data.Note;
                                         }
                                     },
                                     error: function () {
@@ -648,18 +835,35 @@
                                 });
                             }
 
-                            function SaveAviacompanyUnionDetails() {
+                            function SaveMilecardstatusDetails() {
+                                var MinVal = document.getElementById("inputMilecardstatusMinVal").value;
+                                var MaxVal = document.getElementById("inputMilecardstatusMaxVal").value;
+
+                                if (MinVal == '')
+                                {
+                                    MinVal = -1;
+                                }
+
+                                if (MaxVal == '')
+                                {
+                                    MaxVal = -1;
+                                }
+
                                 $.ajax({
                                     type: 'POST',
-                                    url: '@Url.Action("SaveAviacompanyUnion", "Home")',
+                                    url: '@Url.Action("SaveMileCardStatus", "Home")',
                                     dataType: 'json',
                                     data: {
-                                        id: EditedAviacompanUnionID,
-                                        Name: document.getElementById("inputAviacompanyUnionName").value,
-                                        Note: document.getElementById("textaviacompanyuniondescription").value
+                                        id: EditedMilecardstatusID,
+                                        Name: document.getElementById("inputMilecardstatusName").value,
+                                        MinVal: MinVal,
+                                        MaxVal: MaxVal,
+                                        nameAC: document.getElementById("inputMilecardstatusAviaCompany").value,
+                                        nameACU: document.getElementById("inputMilecardstatusAviaUnion").value,
+                                        Note: document.getElementById("textmilecardstatusdescription").value
                                     },
                                     success: function (data) {
-                                        $('#aviacompanyuniondetails').modal('toggle');
+                                        $('#milecardstatusdetails').modal('toggle');
                                         location.reload();
                                     },
                                     error: function () {
@@ -668,17 +872,17 @@
                                 });
                             }
 
-                            function DeleteAviacompanyUnion() {
-                                if (confirm("Are you sure to delete the Aviacompany alliance?")) {
+                            function DeleteMilecardstatus() {
+                                if (confirm("Are you sure to delete the mile card status?")) {
                                     $.ajax({
                                         type: 'POST',
-                                        url: '@Url.Action("DeleteAviacompanyUnion", "Home")',
+                                        url: '@Url.Action("DeleteMileCardStatus", "Home")',
                                         dataType: 'json',
                                         data: {
-                                            id: EditedAviacompanUnionID,
+                                            id: EditedMilecardstatusID,
                                         },
                                         success: function (data) {
-                                            $('#aviacompanyuniondetails').modal('toggle');
+                                            $('#milecardstatusdetails').modal('toggle');
                                             location.reload();
                                         },
                                         error: function () {
@@ -988,6 +1192,69 @@
                             <div class="col-lg-6" style="text-align: right">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-primary" onclick="SaveAviacompanyUnionDetails()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Mile card status-->
+        <div class="modal fade" id="milecardstatusdetails" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="milecardstatusdetailslabel">Mile card status</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group" id="divMilecardstatusName">
+                                    <input class="form-control" placeholder="Name" id="inputMilecardstatusName">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group" id="divMilecardstatusMinVal">
+                                    <input class="form-control" placeholder="From" id="inputMilecardstatusMinVal">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group" id="divMilecardstatusMaxVal">
+                                    <input class="form-control" placeholder="Till" id="inputMilecardstatusMaxVal">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group" id="divMilecardstatusAviaCompany">
+                                    <input class="form-control" placeholder="Aviacompany" id="inputMilecardstatusAviaCompany" list="listAviacompany">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group" id="divMilecardstatusAviaUnion">
+                                    <input class="form-control" placeholder="Avia alliance" id="inputMilecardstatusAviaUnion" list="listAviacompanyUnion">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <textarea class="form-control" rows="3" id="textmilecardstatusdescription" placeholder="Note"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-lg-6" style="text-align: left">
+                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeleteMilecardstatus()">
+                                    <i class="glyphicon glyphicon-remove fa-1x"></i>
+                                </button>
+                            </div>
+                            <div class="col-lg-6" style="text-align: right">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="SaveMilecardstatusDetails()">Save</button>
                             </div>
                         </div>
                     </div>

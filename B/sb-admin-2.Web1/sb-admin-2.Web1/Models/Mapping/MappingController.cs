@@ -33,6 +33,7 @@ namespace sb_admin_2.Web1.Models.Mapping
 
             settingsData.aviaCompanyList.Load();
             settingsData.aviaCompanyUnionList.Load();
+            settingsData.mileCardStatusList.Load();
         }
 
         public OrderData ConstructOrderData(int ID)

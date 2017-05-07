@@ -154,6 +154,7 @@
     </Compile>
     <Compile Include="Models\Mapping\MappingController.cs" />
     <Compile Include="Models\Mapping\Preferences.cs" />
+    <Compile Include="Models\MileCard.cs" />
     <Compile Include="Models\Money.cs" />
     <Compile Include="Models\Navbar.cs" />
     <Compile Include="Models\Order.cs" />
