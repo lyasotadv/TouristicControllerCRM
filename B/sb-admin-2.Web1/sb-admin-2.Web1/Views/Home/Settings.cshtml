@@ -267,6 +267,20 @@
 
                             EditedAviacompanyID = 0;
 
+                            function ClearAviaUnionSelectList() {
+                                var x = document.getElementById("slAviaUnionChosen");
+                                var n = x.length;
+                                for (i = 0; i < n; i++) {
+                                    x.remove(x[0]);
+                                }
+
+                                var x = document.getElementById("slAviaUnionChosenMirror");
+                                var n = x.length;
+                                for (i = 0; i < n; i++) {
+                                    x.remove(x[0]);
+                                }
+                            }
+
                             function ClearAviacompanyDetails() {
                                 EditedAviacompanyID = 0;
 
@@ -274,6 +288,8 @@
                                 $('#inputAviacompanyIATA').val('');
                                 $('#inputAviacompanyICAO').val('');
                                 $('#textaviacompanydescription').val('');
+
+                                ClearAviaUnionSelectList();
                             }
 
                             function FillAviacompanyDetails(id) {
@@ -290,6 +306,23 @@
                                             document.getElementById("inputAviacompanyName").value = data.FullName;
                                             document.getElementById("inputAviacompanyICAO").value = data.ICAO;
                                             document.getElementById("textaviacompanydescription").value = data.Description;
+
+                                            ClearAviaUnionSelectList();
+
+                                            var inp = document.getElementById("slAviaUnionChosen");
+                                            for (i = 0; i < data.aviaCompanyUnionList.length; i++)
+                                            {
+                                                var option = document.createElement("option");
+                                                option.text = data.aviaCompanyUnionList[i].Name;
+                                                inp.add(option);
+                                            }
+
+                                            var inp = document.getElementById("slAviaUnionChosenMirror");
+                                            for (i = 0; i < data.mirror.length; i++) {
+                                                var option = document.createElement("option");
+                                                option.text = data.mirror[i].Name;
+                                                inp.add(option);
+                                            }
                                         }
                                     },
                                     error: function () {
@@ -733,13 +766,13 @@
                             </div>
 
                             <div class="col-lg-3">
-                                <div class="form-group" id="divAviacompanyShorName">
+                                <div class="form-group" id="divAviacompanyIATA">
                                     <input class="form-control" placeholder="IATA" id="inputAviacompanyIATA">
                                 </div>
                             </div>
 
                             <div class="col-lg-3">
-                                <div class="form-group" id="divAviacompanyShorName">
+                                <div class="form-group" id="divAviacompanyICAO">
                                     <input class="form-control" placeholder="ICAO" id="inputAviacompanyICAO">
                                 </div>
                             </div>
@@ -752,6 +785,98 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-lg-5">
+                                <label for="slAviaUnionChosen">Aviacompany union (joined)</label>
+                                <select class="form-control" id="slAviaUnionChosen" size="5"></select>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <label></label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <button type="button" class="btn" onclick="OnClickJoinAviaUnionAdd()"><i class="glyphicon glyphicon-chevron-left"></i></button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <button type="button" class="btn" onclick="OnClickJoinAviaUnionRemove()"><i class="glyphicon glyphicon-chevron-right"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                <label for="slAviaUnionChosenMirror">Aviacompany union</label>
+                                <select class="form-control" id="slAviaUnionChosenMirror" size="5"></select>
+                            </div>
+                        </div>
+
+                        <script>
+    function OnClickJoinAviaUnionAdd() {
+        var inp = document.getElementById("slAviaUnionChosen");
+        var inpMirror = document.getElementById("slAviaUnionChosenMirror");
+        var selectedMirror = inpMirror.selectedIndex;
+        if (selectedMirror >= 0) {
+            var nameMirror = inpMirror[selectedMirror].text;
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("JoinAviaCompanyUnion", "Home")',
+                                        dataType: 'json',
+                                        data: {
+                                            idAC: EditedAviacompanyID,
+                                            nameACU: nameMirror,
+                                            status: true,
+                                        },
+                                        success: function (data) {
+
+                                        },
+                                        error: function () {
+                                            alert('error');
+                                        }
+                                    });
+
+                                    inpMirror.remove(inpMirror[selectedMirror]);
+
+                                    var option = document.createElement("option");
+                                    option.text = nameMirror;
+                                    inp.add(option);
+                                }
+                            }
+
+                            function OnClickJoinAviaUnionRemove() {
+                                var inp = document.getElementById("slAviaUnionChosen");
+                                var inpMirror = document.getElementById("slAviaUnionChosenMirror");
+                                var selected = inp.selectedIndex;
+                                if (selected >= 0) {
+                                    var name = inp[selected].text;
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '@Url.Action("JoinAviaCompanyUnion", "Home")',
+                                        dataType: 'json',
+                                        data: {
+                                            idAC: EditedAviacompanyID,
+                                            nameACU: name,
+                                            status: false,
+                                        },
+                                        success: function (data) {
+
+                                        },
+                                        error: function () {
+                                            alert('error');
+                                        }
+                                    });
+
+                                    inp.remove(inp[selected]);
+
+                                    var option = document.createElement("option");
+                                    option.text = name;
+                                    inpMirror.add(option);
+                                }
+                            }
+                        </script>
                     </div>
                     <div class="modal-footer">
                         <div class="row">

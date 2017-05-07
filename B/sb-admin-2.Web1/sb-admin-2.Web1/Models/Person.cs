@@ -1043,9 +1043,15 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
+        public AviaCompanyUnionList aviaCompanyUnionList { get; private set; }
+
+        public AviaCompanyUnionList mirror { get; private set; }
+
         public AviaCompany()
         {
             companyType = CompanyType.avia;
+
+            aviaCompanyUnionList = new AviaCompanyUnionList();
         }
 
         public override void Load()
@@ -1062,6 +1068,9 @@ namespace sb_admin_2.Web1.Models
             FullName = Convert.ToString(DBInterface.GetOutParameter("@outName"));
             ICAO = Convert.ToString(DBInterface.GetOutParameter("@outShortName"));
             Description = Convert.ToString(DBInterface.GetOutParameter("@outNote"));
+
+            aviaCompanyUnionList.Load(this);
+            mirror = aviaCompanyUnionList.mirror;
 
             Changed = false;
         }
@@ -1130,6 +1139,25 @@ namespace sb_admin_2.Web1.Models
 
     public class AviaCompanyUnionList : DBObjectList<AviaCompanyUnion>
     {
+        public AviaCompanyUnionList()
+        {
+
+        }
+
+        public AviaCompanyUnionList mirror { get; private set; }
+        
+        private void UpdateMirror()
+        {
+            if (mirror == null)
+                mirror = new AviaCompanyUnionList();
+            mirror.Clear();
+            mirror.Load();
+            foreach(var acu in this)
+            {
+                mirror.RemoveAll(item => item.ID == acu.ID);
+            }
+        }
+
         public override void Load()
         {
             Clear();
@@ -1149,11 +1177,92 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
+        public void Load(AviaCompany ac)
+        {
+            Clear();
+            
+            if (ac == null)
+                return;
+
+            DBInterface.CommandText = "select " +
+                                        "aviacompanyunion.idAviaCompanyUnion, " +
+                                        "aviacompanyunion.UnionName, " +
+                                        "aviacompanyunion.note " +
+                                        "from joinaviacompanyunion " +
+                                        "left join aviacompanyunion " +
+                                        "on joinaviacompanyunion.idAviaCompanyUnion = aviacompanyunion.idAviaCompanyUnion " +
+                                        "where joinaviacompanyunion.idAviaCompany = @idAviaCompany";
+
+            DBInterface.AddParameter("@idAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32, ac.ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach (DataRow row in tab.Rows)
+            {
+                AviaCompanyUnion acu = new AviaCompanyUnion();
+
+                acu.ID = Convert.ToInt32(row["idAviaCompanyUnion"]);
+                acu.Name = row["UnionName"].ToString();
+                acu.Note = row["note"].ToString();
+
+                this.Add(acu);
+            }
+
+            UpdateMirror();
+        }
+
         public AviaCompanyUnion Create()
         {
             AviaCompanyUnion acu = new AviaCompanyUnion();
             Init(acu);
             return acu;
+        }
+
+        public void AddElement(AviaCompany ac, AviaCompanyUnion acu)
+        {
+            DBInterface.CommandText = "select * " +
+                                        "from joinaviacompanyunion " +
+                                        "where joinaviacompanyunion.idAviaCompany = @idAviaCompany " +
+                                        "and joinaviacompanyunion.idAviaCompanyUnion = @idAviaCompanyUnion;";
+
+            DBInterface.AddParameter("@idAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32, ac.ID);
+            DBInterface.AddParameter("@idAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, acu.ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            if (tab.Rows.Count == 0)
+            {
+                DBInterface.StoredProcedure("join_avia_company_union_insert");
+
+                DBInterface.AddParameter("@inIdAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, acu.ID);
+                DBInterface.AddParameter("@inIdAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32, ac.ID);
+                DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, "");
+
+                DBInterface.AddOutParameter("@outIdJoinAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32);
+
+                DBInterface.ExecuteTransaction();
+            }
+        }
+
+        public void RemoveElement(AviaCompany ac, AviaCompanyUnion acu)
+        {
+            DBInterface.CommandText = "select * " +
+                                        "from joinaviacompanyunion " +
+                                        "where joinaviacompanyunion.idAviaCompany = @idAviaCompany " +
+                                        "and joinaviacompanyunion.idAviaCompanyUnion = @idAviaCompanyUnion;";
+
+            DBInterface.AddParameter("@idAviaCompany", MySql.Data.MySqlClient.MySqlDbType.Int32, ac.ID);
+            DBInterface.AddParameter("@idAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, acu.ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            
+            foreach (DataRow row in tab.Rows)
+            {
+                DBInterface.StoredProcedure("join_avia_company_union_delete");
+                DBInterface.AddParameter("@inIdJoinAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, Convert.ToInt32(row["idJoinAviaCompanyUnion"]));
+                DBInterface.ExecuteTransaction();
+            }
         }
     }
 
@@ -1265,9 +1374,28 @@ namespace sb_admin_2.Web1.Models
 
         public void Delete()
         {
+            DeleteJoin();
             DBInterface.StoredProcedure("avia_company_union_delete");
             DBInterface.AddParameter("@inIdAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
             DBInterface.ExecuteTransaction();
+        }
+
+        private void DeleteJoin()
+        {
+            DBInterface.CommandText = "select * " +
+                                        "from joinaviacompanyunion " +
+                                        "where joinaviacompanyunion.idAviaCompanyUnion = @idAviaCompanyUnion;";
+
+            DBInterface.AddParameter("@idAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach (DataRow row in tab.Rows)
+            {
+                DBInterface.StoredProcedure("join_avia_company_union_delete");
+                DBInterface.AddParameter("@inIdJoinAviaCompanyUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, Convert.ToInt32(row["idJoinAviaCompanyUnion"]));
+                DBInterface.ExecuteTransaction();
+            }
         }
 
         public event EventHandler Updated;
