@@ -1019,15 +1019,15 @@
                         </div>
 
                         <script>
-    function OnClickJoinAviaUnionAdd() {
-        var inp = document.getElementById("slAviaUnionChosen");
-        var inpMirror = document.getElementById("slAviaUnionChosenMirror");
-        var selectedMirror = inpMirror.selectedIndex;
-        if (selectedMirror >= 0) {
-            var nameMirror = inpMirror[selectedMirror].text;
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("JoinAviaCompanyUnion", "Home")',
+                            function OnClickJoinAviaUnionAdd() {
+                                var inp = document.getElementById("slAviaUnionChosen");
+                                var inpMirror = document.getElementById("slAviaUnionChosenMirror");
+                                var selectedMirror = inpMirror.selectedIndex;
+                                if (selectedMirror >= 0) {
+                                    var nameMirror = inpMirror[selectedMirror].text;
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '@Url.Action("JoinAviaCompanyUnion", "Home")',
                                         dataType: 'json',
                                         data: {
                                             idAC: EditedAviacompanyID,

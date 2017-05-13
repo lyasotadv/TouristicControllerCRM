@@ -33,6 +33,7 @@ namespace sb_admin_2.Web1.Controllers
                     Session["UserID"] = data.ID;
                     Session["UserName"] = data.Name;
                     Session["UserRole"] = data.role.RoleString;
+                    Session.Timeout = 240;
                     return RedirectToAction("PersonList");
                 }
             }
@@ -756,6 +757,83 @@ namespace sb_admin_2.Web1.Controllers
             if (mcs != null)
             {
                 mcs.Delete();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult FindMileCard(int PersonID, int id)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.mileCardList.Load();
+                MileCard mc = person.mileCardList.Find(item => item.ID == id);
+                if (mc != null)
+                {
+                    mc.Load();
+                    return Json(mc);
+                }
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult SaveMileCard(int PersonID, int id, string Number, string Password, string nameACU, string nameAC, string nameResondedPerson, 
+                                            string note, int MilesCount)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.mileCardList.Load();
+                MileCard mc = person.mileCardList.Find(item => item.ID == id);
+                if (mc == null)
+                {
+                    mc = person.mileCardList.Create();
+                }
+
+                mc.Number = Number;
+                mc.Password = Password;
+                mc.Note = note;
+                mc.MilesCount = MilesCount;
+
+                mappingController.settingsData.aviaCompanyUnionList.Load();
+                AviaCompanyUnion acu = mappingController.settingsData.aviaCompanyUnionList.Find(item => item.Name == nameACU);
+                if (acu != null)
+                {
+                    mc.AviaCompanyUnionID = acu.ID;
+                }
+
+                mappingController.settingsData.aviaCompanyList.Load();
+                AviaCompany ac = mappingController.settingsData.aviaCompanyList.Find(item => item.FullName == nameAC);
+                if (ac != null)
+                {
+                    mc.AviaCompanyID = ac.ID;
+                }
+
+                PersonGeneral personResponded = mappingController.personListData.personList.Find(item => item.FullName == nameResondedPerson);
+                if (personResponded != null)
+                {
+                    mc.PersonRespondedID = personResponded.ID;
+                }
+
+                mc.Save();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteMileCard(int PersonID, int id)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if (person != null)
+            {
+                person.mileCardList.Load();
+                MileCard mc = person.mileCardList.Find(item => item.ID == id);
+                if (mc != null)
+                {
+                    mc.Delete();
+                }
             }
             return Json("");
         }

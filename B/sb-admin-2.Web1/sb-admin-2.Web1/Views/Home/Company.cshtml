@@ -6,88 +6,68 @@
 
 @if (Session["UserID"] != null)
 {
-<script>
-    $(document).ready(function () {
-        $('#tableContact').DataTable({
-            responsive: true
+    <script>
+        $(document).ready(function () {
+            $('#tableContact').DataTable({
+                responsive: true
+            });
         });
-    });
 
-    EditedConatctID = 0;
-
-    function ClearContactDetails() {
         EditedConatctID = 0;
 
-        $('#inputContactContent').val('');
-        $('#textcontactdescription').val('');
-        $('#selectContactType').val('e-mail').change();
-    }
+        function ClearContactDetails() {
+            EditedConatctID = 0;
 
-    function FillContactDetails(id) {
-        EditedConatctID = id;
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("FindContact", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                id: id
-            },
-            success: function (data) {
-                if (data != null) {
-                    document.getElementById("inputContactContent").value = data.Content;
-                    document.getElementById("textcontactdescription").value = data.Description;
+            $('#inputContactContent').val('');
+            $('#textcontactdescription').val('');
+            $('#selectContactType').val('e-mail').change();
+        }
 
-                    switch (data.contactType) {
-                        case "e-mail":
-                            $('#selectContactType').val('e-mail').change();
-                            break;
-                        case "mobile":
-                            $('#selectContactType').val('mobile').change();
-                            break;
-                        case "adress":
-                            $('#selectContactType').val('adress').change();
-                            break;
-                    }
-                }
-            },
-            error: function () {
-                alert('error');
-            }
-        });
-    }
-
-    function SaveContactDetails() {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("SaveContact", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                id: EditedConatctID,
-                content: document.getElementById("inputContactContent").value,
-                description: document.getElementById("textcontactdescription").value,
-                contactType: document.getElementById("selectContactType").value
-            },
-            success: function (data) {
-                $('#contactdetails').modal('toggle');
-                location.reload();
-            },
-            error: function () {
-                alert('error');
-            }
-        })
-    }
-
-    function DeleteContact() {
-        if (confirm("Are you sure to delete the contact?")) {
+        function FillContactDetails(id) {
+            EditedConatctID = id;
             $.ajax({
                 type: 'POST',
-                url: '@Url.Action("DeleteContact", "Home")',
+                url: '@Url.Action("FindContact", "Home")',
                 dataType: 'json',
                 data: {
                     PersonID: '@Model.company.ID',
-                    id: EditedConatctID
+                    id: id
+                },
+                success: function (data) {
+                    if (data != null) {
+                        document.getElementById("inputContactContent").value = data.Content;
+                        document.getElementById("textcontactdescription").value = data.Description;
+
+                        switch (data.contactType) {
+                            case "e-mail":
+                                $('#selectContactType').val('e-mail').change();
+                                break;
+                            case "mobile":
+                                $('#selectContactType').val('mobile').change();
+                                break;
+                            case "adress":
+                                $('#selectContactType').val('adress').change();
+                                break;
+                        }
+                    }
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        }
+
+        function SaveContactDetails() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveContact", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID',
+                    id: EditedConatctID,
+                    content: document.getElementById("inputContactContent").value,
+                    description: document.getElementById("textcontactdescription").value,
+                    contactType: document.getElementById("selectContactType").value
                 },
                 success: function (data) {
                     $('#contactdetails').modal('toggle');
@@ -98,420 +78,763 @@
                 }
             })
         }
-    }
 
-    function FillPersonDetails() {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("GetPersonalData", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID'
-            },
-            success: function (data) {
-                if (data != null) {
-                    document.getElementById("inputOfficialName").value = data.FullName;
-                    document.getElementById("textpersondescription").value = data.Description;
-                }
-            },
-            error: function () {
-                alert('error');
+        function DeleteContact() {
+            if (confirm("Are you sure to delete the contact?")) {
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("DeleteContact", "Home")',
+                    dataType: 'json',
+                    data: {
+                        PersonID: '@Model.company.ID',
+                        id: EditedConatctID
+                    },
+                    success: function (data) {
+                        $('#contactdetails').modal('toggle');
+                        location.reload();
+                    },
+                    error: function () {
+                        alert('error');
+                    }
+                })
             }
-        });
-    }
+        }
 
-    function SaveCompanyDetails() {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("SaveCompanyDetails", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                Name: document.getElementById("inputOfficialName").value,
-                Description: document.getElementById("textpersondescription").value
-            },
-            success: function (data) {
-                if (data != '') {
-                    alert(data);
-                }
-                else {
-                    $('#personaldata').modal('toggle');
-                    location.reload();
-                }
-            },
-            error: function () {
-                alert('error');
-            }
-        })
-    }
-
-    function DeletePerson() {
-        if (confirm("Are you sure to delete the company and all attached contacts and documents?")) {
+        function FillPersonDetails() {
             $.ajax({
                 type: 'POST',
-                url: '@Url.Action("DeletePerson", "Home")',
+                url: '@Url.Action("GetPersonalData", "Home")',
                 dataType: 'json',
                 data: {
                     PersonID: '@Model.company.ID'
                 },
                 success: function (data) {
                     if (data != null) {
-                        var url = '@Url.Action("PersonList", "Home")/';
-                        window.location.href = url;
+                        document.getElementById("inputOfficialName").value = data.FullName;
+                        document.getElementById("textpersondescription").value = data.Description;
                     }
                 },
                 error: function () {
                     alert('error');
                 }
             });
-        };
-    }
-
-    function FillPaymentDetails() {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("GetPersonalData", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID'
-            },
-            success: function (data) {
-                if (data != null) {
-                    document.getElementById("inputMFO").value = data.MFO;
-                    document.getElementById("inputEDRPOU").value = data.EDRPOU;
-                    document.getElementById("inputAccount").value = data.Account;
-                    document.getElementById("inputBankName").value = data.BankName;
-                }
-            },
-            error: function () {
-                alert('error');
-            }
-        });
-    }
-
-    function SavePaymentDetails() {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("SavePaymentDetails", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                MFO: document.getElementById("inputMFO").value,
-                EDRPOU: document.getElementById("inputEDRPOU").value,
-                Account: document.getElementById("inputAccount").value,
-                BankName: document.getElementById("inputBankName").value
-            },
-            success: function (data) {
-                if (data != '') {
-                    alert(data);
-                }
-                else {
-                    $('#paymentdetails').modal('toggle');
-                    location.reload();
-                }
-            },
-            error: function () {
-                alert('error');
-            }
-        })
-    }
-
-    function AddLabel() {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("AddLabelPerson", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                Name: document.getElementById("inputLabelAdd").value,
-                Note: ''
-            },
-            success: function (data) {
-                location.reload();
-            },
-            error: function () {
-                alert('error');
-            }
-        })
-    }
-
-    function DeleteLabel(id) {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("DeleteLabelPerson", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                LabelID: id
-            },
-            success: function (data) {
-                location.reload();
-            },
-            error: function () {
-                alert('error');
-            }
-        })
-    }
-
-    EditedFilePersonID = 0;
-
-    function AddFilePerson() {
-        var formData = new FormData();
-        var totalFiles = document.getElementById("fileUploadFile").files.length;
-        for (var i = 0; i < totalFiles; i++) {
-            var file = document.getElementById("fileUploadFile").files[i];
-            formData.append("FileUpload", file);
         }
 
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("UploadFile", "Home")',
-            dataType: 'json',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function (data) {
-                document.getElementById("fileUploadFile").value = "";
+        function SaveCompanyDetails() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveCompanyDetails", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID',
+                    Name: document.getElementById("inputOfficialName").value,
+                    Description: document.getElementById("textpersondescription").value
+                },
+                success: function (data) {
+                    if (data != '') {
+                        alert(data);
+                    }
+                    else {
+                        $('#personaldata').modal('toggle');
+                        location.reload();
+                    }
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
 
+        function DeletePerson() {
+            if (confirm("Are you sure to delete the company and all attached contacts and documents?")) {
                 $.ajax({
                     type: 'POST',
-                    url: '@Url.Action("UploadFileToPerson", "Home")',
+                    url: '@Url.Action("DeletePerson", "Home")',
                     dataType: 'json',
                     data: {
-                        PersonID: '@Model.company.ID',
-                        data: data
+                        PersonID: '@Model.company.ID'
                     },
                     success: function (data) {
-                        location.reload();
+                        if (data != null) {
+                            var url = '@Url.Action("PersonList", "Home")/';
+                            window.location.href = url;
+                        }
                     },
                     error: function () {
                         alert('error');
                     }
                 });
-            },
-            error: function () {
-                alert('error');
-            }
-        });
-    }
+            };
+        }
 
-    function DeleteFilePerson() {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("DeleteFilePerson", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                FileID: EditedFilePersonID
-            },
-            success: function (data) {
-                location.reload();
-            },
-            error: function () {
-                alert('error');
-            }
-        })
-    }
-
-    function FillFilePersonDetails(id) {
-        EditedFilePersonID = id;
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("FindFilePerson", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                FileID: id
-            },
-            success: function (data) {
-                if (data != null) {
-                    document.getElementById("textfilepersondescription").value = data.Description;
+        function FillPaymentDetails() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetPersonalData", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID'
+                },
+                success: function (data) {
+                    if (data != null) {
+                        document.getElementById("inputMFO").value = data.MFO;
+                        document.getElementById("inputEDRPOU").value = data.EDRPOU;
+                        document.getElementById("inputAccount").value = data.Account;
+                        document.getElementById("inputBankName").value = data.BankName;
+                    }
+                },
+                error: function () {
+                    alert('error');
                 }
-            },
-            error: function () {
-                alert('error');
+            });
+        }
+
+        function SavePaymentDetails() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SavePaymentDetails", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID',
+                    MFO: document.getElementById("inputMFO").value,
+                    EDRPOU: document.getElementById("inputEDRPOU").value,
+                    Account: document.getElementById("inputAccount").value,
+                    BankName: document.getElementById("inputBankName").value
+                },
+                success: function (data) {
+                    if (data != '') {
+                        alert(data);
+                    }
+                    else {
+                        $('#paymentdetails').modal('toggle');
+                        location.reload();
+                    }
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
+
+        function AddLabel() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AddLabelPerson", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID',
+                    Name: document.getElementById("inputLabelAdd").value,
+                    Note: ''
+                },
+                success: function (data) {
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
+
+        function DeleteLabel(id) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("DeleteLabelPerson", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID',
+                    LabelID: id
+                },
+                success: function (data) {
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
+
+        EditedFilePersonID = 0;
+
+        function AddFilePerson() {
+            var formData = new FormData();
+            var totalFiles = document.getElementById("fileUploadFile").files.length;
+            for (var i = 0; i < totalFiles; i++) {
+                var file = document.getElementById("fileUploadFile").files[i];
+                formData.append("FileUpload", file);
             }
-        });
-    }
 
-    function SaveFilePersonDetails() {
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("SaveFilePerson", "Home")',
-            dataType: 'json',
-            data: {
-                PersonID: '@Model.company.ID',
-                FileID: EditedFilePersonID,
-                Description: document.getElementById("textfilepersondescription").value
-            },
-            success: function (data) {
-                $('#filepersondetails').modal('toggle');
-                location.reload();
-            },
-            error: function () {
-                alert('error');
-            }
-        })
-    }
-</script>
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("UploadFile", "Home")',
+                dataType: 'json',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    document.getElementById("fileUploadFile").value = "";
 
-<div class="row">
-    <div class="col-lg-6">
-        <h2>Company</h2>
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("UploadFileToPerson", "Home")',
+                        dataType: 'json',
+                        data: {
+                            PersonID: '@Model.company.ID',
+                            data: data
+                        },
+                        success: function (data) {
+                            location.reload();
+                        },
+                        error: function () {
+                            alert('error');
+                        }
+                    });
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        }
+
+        function DeleteFilePerson() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("DeleteFilePerson", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID',
+                    FileID: EditedFilePersonID
+                },
+                success: function (data) {
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
+
+        function FillFilePersonDetails(id) {
+            EditedFilePersonID = id;
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("FindFilePerson", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID',
+                    FileID: id
+                },
+                success: function (data) {
+                    if (data != null) {
+                        document.getElementById("textfilepersondescription").value = data.Description;
+                    }
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        }
+
+        function SaveFilePersonDetails() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveFilePerson", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.company.ID',
+                    FileID: EditedFilePersonID,
+                    Description: document.getElementById("textfilepersondescription").value
+                },
+                success: function (data) {
+                    $('#filepersondetails').modal('toggle');
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
+    </script>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <h2>Company</h2>
+        </div>
+        <div class="col-lg-6" style="text-align: right">
+            <button type="button" title="Delete person" onclick="DeletePerson()"><i class="glyphicon glyphicon-remove"></i></button>
+        </div>
     </div>
-    <div class="col-lg-6" style="text-align: right">
-        <button type="button" title="Delete person" onclick="DeletePerson()"><i class="glyphicon glyphicon-remove"></i></button>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-lg-6">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-lg-10">
-                                <h3>Company data</h3>
-                            </div>
-                            <div class="col-lg-2" style="text-align: right">
-                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Edit" data-toggle="modal" data-target="#personaldata" onclick="FillPersonDetails()">
-                                    <i class="glyphicon glyphicon-pencil"></i>
-                                </button>
+    <div class="row">
+        <div class="col-lg-6">
+            <!--Company data-->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-10">
+                                    <h3>Company data</h3>
+                                </div>
+                                <div class="col-lg-2" style="text-align: right">
+                                    <button type="button" class="btn btn-primary btn-circle btn-lg" title="Edit" data-toggle="modal" data-target="#personaldata" onclick="FillPersonDetails()">
+                                        <i class="glyphicon glyphicon-pencil"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-lg-8">
-                                <div><h3>@Html.DisplayFor(model => model.company.FullName)</h3></div>
-                            </div>
-                            <div class="col-lg-4">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div><h3>@Html.DisplayFor(model => model.company.FullName)</h3></div>
+                                </div>
+                                <div class="col-lg-4">
                                 
+                                </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                @foreach (var item in Model.company.labelList)
-                                {
-                                    <span class="label label-default" style="background-color:@item.ColorHtml; color:@item.BlackOrWhite" title="@item.Comment">
-                                        @Html.DisplayFor(model => item.Name)
-                                    </span>
-                                }
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12 multiline">
-                                <h5>
-                                    @Html.DisplayFor(model => model.company.Description)
-                                </h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-lg-10">
-                                <h3>Contacts</h3>
-                            </div>
-                            <div class="col-lg-2" style="text-align: right">
-                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#contactdetails" onclick="ClearContactDetails()">
-                                    <i class="fa fa-plus fa-1x"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div class="dataTable_wrapper">
-                            <table class="table table-striped table-bordered table-hover" id="tableContact">
-                                <thead>
-                                    <tr>
-                                        <th>Contact</th>
-                                        <th>Description</th>
-                                        <th>Edit</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model.company.ContactList)
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    @foreach (var item in Model.company.labelList)
                                     {
-                                        <tr class="odd gradeX">
-                                            <td>@Html.DisplayFor(model => item.Content)</td>
-                                            <td>@Html.DisplayFor(model => item.Description)</td>
-                                            <td><button type="button" data-toggle="modal" data-target="#contactdetails" onclick="FillContactDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                                        </tr>
+                                        <span class="label label-default" style="background-color:@item.ColorHtml; color:@item.BlackOrWhite" title="@item.Comment">
+                                            @Html.DisplayFor(model => item.Name)
+                                        </span>
                                     }
-                                </tbody>
-                            </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 multiline">
+                                    <h5>
+                                        @Html.DisplayFor(model => model.company.Description)
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Contact-->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-10">
+                                    <h3>Contacts</h3>
+                                </div>
+                                <div class="col-lg-2" style="text-align: right">
+                                    <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#contactdetails" onclick="ClearContactDetails()">
+                                        <i class="fa fa-plus fa-1x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="dataTable_wrapper">
+                                <table class="table table-striped table-bordered table-hover" id="tableContact">
+                                    <thead>
+                                        <tr>
+                                            <th>Contact</th>
+                                            <th>Description</th>
+                                            <th>Edit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.company.ContactList)
+                                        {
+                                            <tr class="odd gradeX">
+                                                <td>@Html.DisplayFor(model => item.Content)</td>
+                                                <td>@Html.DisplayFor(model => item.Description)</td>
+                                                <td><button type="button" data-toggle="modal" data-target="#contactdetails" onclick="FillContactDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Label-->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-3">
+                                    <h3>
+                                        Label
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Comment</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.company.labelList)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <span class="label label-default" style="background-color:@item.ColorHtml; color:@item.BlackOrWhite">
+                                                            @Html.DisplayFor(model => item.Name)
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Comment)
+                                                    </td>
+                                                    <td>
+                                                        <div class="col-lg-12" style="text-align: right">
+                                                            <button type="button" title="Delete" onclick="DeleteLabel('@item.ID')"><i class="glyphicon glyphicon-remove"></i></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row">
+                                        <div class="col-lg-10">
+                                            <div class="form-group" id="divLabelAdd">
+                                                <input class="form-control" placeholder="Label name" id="inputLabelAdd" list="listLabel">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <button type="button" class="btn btn-primary" title="Delete" onclick="AddLabel()">
+                                                <i class="glyphicon glyphicon-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-lg-3">
-                                <h3>
-                                    Label
-                                </h3>
+        <div class="col-lg-6">
+            <!--Paymant details-->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-10">
+                                    <h3>Payment details</h3>
+                                </div>
+                                <div class="col-lg-2" style="text-align: right">
+                                    <button type="button" class="btn btn-primary btn-circle btn-lg" title="Edit" data-toggle="modal" data-target="#paymentdetails" onclick="FillPaymentDetails()">
+                                        <i class="glyphicon glyphicon-pencil"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <label>MFO:</label>
+                                </div>
+                                <div class="col-lg-8">
+                                    <div><h3>@Html.DisplayFor(model => model.company.MFO)</h3></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <label>EDRPOU:</label>
+                                </div>
+                                <div class="col-lg-8">
+                                    <div><h3>@Html.DisplayFor(model => model.company.EDRPOU)</h3></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <label>Account:</label>
+                                </div>
+                                <div class="col-lg-8">
+                                    <div><h3>@Html.DisplayFor(model => model.company.Account)</h3></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <label>Bank name:</label>
+                                </div>
+                                <div class="col-lg-8">
+                                    <div><h3>@Html.DisplayFor(model => model.company.BankName)</h3></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <table class="table">
+                </div>
+            </div>
+
+            <!--Mile card-->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-10">
+                                    <h3>Mile cards</h3>
+                                </div>
+                                <div class="col-lg-2" style="text-align: right">
+                                    <button type="button" class="btn btn-primary btn-circle btn-lg" title="Add" data-toggle="modal" data-target="#milecarddetails" onclick="OpenMileCardDetails()">
+                                        <i class="fa fa-plus fa-1x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="dataTable_wrapper">
+                                <table class="table table-striped table-bordered table-hover" id="tableMileCard">
                                     <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Comment</th>
-                                            <th></th>
+                                            <th>Number</th>
+                                            <th>Alliance / Aviacompany</th>
+                                            <th>Status</th>
+                                            <th>Miles</th>
+                                            <th>Edit</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var item in Model.company.labelList)
+                                        @foreach (var item in Model.company.mileCardList)
                                         {
+                                            <tr class="odd gradeX">
+                                                <td>@Html.DisplayFor(model => item.Number)</td>
+                                                <td>@Html.DisplayFor(model => item.AviaUnionAndCompanyStr)</td>
+                                                <td>@Html.DisplayFor(model => item.mileCardStatus.Name)</td>
+                                                <td>@Html.DisplayFor(model => item.MilesCount)</td>
+                                                <td><button type="button" data-toggle="modal" data-target="#milecarddetails" onclick="FillMileCardDetails('@item.ID')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <script>
+                            $(document).ready(function () {
+                                $('#tableMileCard').DataTable({
+                                    "responsive": false,
+                                    "paging": false,
+                                    "ordering": false,
+                                    "info": false
+                                });
+                            });
+
+                            EditedMileCardID = 0;
+                            MileCardMilesCount = 0;
+
+                            function ClearMileCardDetails() {
+                                EditedMileCardID = 0;
+                                MileCardMilesCount = 0;
+
+                                $('#inputMileCardNumber').val('');
+                                $('#inputMileCardPassword').val('');
+                                $('#inputMileCardAviaCompanyUnion').val('');
+                                $('#inputMileCardAviaCompany').val('');
+                                $('#inputMileCardRespondedPerson').val('');
+                                $('#textmilecarddescription').val('');
+
+
+                                document.getElementById("labMileCardStatus").innerText = "";
+                                document.getElementById("numMileCardMilesCount").value = 0;
+                                document.getElementById("numMileCardMilesAdd").value = 0;
+
+                                $('#inputMileCardNumber').prop('disabled', true);
+                                $('#inputMileCardPassword').prop('disabled', true);
+                                $('#inputMileCardAviaCompanyUnion').prop('disabled', true);
+                                $('#inputMileCardAviaCompany').prop('disabled', true);
+                                $('#inputMileCardRespondedPerson').prop('disabled', true);
+                                $('#textmilecarddescription').prop('disabled', true);
+
+
+                                document.getElementById("labMileCardStatus").disabled = true;
+                                document.getElementById("numMileCardMilesCount").disabled = true;
+                                document.getElementById("numMileCardMilesAdd").disabled = true;
+                            }
+
+                            function EnableMileCardDetails() {
+                                $('#inputMileCardNumber').prop('disabled', false);
+                                $('#inputMileCardPassword').prop('disabled', false);
+                                $('#inputMileCardAviaCompanyUnion').prop('disabled', false);
+                                $('#inputMileCardAviaCompany').prop('disabled', false);
+                                $('#inputMileCardRespondedPerson').prop('disabled', false);
+                                $('#textmilecarddescription').prop('disabled', false);
+
+
+                                document.getElementById("labMileCardStatus").disabled = false;
+                                document.getElementById("numMileCardMilesCount").disabled = false;
+                                document.getElementById("numMileCardMilesAdd").disabled = false;
+                            }
+
+                            function OpenMileCardDetails() {
+                                ClearMileCardDetails();
+                                EnableMileCardDetails();
+                            }
+
+                            function FillMileCardDetails(id) {
+                                ClearMileCardDetails();
+                                EditedMileCardID = id;
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("FindMileCard", "Home")',
+                                    dataType: 'json',
+                                    data: {
+                                        PersonID: '@Model.company.ID',
+                                        id: id
+                                    },
+                                    success: function (data) {
+                                        if (data != null) {
+                                            document.getElementById("inputMileCardNumber").value = data.Number;
+                                            document.getElementById("inputMileCardPassword").value = data.Password;
+                                            document.getElementById("inputMileCardAviaCompanyUnion").value = data.aviacompanyunion.Name;
+                                            document.getElementById("inputMileCardAviaCompany").value = data.aviacompany.FullName;
+                                            document.getElementById("inputMileCardRespondedPerson").value = data.PersonRespondedName;
+                                            document.getElementById("textmilecarddescription").value = data.Note;
+                                            document.getElementById("labMileCardStatus").innerText = data.mileCardStatus.Name;
+                                            document.getElementById("numMileCardMilesCount").value = data.MilesCount;
+
+                                            EnableMileCardDetails();
+                                            MileCardMilesCount = data.MilesCount;
+                                        }
+                                    },
+                                    error: function () {
+                                        alert('error');
+                                    }
+                                });
+                            }
+
+                            function SaveMileCardDetails() {
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("SaveMileCard", "Home")',
+                                    dataType: 'json',
+                                    data: {
+                                        PersonID: '@Model.company.ID',
+                                        id: EditedMileCardID,
+                                        Number: document.getElementById("inputMileCardNumber").value,
+                                        Password: document.getElementById("inputMileCardPassword").value,
+                                        nameACU: document.getElementById("inputMileCardAviaCompanyUnion").value,
+                                        nameAC: document.getElementById("inputMileCardAviaCompany").value,
+                                        nameResondedPerson: document.getElementById("inputMileCardRespondedPerson").value,
+                                        note: document.getElementById("textmilecarddescription").value,
+                                        MilesCount: document.getElementById("numMileCardMilesCount").value
+                                    },
+                                    success: function (data) {
+                                        $('#milecarddetails').modal('toggle');
+                                        location.reload();
+                                    },
+                                    error: function () {
+                                        alert('error');
+                                    }
+                                })
+                            }
+
+                            function DeleteMileCard() {
+                                if (confirm("Are you sure to delete the mile card?")) {
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '@Url.Action("DeleteMileCard", "Home")',
+                                        dataType: 'json',
+                                        data: {
+                                            PersonID: '@Model.company.ID',
+                                            id: EditedMileCardID
+                                        },
+                                        success: function (data) {
+                                            $('#milecarddetails').modal('toggle');
+                                            location.reload();
+                                        },
+                                        error: function () {
+                                            alert('error');
+                                        }
+                                    })
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+
+            <!--Files-->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-3">
+                                    <h3>
+                                        Files
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <table class="table">
+                                        <thead>
                                             <tr>
-                                                <td>
-                                                    <span class="label label-default" style="background-color:@item.ColorHtml; color:@item.BlackOrWhite">
+                                                <th>Name</th>
+                                                <th>Comment</th>
+                                                <th>Type</th>
+                                                <th></th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.company.attachFileList)
+                                            {
+                                                <tr>
+                                                    <td>
                                                         @Html.DisplayFor(model => item.Name)
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    @Html.DisplayFor(model => item.Comment)
-                                                </td>
-                                                <td>
-                                                    <div class="col-lg-12" style="text-align: right">
-                                                        <button type="button" title="Delete" onclick="DeleteLabel('@item.ID')"><i class="glyphicon glyphicon-remove"></i></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Description)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(model => item.Extension)
+                                                    </td>
+                                                    <td>
+                                                        <div class="col-lg-12" style="text-align: right">
+                                                            @Html.ActionLink("Download", "DownloadFile", new { PersonID = Model.company.ID, FileID = item.ID }, "Home")
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="col-lg-12" style="text-align: right">
+                                                            <button type="button" data-toggle="modal" data-target="#filepersondetails" onclick="FillFilePersonDetails('@item.ID')">
+                                                                <i class="glyphicon glyphicon-pencil"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="panel-footer">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="row">
-                                    <div class="col-lg-10">
-                                        <div class="form-group" id="divLabelAdd">
-                                            <input class="form-control" placeholder="Label name" id="inputLabelAdd" list="listLabel">
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-2">
-                                        <button type="button" class="btn btn-primary" title="Delete" onclick="AddLabel()">
-                                            <i class="glyphicon glyphicon-plus"></i>
-                                        </button>
+                        <div class="panel-footer">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row">
+                                        <form method="post" enctype="multipart/form-data">
+                                            <div class="col-lg-6">
+                                                <input type="file" multiple name="UploadFile" id="fileUploadFile" onchange="AddFilePerson()" />
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -521,134 +844,6 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-6">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-lg-10">
-                                <h3>Payment details</h3>
-                            </div>
-                            <div class="col-lg-2" style="text-align: right">
-                                <button type="button" class="btn btn-primary btn-circle btn-lg" title="Edit" data-toggle="modal" data-target="#paymentdetails" onclick="FillPaymentDetails()">
-                                    <i class="glyphicon glyphicon-pencil"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <label>MFO:</label>
-                            </div>
-                            <div class="col-lg-8">
-                                <div><h3>@Html.DisplayFor(model => model.company.MFO)</h3></div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <label>EDRPOU:</label>
-                            </div>
-                            <div class="col-lg-8">
-                                <div><h3>@Html.DisplayFor(model => model.company.EDRPOU)</h3></div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <label>Account:</label>
-                            </div>
-                            <div class="col-lg-8">
-                                <div><h3>@Html.DisplayFor(model => model.company.Account)</h3></div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <label>Bank name:</label>
-                            </div>
-                            <div class="col-lg-8">
-                                <div><h3>@Html.DisplayFor(model => model.company.BankName)</h3></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-lg-3">
-                                <h3>
-                                    Files
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Comment</th>
-                                            <th>Type</th>
-                                            <th></th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in Model.company.attachFileList)
-                                        {
-                                            <tr>
-                                                <td>
-                                                    @Html.DisplayFor(model => item.Name)
-                                                </td>
-                                                <td>
-                                                    @Html.DisplayFor(model => item.Description)
-                                                </td>
-                                                <td>
-                                                    @Html.DisplayFor(model => item.Extension)
-                                                </td>
-                                                <td>
-                                                    <div class="col-lg-12" style="text-align: right">
-                                                        @Html.ActionLink("Download", "DownloadFile", new { PersonID = Model.company.ID, FileID = item.ID }, "Home")
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="col-lg-12" style="text-align: right">
-                                                        <button type="button" data-toggle="modal" data-target="#filepersondetails" onclick="FillFilePersonDetails('@item.ID')">
-                                                            <i class="glyphicon glyphicon-pencil"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-footer">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="row">
-                                    <form method="post" enctype="multipart/form-data">
-                                        <div class="col-lg-6">
-                                            <input type="file" multiple name="UploadFile" id="fileUploadFile" onchange="AddFilePerson()" />
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
     <datalist id="listLabel">
         @foreach (var item in Model.catalog.labelList)
@@ -656,136 +851,157 @@
             <option value='@item.Name' />
         }
     </datalist>
+    
+    <datalist id="listAviacompany">
+        @foreach (var item in Model.catalog.aviaCompanyList)
+        {
+            <option value='@item.FullName' />
+        }
+    </datalist>
 
-<!--Modal-->
+    <datalist id="listAviacompanyUnion">
+        @foreach (var item in Model.catalog.aviaCompanyUnionList)
+        {
+            <option value='@item.Name' />
+        }
+    </datalist>
 
-<!--Personal data-->
-<div class="modal fade" id="personaldata" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="personaldatalabel">Company data</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group" id="divOfficialName">
-                            <input class="form-control" placeholder="Offical name" id="inputOfficialName">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <textarea class="form-control" rows="3" id="textpersondescription" placeholder="Description"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="SaveCompanyDetails()">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <datalist id="listPerson">
+        @foreach (var item in Model.catalog.personList)
+        {
+            <option value='@item.FullName' />
+        }
+    </datalist>
+    
+    <!--Modal-->
 
-<!--Contacts-->
-<div class="modal fade" id="contactdetails" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="contactdetailslabel">Contact</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <select class="form-control" id="selectContactType">
-                                <option value="e-mail">e-mail</option>
-                                <option value="mobile">Mobile</option>
-                                <option value="adress">Adress</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-9">
-                        <div class="form-group" id="divContactContent">
-                            <input class="form-control" placeholder="Contact" id="inputContactContent">
-                        </div>
-                    </div>
+    <!--Personal data-->
+    <div class="modal fade" id="personaldata" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="personaldatalabel">Company data</h4>
                 </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <textarea class="form-control" rows="3" id="textcontactdescription" placeholder="Description"></textarea>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group" id="divOfficialName">
+                                <input class="form-control" placeholder="Offical name" id="inputOfficialName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <textarea class="form-control" rows="3" id="textpersondescription" placeholder="Description"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <div class="col-lg-6" style="text-align: left">
-                    <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeleteContact()">
-                        <i class="glyphicon glyphicon-remove fa-1x"></i>
-                    </button>
-                </div>
-                <div class="col-lg-6" style="text-align: right">
+                <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="SaveContactDetails()">Save</button>
+                    <button type="button" class="btn btn-primary" onclick="SaveCompanyDetails()">Save</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!--Payment-->
-<div class="modal fade" id="paymentdetails" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="paymentdetailslabel">Payment details</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group" id="divMFO">
-                            <input class="form-control" placeholder="MFO" id="inputMFO">
+    <!--Contacts-->
+    <div class="modal fade" id="contactdetails" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="contactdetailslabel">Contact</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <select class="form-control" id="selectContactType">
+                                    <option value="e-mail">e-mail</option>
+                                    <option value="mobile">Mobile</option>
+                                    <option value="adress">Adress</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-9">
+                            <div class="form-group" id="divContactContent">
+                                <input class="form-control" placeholder="Contact" id="inputContactContent">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <textarea class="form-control" rows="3" id="textcontactdescription" placeholder="Description"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group" id="divEDRPOU">
-                            <input class="form-control" placeholder="EDRPOU" id="inputEDRPOU">
-                        </div>
+                <div class="modal-footer">
+                    <div class="col-lg-6" style="text-align: left">
+                        <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeleteContact()">
+                            <i class="glyphicon glyphicon-remove fa-1x"></i>
+                        </button>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group" id="divAccount">
-                            <input class="form-control" placeholder="Account" id="inputAccount">
-                        </div>
+                    <div class="col-lg-6" style="text-align: right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="SaveContactDetails()">Save</button>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group" id="divBankName">
-                            <input class="form-control" placeholder="Bank Name" id="inputBankName">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <div class="col-lg-12" style="text-align: right">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="SavePaymentDetails()">Save</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!--Payment-->
+    <div class="modal fade" id="paymentdetails" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="paymentdetailslabel">Payment details</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group" id="divMFO">
+                                <input class="form-control" placeholder="MFO" id="inputMFO">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group" id="divEDRPOU">
+                                <input class="form-control" placeholder="EDRPOU" id="inputEDRPOU">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group" id="divAccount">
+                                <input class="form-control" placeholder="Account" id="inputAccount">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group" id="divBankName">
+                                <input class="form-control" placeholder="Bank Name" id="inputBankName">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-lg-12" style="text-align: right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="SavePaymentDetails()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!--AttachFile-->
     <div class="modal fade" id="filepersondetails" tabindex="-1" role="dialog" aria-hidden="true">
@@ -814,6 +1030,105 @@
                         <div class="col-lg-6" style="text-align: right">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                             <button type="button" class="btn btn-primary" onclick="SaveFilePersonDetails()">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Mile card-->
+    <div class="modal fade" id="milecarddetails" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h4 class="modal-title" id="milecardlabel">
+                                Mile card
+                                <span class="label label-default" id="labMileCardStatus"></span>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group" id="divMileCardNumber">
+                                <label for="inputMileCardNumber">Card number:</label>
+                                <input class="form-control" placeholder="Number" id="inputMileCardNumber">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group" id="divMileCardPassword">
+                                <label for="inputMileCardPassword">Password:</label>
+                                <input class="form-control" placeholder="Password" id="inputMileCardPassword">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group" id="divMileCardAviaCompanyUnion">
+                                <label for="inputMileCardAviaCompanyUnion">Alliance:</label>
+                                <input class="form-control" placeholder="Alliance" id="inputMileCardAviaCompanyUnion" list="listAviacompanyUnion">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group" id="divMileCardAviaCompany">
+                                <label for="inputMileCardAviaCompany">Aviacompany:</label>
+                                <input class="form-control" placeholder="Aviacompany" id="inputMileCardAviaCompany" list="listAviacompany">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <div class="form-group" id="divMileCardMilesCount">
+                                <label for="numMileCardMilesCount">Miles count:</label>
+                                <input class="form-control" type="number" id="numMileCardMilesCount" min="0">
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group" id="divMileCardMilesCount">
+                                <label for="numMileCardMilesAdd">Add:</label>
+                                <input class="form-control" type="number" id="numMileCardMilesAdd" min="0" onchange="OnMileCardMilesAddChange()">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group" id="divMileCardRespondedPerson">
+                                <label for="inputMileCardRespondedPerson">Responded:</label>
+                                <input class="form-control" placeholder="Responded person" id="inputMileCardRespondedPerson" list="listPerson">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <textarea class="form-control" rows="3" id="textmilecarddescription" placeholder="Note"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function OnMileCardMilesAddChange() {
+                            var delt = Number(document.getElementById("numMileCardMilesAdd").value);
+                            var val = MileCardMilesCount;
+                            val = val + delt;
+                            document.getElementById("numMileCardMilesCount").value = val;
+                        }
+                    </script>
+
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-lg-6" style="text-align: left">
+                            <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeleteMileCard()">
+                                <i class="glyphicon glyphicon-remove fa-1x"></i>
+                            </button>
+                        </div>
+                        <div class="col-lg-6" style="text-align: right">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="SaveMileCardDetails()">Save</button>
                         </div>
                     </div>
                 </div>

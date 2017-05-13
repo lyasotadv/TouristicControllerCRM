@@ -188,6 +188,7 @@ namespace sb_admin_2.Web1.Models
             ContactList.person = this;
             labelList = new LabelListPerson(this);
             attachFileList = new AttachFilePersonList(this);
+            mileCardList = new MileCardList(this);
 
             Changed = false;
             ID = -1;
@@ -204,6 +205,8 @@ namespace sb_admin_2.Web1.Models
         }
 
         public ContactList ContactList { get; private set; }
+
+        public MileCardList mileCardList { get; private set; }
 
 
         public event EventHandler Updated;
@@ -247,6 +250,66 @@ namespace sb_admin_2.Web1.Models
                 str = " " + str;
             }
             return str;
+        }
+
+        protected void LoadGeneral()
+        {
+            ContactList.Load();
+            labelList.Load();
+            attachFileList.Load();
+            mileCardList.Load();
+        }
+
+
+        static public PersonGeneral Create(int PersonID)
+        {
+            PersonGeneral personGen = null;
+
+            DBInterface.CommandText = "select " +
+                                        "person.idPerson, " +
+                                        "people.idPeople, " +
+                                        "company.idCompany, " +
+                                        "people.firstName, " +
+                                        "people.lastName, " +
+                                        "people.middleName, " +
+                                        "company.officialCompanyName, " +
+                                        "person.isPeople " +
+                                        "from person " +
+                                        "left join people " +
+                                        "on people.idPerson = person.idPerson " +
+                                        "left join company " +
+                                        "on company.idPerson = person.idPerson " +
+                                        "where person.idPerson = @id;";
+
+            DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, PersonID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+            if (tab.Rows.Count == 1)
+            {
+                DataRow row = tab.Rows[0];
+
+                if (row["isPeople"].ToString() == "1")
+                {
+                    personGen = new Person();
+                    Person person = personGen as Person;
+
+                    person.ID = Convert.ToInt32(row["idPerson"]);
+                    person.PersonID = Convert.ToInt32(row["idPeople"]);
+                    person.FirstName = row["firstName"].ToString();
+                    person.SecondName = row["lastName"].ToString();
+                    person.MiddleName = row["middleName"].ToString();
+                }
+                else
+                {
+                    personGen = new Company();
+                    Company company = personGen as Company;
+
+                    company.ID = Convert.ToInt32(row["idPerson"]);
+                    company.CompanyID = Convert.ToInt32(row["idCompany"]);
+                    company.FullName = row["officialCompanyName"].ToString();
+                }
+            }
+            return personGen;
         }
     }
 
@@ -567,10 +630,9 @@ namespace sb_admin_2.Web1.Models
                 throw new DuplicateNameException("People table has rows with same id");
             }
 
-            ContactList.Load();
+            
             PassportList.Load();
-            labelList.Load();
-            attachFileList.Load();
+            LoadGeneral();
 
             Changed = false;
         }
@@ -902,9 +964,7 @@ namespace sb_admin_2.Web1.Models
                 throw new DuplicateNameException("Company table has rows with same id");
             }
 
-            ContactList.Load();
-            labelList.Load();
-            attachFileList.Load();
+            LoadGeneral();
 
             Changed = false;
         }

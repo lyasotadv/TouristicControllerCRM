@@ -10,9 +10,24 @@ using System.Data;
 
 namespace sb_admin_2.Web1.Models.Mapping.DBUtils
 {
+    public interface IDBInterface
+    {
+        void StoredProcedure(string ProcedureName);
+
+        void AddParameter(string parameterName, MySqlDbType DBType, object Value);
+
+        void AddOutParameter(string parameterName, MySqlDbType DBType);
+
+        int GetOutParameterInt(string parameterName);
+
+        string GetOutParameterStr(string parameterName);
+
+        void Execute();
+    }
+
     public class DBInterface
     {
-        private class DBInterfaceObject
+        public class DBInterfaceObject
         {
             private MySqlConnection conn { get; set; }
 
@@ -69,6 +84,87 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
                 trans.Commit();
                 return id;
             }
+        }
+
+        public class DBInterfacePointer : IDBInterface
+        {
+            private DBInterfaceObject _obj;
+
+            protected DBInterfaceObject obj
+            {
+                get
+                {
+                    if (_obj == null)
+                        _obj = new DBInterfaceObject();
+                    return _obj;
+                }
+            }
+
+            public DBInterfacePointer()
+            {
+                _obj = null;
+            }
+
+            public void StoredProcedure(string ProcedureName)
+            {
+                obj.Clear();
+                obj.command.CommandText = ProcedureName;
+                obj.command.CommandType = CommandType.StoredProcedure;
+            }
+
+            public void AddParameter(string parameterName, MySqlDbType DBType, object Value)
+            {
+                if (obj.command == null)
+                    throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+                obj.command.Parameters.Add(parameterName, DBType);
+                int cnt = obj.command.Parameters.Count;
+                obj.command.Parameters[cnt - 1].Value = Value;
+            }
+
+            public void AddOutParameter(string parameterName, MySqlDbType DBType)
+            {
+                if (obj.command == null)
+                    throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+                obj.command.Parameters.Add(parameterName, DBType).Direction = ParameterDirection.Output;
+            }
+
+            public int GetOutParameterInt(string parameterName)
+            {
+                if (obj.command == null)
+                    throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+                if (obj.command.Parameters[parameterName].Value == DBNull.Value)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return Convert.ToInt32(obj.command.Parameters[parameterName].Value);
+                }
+            }
+
+            public string GetOutParameterStr(string parameterName)
+            {
+                if (obj.command == null)
+                    throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+                if (obj.command.Parameters[parameterName].Value == DBNull.Value)
+                {
+                    return string.Empty;
+                }
+                else
+                {
+                    return Convert.ToString(obj.command.Parameters[parameterName].Value);
+                }
+            }
+
+            public void Execute()
+            {
+                obj.ExecuteTransaction();
+            }
+        }
+
+        static public DBInterfacePointer CreatePointer()
+        {
+            return new DBInterfacePointer();
         }
 
         static DBInterface()
@@ -129,6 +225,34 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
             if (obj.command == null)
                 throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
             return obj.command.Parameters[parameterName].Value;
+        }
+
+        static public int GetOutParameterInt(string parameterName)
+        {
+            if (obj.command == null)
+                throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+            if (obj.command.Parameters[parameterName].Value == DBNull.Value)
+            {
+                return -1;
+            }
+            else
+            {
+                return Convert.ToInt32(obj.command.Parameters[parameterName].Value);
+            }
+        }
+
+        static public string GetOutParameterStr(string parameterName)
+        {
+            if (obj.command == null)
+                throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+            if (obj.command.Parameters[parameterName].Value == DBNull.Value)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return Convert.ToString(obj.command.Parameters[parameterName].Value);
+            }
         }
 
         static public DataTable ExecuteSelection()
