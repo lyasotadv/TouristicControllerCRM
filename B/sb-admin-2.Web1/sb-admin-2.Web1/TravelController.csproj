@@ -910,6 +910,7 @@
     <None Include="Properties\PublishProfiles\Default Settings.pubxml" />
     <None Include="Properties\PublishProfiles\tccrmtest - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\tccrmtest - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\tomahawk_server_turmandry.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\flot-data.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
