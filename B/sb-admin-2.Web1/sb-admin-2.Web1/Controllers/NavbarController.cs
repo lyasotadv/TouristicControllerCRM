@@ -14,7 +14,15 @@ namespace sb_admin_2.Web1.Controllers
         public ActionResult Index()
         {
             var data = new Data();
-            return PartialView("_Navbar", data.navbarItems().ToList());
+
+            if ((Session["UserName"] != null) && (Session["UserName"].ToString() == "dimon"))
+            {
+                return PartialView("_Navbar", data.navbarItemsAdmin().ToList());
+            }
+            else
+            {
+                return PartialView("_Navbar", data.navbarItems().ToList());
+            }
         }
     }
 }

@@ -110,6 +110,21 @@ namespace sb_admin_2.Web1.Controllers
             }
         }
 
+        private ControllerUtils _controllerUtils;
+
+        private ControllerUtils controllerUtils
+        {
+            get
+            {
+                if (_controllerUtils == null)
+                {
+                    _controllerUtils = new ControllerUtils();
+                    _controllerUtils.Server = Server;
+                }
+                return _controllerUtils;
+            }
+        }
+
         public ActionResult Person(string id)
         {
             if (Session["UserID"] != null)
@@ -126,13 +141,20 @@ namespace sb_admin_2.Web1.Controllers
                         throw new ArgumentException("Person ID is not convertable to valid type");
                     }
 
-                    PageData data = mappingController.ConstructPersonData(ID);
-                    if (data is PersonData)
-                        return View("Person", data);
-                    else if (data is CompanyData)
-                        return View("Company", data);
-                    else
-                        throw new NotImplementedException("View for current person type have not been created");
+                    try
+                    {
+                        PageData data = mappingController.ConstructPersonData(ID);
+                        if (data is PersonData)
+                            return View("Person", data);
+                        else if (data is CompanyData)
+                            return View("Company", data);
+                        else
+                            throw new NotImplementedException("View for current person type have not been created");
+                    }
+                    catch
+                    {
+                        return RedirectToAction("PersonList");
+                    }
                 }
                 return RedirectToAction("PersonList");
             }
@@ -897,58 +919,12 @@ namespace sb_admin_2.Web1.Controllers
             return Json("");
         }
 
-        public AttachFileTransferData UploadFileAndSave(HttpPostedFileBase file)
-        {
-            if (file.ContentLength > 0)
-            {
-                string fileName = Path.GetFileName(file.FileName);
-                string fileFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/temp"), fileName);
-                file.SaveAs(fileFullName);
-                
-                string newName = Guid.NewGuid().ToString();
-                string newFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/data"), newName);
-                System.IO.File.Move(fileFullName, newFullName);
-
-                AttachFileTransferData data = new AttachFileTransferData();
-                data.guid = newName;
-                data.Name = Path.GetFileNameWithoutExtension(fileName);
-                data.Extension = Path.GetExtension(fileName);
-                return data;
-            }
-            return null;
-        }
-
-        public void DeleteFile(string guid)
-        {
-            string FullName = Path.Combine(Server.MapPath("~/App_Data/uploads/data"), guid);
-            if (System.IO.File.Exists(FullName))
-                System.IO.File.Delete(FullName);
-        }
-
-        public void UploadFileAndParse(HttpPostedFileBase file, Func<string, bool> Parser)
-        {
-            if (file.ContentLength > 0)
-            {
-                string fileName = Path.GetFileName(file.FileName);
-                string fileFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/temp"), fileName);
-                file.SaveAs(fileFullName);
-                
-                try
-                {
-                    if (!Parser(fileFullName)) 
-                        throw new FileLoadException("File structure is incorrect");
-                }
-                finally
-                {
-                    System.IO.File.Delete(fileFullName);
-                }
-            }
-        }
+        
 
         [HttpPost]
         public ActionResult UploadCountry(HttpPostedFileBase file)
         {
-            UploadFileAndParse(file, mappingController.settingsData.catalog.countryList.Export);
+            controllerUtils.UploadFileAndParse(file, mappingController.settingsData.catalog.countryList.Export);
 
             return RedirectToAction("Settings");
         }
@@ -959,7 +935,7 @@ namespace sb_admin_2.Web1.Controllers
             List<AttachFileTransferData> data = new List<AttachFileTransferData>();
             for (int n = 0; n < Request.Files.Count; n++ )
             {
-                AttachFileTransferData atd = UploadFileAndSave(Request.Files[n]);
+                AttachFileTransferData atd = controllerUtils.UploadFileAndSave(Request.Files[n]);
                 if (atd != null)
                     data.Add(atd);
             }
@@ -1007,7 +983,7 @@ namespace sb_admin_2.Web1.Controllers
                 if (atp != null)
                 {
                     atp.Delete();
-                    DeleteFile(atp.guid);
+                    controllerUtils.DeleteFile(atp.guid);
                 }
             }
             return Json("");

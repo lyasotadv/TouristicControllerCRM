@@ -264,6 +264,16 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
         {
             return obj.ExecuteTransaction();
         }
+
+        static public string DBTestConnection
+        {
+            get
+            {
+                CommandText = "select * from sellcontroller.user";
+                DataTable tab = DBInterface.ExecuteSelection();
+                return tab.Rows.Count.ToString();
+            }
+        }
     }
 
     public interface IDBObject

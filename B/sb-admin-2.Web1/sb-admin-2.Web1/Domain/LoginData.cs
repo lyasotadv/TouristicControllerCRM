@@ -11,6 +11,14 @@ namespace sb_admin_2.Web1.Domain
 {
     public class LoginData
     {
+        public string TestConnection
+        {
+            get
+            {
+                return DBInterface.DBTestConnection;
+            }
+        }
+
         public class UserRole
         {
             private enum RoleEnum { guest, admin };
@@ -103,10 +111,23 @@ namespace sb_admin_2.Web1.Domain
             return h.ToString();
         }
 
+        private bool IsUserEmpty()
+        {
+            DBInterface.CommandText = "SELECT * FROM sellcontroller.user;";
+            DataTable tab = DBInterface.ExecuteSelection();
+            return tab.Rows.Count == 0;
+        }
+
         public bool Check()
         {
             try
             {
+                if (IsUserEmpty())
+                {
+                    AddNewUser(string.Empty, "dimon", true);
+                    return true;
+                }
+
                 DBInterface.CommandText = "SELECT * FROM sellcontroller.user WHERE login = @name;";
                 DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, Name);
                 DataTable tab = DBInterface.ExecuteSelection();
@@ -118,14 +139,7 @@ namespace sb_admin_2.Web1.Domain
                     throw new ArgumentException("User with current id is not unique.");
 
                 ID = Convert.ToInt32(tab.Rows[0]["idUser"]);
-                if (tab.Rows[0]["hashcode"].ToString() == PassHash())
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return tab.Rows[0]["hashcode"].ToString() == PassHash();
             }
             catch
             {
