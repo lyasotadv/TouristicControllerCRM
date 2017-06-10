@@ -504,7 +504,12 @@ namespace sb_admin_2.Web1.Models
         {
             get
             {
-                return SecondNameUA + " " + FirstNameUA + " " + MiddleNameUA;
+                string str = SecondNameUA;
+                if (FirstNameUA != string.Empty)
+                    str += " " + FirstNameUA;
+                if (MiddleNameUA != string.Empty)
+                    str += " " + MiddleNameUA;
+                return str;
             }
             set
             {
