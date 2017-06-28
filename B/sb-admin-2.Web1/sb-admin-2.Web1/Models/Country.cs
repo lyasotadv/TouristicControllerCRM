@@ -58,9 +58,7 @@ namespace sb_admin_2.Web1.Models
                 foreach (DataRow row in tab.Rows)
                 {
                     Country item = new Country() { ID = Convert.ToInt32(row["idCountry"]), Name = Convert.ToString(row["nameCountry"]) };
-                    item.ISO = Convert.ToString(row["codeISO2"]);
-                    item.ISO3 = Convert.ToString(row["codeISO3"]);
-                    item.Nationality = Convert.ToString(row["codeCitizen"]);
+                    item.Load();
                     Add(item);
                 }
             }
@@ -81,7 +79,7 @@ namespace sb_admin_2.Web1.Models
         }
     }
 
-    public class Country : IDBObject, VizaFormation
+    public class Country : IDBObject, IVizaFormation
     {
         public int ID { get; set; }
 
@@ -164,6 +162,8 @@ namespace sb_admin_2.Web1.Models
 
         public CountryUnionList UnionList { get; private set; }
 
+        public CountryUnionList mirror { get; private set; }
+
         public Country()
         {
             ID = -1;
@@ -171,7 +171,6 @@ namespace sb_admin_2.Web1.Models
 
             UnionList = new CountryUnionList();
         }
-
 
         public event EventHandler Updated;
 
@@ -192,6 +191,9 @@ namespace sb_admin_2.Web1.Models
             {
                 throw new DuplicateNameException("Country table has rows with same id");
             }
+
+            UnionList.Load(this);
+            mirror = UnionList.mirror;
 
             Changed = false;
         }
@@ -257,15 +259,127 @@ namespace sb_admin_2.Web1.Models
 
     public class CountryUnionList : DBObjectList<CountryUnion>
     {
+        public CountryUnionList mirror { get; private set; }
+
+        private void UpdateMirror()
+        {
+            if (mirror == null)
+                mirror = new CountryUnionList();
+            mirror.Clear();
+            mirror.Load();
+            foreach (var cu in this)
+            {
+                mirror.RemoveAll(item => item.ID == cu.ID);
+            }
+        }
+
+        public CountryUnionList()
+        {
+
+        }
+
         public override void Load()
         {
-            throw new NotImplementedException();
+            Clear();
+            DBInterface.CommandText = "SELECT * from sellcontroller.countryunion";
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach (DataRow row in tab.Rows)
+            {
+                CountryUnion item = Create();
+
+                item.ID = Convert.ToInt32(row["idCountryUnion"]);
+                item.Name = row["UnionName"].ToString();
+                item.ShortName = row["shortUnionName"].ToString();
+                item.Note = row["note"].ToString();
+            }
+        }
+
+        public void Load(Country country)
+        {
+            Clear();
+
+            if (country == null)
+                return;
+
+            DBInterface.CommandText = "select " +
+                                        "countryunion.idCountryUnion, " +
+                                        "countryunion.UnionName, " +
+                                        "countryunion.shortUnionName, " +
+                                        "countryunion.note " +
+                                        "from joincountryunion " +
+                                        "left join countryunion " +
+                                        "on joincountryunion.idCountryUnion = countryunion.idCountryUnion " +
+                                        "where joincountryunion.idCountry = @idCountry";
+
+            DBInterface.AddParameter("@idCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, country.ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach (DataRow row in tab.Rows)
+            {
+                CountryUnion item = Create();
+                item.ID = Convert.ToInt32(row["idCountryUnion"]);
+                item.Name = row["UnionName"].ToString();
+                item.ShortName = row["shortUnionName"].ToString();
+                item.Note = row["note"].ToString();
+            }
+
+            UpdateMirror();
+        }
+
+        public void AddElement(Country country, CountryUnion countryUnion)
+        {
+            DBInterface.CommandText = "select * " +
+                                        "from joincountryunion " +
+                                        "where joincountryunion.idCountry = @idCountry " +
+                                        "and joincountryunion.idCountryUnion = @idCountryUnion;";
+
+            DBInterface.AddParameter("@idCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, country.ID);
+            DBInterface.AddParameter("@idCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, countryUnion.ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            if (tab.Rows.Count == 0)
+            {
+                DBInterface.StoredProcedure("join_Country_union_insert");
+
+                DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, countryUnion.ID);
+                DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, country.ID);
+                DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, "");
+
+                DBInterface.AddOutParameter("@outIdJoinCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32);
+
+                DBInterface.ExecuteTransaction();
+            }
+        }
+
+        public void RemoveElement(Country country, CountryUnion countryUnion)
+        {
+            DBInterface.CommandText = "select * " +
+                                        "from joincountryunion " +
+                                        "where joincountryunion.idCountry = @idCountry " +
+                                        "and joincountryunion.idCountryUnion = @idCountryUnion;";
+
+            DBInterface.AddParameter("@idCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, country.ID);
+            DBInterface.AddParameter("@idCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, countryUnion.ID);
+
+            DataTable tab = DBInterface.ExecuteSelection();
+
+            foreach (DataRow row in tab.Rows)
+            {
+                DBInterface.StoredProcedure("join_Country_union_delete");
+                DBInterface.AddParameter("@inIdJoinCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, Convert.ToInt32(row["idJoinCountryUnion"]));
+                DBInterface.ExecuteTransaction();
+            }
         }
 
         public CountryUnion Create()
         {
             CountryUnion union = new CountryUnion();
             Init(union);
+            Add(union);
             return union;
         }
 
@@ -292,40 +406,152 @@ namespace sb_admin_2.Web1.Models
         }
     }
 
-    public class CountryUnion : CountryListGeneral, IDBObject, VizaFormation
+    public class CountryUnion : IDBObject, IVizaFormation
     {
         public event EventHandler Updated;
 
         public int ID { get; set; }
 
-        public string Name { get; set; }
+        private string _Name;
 
-        public string ShortName { get; set; }
-
-        public override void Load()
+        public string Name
         {
-            throw new NotImplementedException("Country union is not implemented");
-
-            DBInterface.CommandText = "";
-            DBInterface.AddParameter("idUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
-            Append(DBInterface.ExecuteSelection());
+            get
+            {
+                return _Name;
+            }
+            set
+            {
+                if (value != _Name)
+                {
+                    _Name = value;
+                    Changed = true;
+                }
+            }
         }
 
-        public override void Save()
+        private string _ShortName;
+
+        public string ShortName
         {
-            base.Save();
-            throw new NotImplementedException("Country union is not implemented");
+            get
+            {
+                return _ShortName;
+            }
+            set
+            {
+                if (value != _ShortName)
+                {
+                    _ShortName = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _Note;
+
+        public string Note
+        {
+            get
+            {
+                return _Note;
+            }
+            set
+            {
+                if (value != _Note)
+                {
+                    _Note = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        public CountryUnion()
+        {
+            Changed = false;
+            ID = -1;
+        }
+
+        public void Load()
+        {
+            if (ID != -1)
+            {
+                IDBInterface db = DBInterface.CreatePointer();
+
+                db.StoredProcedure("Country_union_select_by_id");
+
+                db.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+
+                db.AddOutParameter("@outUnionName", MySql.Data.MySqlClient.MySqlDbType.String);
+                db.AddOutParameter("@outShortUnionName", MySql.Data.MySqlClient.MySqlDbType.String);
+                db.AddOutParameter("@outNote", MySql.Data.MySqlClient.MySqlDbType.String);
+
+                db.Execute();
+
+
+                Name = db.GetOutParameterStr("@outUnionName");
+                ShortName = db.GetOutParameterStr("@outShortUnionName");
+                Note = db.GetOutParameterStr("@outNote");
+
+                Changed = false;
+            }
+        }
+
+        public void Save()
+        {
+            if (Changed)
+            {
+                if (ID >= 0)
+                {
+                    DBInterface.StoredProcedure("country_union_update");
+
+                    DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                    DBInterface.AddParameter("@inUnionName", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                    DBInterface.AddParameter("@inShortUnionName", MySql.Data.MySqlClient.MySqlDbType.String, ShortName);
+                    DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, Note);
+
+                    DBInterface.ExecuteTransaction();
+
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = false });
+                    }
+                }
+                else
+                {
+                    DBInterface.StoredProcedure("country_union_insert");
+
+                    DBInterface.AddParameter("@inUnionName", MySql.Data.MySqlClient.MySqlDbType.String, Name);
+                    DBInterface.AddParameter("@inShortUnionName", MySql.Data.MySqlClient.MySqlDbType.String, ShortName);
+                    DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, Note);
+
+                    DBInterface.AddOutParameter("@outIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32);
+
+                    DBInterface.ExecuteTransaction();
+
+                    ID = Convert.ToInt32(DBInterface.GetOutParameter("@outIdCountryUnion"));
+
+                    if (Updated != null)
+                    {
+                        Updated(this, new DBEventArgs() { ForceUpdate = true });
+                    }
+                }
+
+                Changed = false;
+            }
         }
 
         public void Delete()
         {
-            throw new NotImplementedException("Country union is not implemented");
+            DBInterface.StoredProcedure("Country_union_delete");
+            DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DBInterface.ExecuteTransaction();
         }
 
         public bool Changed { get; private set; }
     }
 
-    public interface VizaFormation
+    public interface IVizaFormation
     {
         int ID { get; set; }
 

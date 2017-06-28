@@ -39,7 +39,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             }
         }
 
-        public AviaCompanyList _aviaCompanyList;
+        private AviaCompanyList _aviaCompanyList;
 
         public AviaCompanyList aviaCompanyList
         {
@@ -55,7 +55,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             }
         }
 
-        public AviaCompanyUnionList _aviaCompanyUnionList;
+        private AviaCompanyUnionList _aviaCompanyUnionList;
 
         public AviaCompanyUnionList aviaCompanyUnionList
         {
@@ -87,6 +87,22 @@ namespace sb_admin_2.Web1.Models.Mapping
             }
         }
 
+        private CountryUnionList _countryUnionList;
+
+        public CountryUnionList countryUnionList
+        {
+            get
+            {
+                if (_countryUnionList.Count == 0)
+                    _countryUnionList.Load();
+                return _countryUnionList;
+            }
+            set
+            {
+                _countryUnionList = value;
+            }
+        }
+
         public Catalog()
         {
             countryList = new CountryList();
@@ -94,6 +110,7 @@ namespace sb_admin_2.Web1.Models.Mapping
             aviaCompanyList = new AviaCompanyList();
             aviaCompanyUnionList = new AviaCompanyUnionList();
             personList = new PersonList();
+            countryUnionList = new CountryUnionList();
         }
     }
 }

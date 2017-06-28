@@ -297,7 +297,7 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public void AddViza(VizaFormation country, DateTime expired)
+        public void AddViza(IVizaFormation country, DateTime expired)
         {
             Viza viza = VizaList.Create();
 
@@ -567,7 +567,7 @@ namespace sb_admin_2.Web1.Models
     {
         public string PassportSerial { get; set; }
 
-        public VizaFormation CountryOfInvintation { get; set; }
+        public IVizaFormation CountryOfInvintation { get; set; }
 
         public Viza()
         {

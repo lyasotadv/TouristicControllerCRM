@@ -34,7 +34,7 @@ namespace sb_admin_2.Web1.Models
 
             foreach(DataRow row in tab.Rows)
             {
-                if (row["isPeople"].ToString() == "1")
+                if ((row["isPeople"].ToString() == "1") && (row["idPeople"] != DBNull.Value))
                 {
                     Person person = new Person();
 
@@ -47,7 +47,7 @@ namespace sb_admin_2.Web1.Models
 
                     this.Add(person);
                 }
-                else
+                else if (row["idCompany"] != DBNull.Value)
                 {
                     Company company = new Company();
 

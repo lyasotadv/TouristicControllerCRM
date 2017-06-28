@@ -27,14 +27,23 @@ namespace sb_admin_2.Web1.Controllers
         {
             if (ModelState.IsValid)
             {
-                if ((data != null) && (data.Check()))
+                if (data != null)
                 {
-                    data.Load();
-                    Session["UserID"] = data.ID;
-                    Session["UserName"] = data.Name;
-                    Session["UserRole"] = data.role.RoleString;
-                    Session.Timeout = 240;
-                    return RedirectToAction("PersonList");
+                    string hash = string.Empty;
+                    if (data.Check(out hash))
+                    {
+                        data.Load();
+                        Session["UserID"] = data.ID;
+                        Session["UserName"] = data.Name;
+                        Session["UserRole"] = data.role.RoleString;
+                        Session.Timeout = 240;
+                        controllerUtils.DataLog("User " + data.Name + " loged as " + data.role.RoleString + " with hash = " + hash + ": success");
+                        return RedirectToAction("PersonList");
+                    }
+                    else
+                    {
+                        controllerUtils.DataLog("User " + data.Name + " loged as " + data.role.RoleString + " with hash = " + hash + ": fail");
+                    }
                 }
             }
             return View("Login", data);
@@ -583,6 +592,10 @@ namespace sb_admin_2.Web1.Controllers
         public ActionResult FindCountry(int id)
         {
             Country country = mappingController.settingsData.catalog.countryList.Find(item => item.ID == id);
+            if (country != null)
+            {
+                country.Load();
+            }
             return Json(country);
         }
 
@@ -611,6 +624,46 @@ namespace sb_admin_2.Web1.Controllers
             if (country != null)
             {
                 country.Delete();
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult FindCountryUnion(int id)
+        {
+            CountryUnion union = mappingController.settingsData.catalog.countryUnionList.Find(item => item.ID == id);
+            if (union != null)
+            {
+                union.Load();
+            }
+            return Json(union);
+        }
+
+        [HttpPost]
+        public ActionResult SaveCountryUnion(int id, string Name, string ShortName, string Note)
+        {
+            CountryUnion union = mappingController.settingsData.catalog.countryUnionList.Find(item => item.ID == id);
+            
+            if (union == null)
+            {
+                union = mappingController.settingsData.catalog.countryUnionList.Create();
+            }
+
+            union.Name = Name;
+            union.ShortName = ShortName;
+            union.Note = Note;
+            union.Save();
+
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteCountryUnion(int id)
+        {
+            CountryUnion union = mappingController.settingsData.catalog.countryUnionList.Find(item => item.ID == id);
+            if (union != null)
+            {
+                union.Delete();
             }
             return Json("");
         }
@@ -720,6 +773,39 @@ namespace sb_admin_2.Web1.Controllers
 
                 ac.Load();
                 acu.Load();
+            }
+
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult JoinCountryUnion(int idCountry, string nameUnion, bool status)
+        {
+            Country country = mappingController.settingsData.catalog.countryList.Find(item => item.ID == idCountry);
+            CountryUnion union = mappingController.settingsData.catalog.countryUnionList.Find(item => item.Name == nameUnion);
+
+            if ((country != null) & (union != null))
+            {
+                country.Load();
+                union.Load();
+
+                if (status)
+                {
+                    if (country.UnionList.Find(item => item.ID == union.ID) == null)
+                    {
+                        country.UnionList.AddElement(country, union);
+                    }
+                }
+                else
+                {
+                    if (country.UnionList.Find(item => item.ID == union.ID) != null)
+                    {
+                        country.UnionList.RemoveElement(country, union);
+                    }
+                }
+
+                country.Load();
+                union.Load();
             }
 
             return Json("");

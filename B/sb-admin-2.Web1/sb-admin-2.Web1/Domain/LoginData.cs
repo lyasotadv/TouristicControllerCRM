@@ -21,7 +21,7 @@ namespace sb_admin_2.Web1.Domain
 
         public class UserRole
         {
-            private enum RoleEnum { guest, admin };
+            private enum RoleEnum { guest, admin, god };
 
             private RoleEnum role { get; set; }
 
@@ -34,6 +34,7 @@ namespace sb_admin_2.Web1.Domain
                 dict = new Dictionary<RoleEnum, string>();
                 dict.Add(RoleEnum.guest, "guest");
                 dict.Add(RoleEnum.admin, "admin");
+                dict.Add(RoleEnum.god, "god");
             }
 
             public string RoleString
@@ -61,10 +62,12 @@ namespace sb_admin_2.Web1.Domain
 
             public void SetByInt(int val)
             {
-                if (val == 1)
-                    role = RoleEnum.admin;
-                else
-                    role = RoleEnum.guest;
+                switch (val)
+                {
+                    case 0: { role = RoleEnum.guest; break; }
+                    case 1: { role = RoleEnum.admin; break; }
+                    case 2: { role = RoleEnum.god; break; }
+                }
             }
         }
 
@@ -118,16 +121,11 @@ namespace sb_admin_2.Web1.Domain
             return tab.Rows.Count == 0;
         }
 
-        public bool Check()
+        public bool Check(out string hash)
         {
+            hash = PassHash();
             try
             {
-                if (IsUserEmpty())
-                {
-                    AddNewUser(string.Empty, "dimon", true);
-                    return true;
-                }
-
                 DBInterface.CommandText = "SELECT * FROM sellcontroller.user WHERE login = @name;";
                 DBInterface.AddParameter("@name", MySql.Data.MySqlClient.MySqlDbType.String, Name);
                 DataTable tab = DBInterface.ExecuteSelection();
@@ -139,7 +137,7 @@ namespace sb_admin_2.Web1.Domain
                     throw new ArgumentException("User with current id is not unique.");
 
                 ID = Convert.ToInt32(tab.Rows[0]["idUser"]);
-                return tab.Rows[0]["hashcode"].ToString() == PassHash();
+                return tab.Rows[0]["hashcode"].ToString() == hash;
             }
             catch
             {
@@ -168,8 +166,9 @@ namespace sb_admin_2.Web1.Domain
             DBInterface.AddParameter("@id", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
             DBInterface.ExecuteTransaction();
 
+            string hash;
             if (ChangePassword && (PasswordNew != null) && (PasswordNew != string.Empty) && (PasswordNew == PasswordConfirm) 
-                && (NameNew != null) && (NameNew != string.Empty) && Check())
+                && (NameNew != null) && (NameNew != string.Empty) && Check(out hash))
             {
                 DBInterface.CommandText = "update sellcontroller.user set login = @login, hashcode = @hash where idUser = @id";
                 DBInterface.AddParameter("@login", MySql.Data.MySqlClient.MySqlDbType.String, NameNew);

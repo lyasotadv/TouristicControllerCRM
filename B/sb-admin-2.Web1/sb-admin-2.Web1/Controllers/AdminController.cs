@@ -47,29 +47,61 @@ namespace sb_admin_2.Web1.Controllers
         [HttpPost]
         public ActionResult UploadPassportData(HttpPostedFileBase file)
         {
-            controllerUtils.UploadFileAndParse(file, bulkMapping.rawPassportList.Export);
+            HandleRawDataFile(file, BulkMapping.RawFileType.passport);
             return RedirectToAction("AdminPage");
         }
 
         [HttpPost]
         public ActionResult UploadPersonData(HttpPostedFileBase file)
         {
-            controllerUtils.UploadFileAndParse(file, bulkMapping.rawPersonList.Export);
+            HandleRawDataFile(file, BulkMapping.RawFileType.person);
             return RedirectToAction("AdminPage");
         }
 
         [HttpPost]
         public ActionResult UploadMileCardData(HttpPostedFileBase file)
         {
-            controllerUtils.UploadFileAndParse(file, bulkMapping.rawMileCardList.Export);
+            HandleRawDataFile(file, BulkMapping.RawFileType.milecard);
             return RedirectToAction("AdminPage");
         }
 
         [HttpPost]
         public ActionResult UploadCompanyData(HttpPostedFileBase file)
         {
-            controllerUtils.UploadFileAndParse(file, bulkMapping.rawCompanyList.Export);
+            HandleRawDataFile(file, BulkMapping.RawFileType.company);
             return RedirectToAction("AdminPage");
+        }
+
+        private void HandleRawDataFile(HttpPostedFileBase file, BulkMapping.RawFileType filetype)
+        {
+            bulkMapping.DataExported += CleanRawDataFile;
+            controllerUtils.UploadFileAndSave(file, bulkMapping.GetStoredFileName(filetype));
+            CheckIfUploaded();
+        }
+
+        private void CleanRawDataFile(object sender, EventArgs e)
+        {
+            if (e is BulkMapping.EventArgsRawData)
+            {
+                BulkMapping.EventArgsRawData arg = e as BulkMapping.EventArgsRawData;
+
+                foreach(var str in arg.FileName)
+                {
+                    controllerUtils.DeleteFile(str);
+                }
+            }
+        }
+
+        private void CheckIfUploaded()
+        {   
+            foreach (var str in bulkMapping.GetStoredFileName())
+            {
+                string fullFileName = string.Empty;
+                if (controllerUtils.FileExists(str, out fullFileName))
+                {
+                    bulkMapping.CheckIfLoaded(str, fullFileName);
+                }
+            }
         }
     }
 }

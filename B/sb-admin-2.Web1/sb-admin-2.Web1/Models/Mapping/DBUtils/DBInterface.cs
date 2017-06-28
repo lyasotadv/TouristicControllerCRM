@@ -77,11 +77,23 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
 
             public long ExecuteTransaction()
             {
-                MySqlTransaction trans = conn.BeginTransaction();
-                command.Transaction = trans;
-                command.ExecuteNonQuery();
-                long id = command.LastInsertedId;
-                trans.Commit();
+                MySqlTransaction trans = null;
+                long id = -1;
+                try
+                {
+                    trans = conn.BeginTransaction();
+                    command.Transaction = trans;
+                    command.ExecuteNonQuery();
+                    id = command.LastInsertedId;
+                    trans.Commit();
+                }
+                catch
+                {
+                    if (trans != null)
+                    {
+                        trans.Rollback();
+                    }
+                }
                 return id;
             }
         }

@@ -11,29 +11,39 @@ namespace sb_admin_2.Web1.Controllers
 {
     public class ControllerUtils
     {
-        private HttpServerUtilityBase _Server;
+        public bool SilentDeleteFileIsExists; 
 
-        public HttpServerUtilityBase Server
+        public HttpServerUtilityBase Server { get; set; }
+
+        public ControllerUtils()
         {
-            get
-            {
-                return _Server;
-            }
-            set
-            {
-                _Server = value;
-            }
+            SilentDeleteFileIsExists = true;
         }
 
         public AttachFileTransferData UploadFileAndSave(HttpPostedFileBase file)
         {
+            string newName = Guid.NewGuid().ToString();
+            return UploadFileAndSave(file, newName);
+        }
+
+        public AttachFileTransferData UploadFileAndSave(HttpPostedFileBase file, string newName)
+        {
             if (file.ContentLength > 0)
             {
+                if (SilentDeleteFileIsExists)
+                {
+                    DeleteFile(newName);
+                }
+                else
+                {
+                    if (FileExists(newName))
+                        throw new FileLoadException("File with current name is exists");
+                }
+
                 string fileName = Path.GetFileName(file.FileName);
                 string fileFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/temp"), fileName);
                 file.SaveAs(fileFullName);
 
-                string newName = Guid.NewGuid().ToString();
                 string newFullName = Path.Combine(Server.MapPath("~/App_Data/uploads/data"), newName);
                 System.IO.File.Move(fileFullName, newFullName);
 
@@ -51,6 +61,18 @@ namespace sb_admin_2.Web1.Controllers
             string FullName = Path.Combine(Server.MapPath("~/App_Data/uploads/data"), guid);
             if (System.IO.File.Exists(FullName))
                 System.IO.File.Delete(FullName);
+        }
+
+        public bool FileExists(string fileName)
+        {
+            string fullFileName;
+            return FileExists(fileName, out fullFileName);
+        }
+
+        public bool FileExists(string fileName, out string fullFileName)
+        {
+            fullFileName = Path.Combine(Server.MapPath("~/App_Data/uploads/data"), fileName);
+            return System.IO.File.Exists(fullFileName);
         }
 
         public void UploadFileAndParse(HttpPostedFileBase file, Func<string, bool> Parser)
@@ -76,9 +98,10 @@ namespace sb_admin_2.Web1.Controllers
         public void DataLog(string data)
         {
             string fileFullName = Path.Combine(Server.MapPath("~/App_Data/"), "data.log");
-            System.IO.StreamWriter file = new System.IO.StreamWriter(fileFullName);
-            file.WriteLine(data);
-            file.Close();
+            using (StreamWriter sw = File.AppendText(fileFullName))
+            {
+                sw.WriteLine(DateTime.Now.ToString() + " " + data);
+            }
         }
     }
 }

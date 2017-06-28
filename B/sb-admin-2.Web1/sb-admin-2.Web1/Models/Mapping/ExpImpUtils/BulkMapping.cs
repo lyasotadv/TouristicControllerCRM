@@ -3,54 +3,460 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
+using System.Threading;
+
+using sb_admin_2.Web1.Models;
+
 namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
 {
     public class BulkMapping
     {
-        public RawBulkDataList<RawBulkPassport> rawPassportList;
+        public event EventHandler DataExported;
 
-        public RawBulkDataList<RawBulkPerson> rawPersonList;
+        public class EventArgsRawData : EventArgs
+        {
+            public List<string> FileName { get; private set; }
 
-        public RawBulkDataList<RawBulkMileCard> rawMileCardList;
+            public EventArgsRawData()
+            {
+                FileName = new List<string>();
+            }
+        }
 
-        public RawBulkDataList<RawBulkCompany> rawCompanyList;
+        public enum RawFileType { passport, person, milecard, company }
+
+        private Dictionary<RawFileType, IRawBulkDataList> dict;
+
+        private RawBulkDataList<RawBulkPassport> rawPassportList;
+
+        private RawBulkDataList<RawBulkPerson> rawPersonList;
+
+        private RawBulkDataList<RawBulkMileCard> rawMileCardList;
+
+        private RawBulkDataList<RawBulkCompany> rawCompanyList;
+
+        private List<RawBulkMileCard> failedMileCard { get; set; }
+        private List<RawBulkPassport> failedPassport { get; set; }
+        private List<RawBulkPerson> failedPerson { get; set; }
+        private List<RawBulkCompany> failedCompany { get; set; }
+
+        private CountryList countryList { get; set; }
+        private AviaCompanyList aviaCompanyList { get; set; }
+
+        private Label labelUnverified;
+
+        public string GetStoredFileName(RawFileType filetype)
+        {
+            IRawBulkDataList list = null;
+            if (dict.TryGetValue(filetype, out list))
+            {
+                return list.StoredFileName;
+            }   
+            return null;
+        }
+
+        public string[] GetStoredFileName()
+        {
+            string[] str = new string[dict.Count];
+            int n = 0;
+            foreach(var pair in dict)
+            {
+                str[n] = pair.Value.StoredFileName;
+                n++;
+            }
+            return str;
+        }
+
+        public void CheckIfLoaded(string fileName, string fullFileName)
+        {
+            foreach(var pair in dict)
+            {
+                if (pair.Value.StoredFileName == fileName)
+                {
+                    pair.Value.StoredFileNameFull = fullFileName;
+                    pair.Value.IsLoaded = true;
+                    break;
+                }
+            }
+        }
 
         public BulkMapping()
         {
             rawPassportList = new RawBulkDataList<RawBulkPassport>();
             rawPassportList.Width = RawBulkPassport.Width;
+            rawPassportList.StoredFileName = "Passport";
 
             rawPersonList = new RawBulkDataList<RawBulkPerson>();
             rawPersonList.Width = RawBulkPerson.Width;
+            rawPersonList.StoredFileName = "Person";
+            rawPersonList.StartCell = "H2";
 
             rawMileCardList = new RawBulkDataList<RawBulkMileCard>();
             rawMileCardList.Width = RawBulkMileCard.Width;
+            rawMileCardList.StoredFileName = "MileCard";
 
             rawCompanyList = new RawBulkDataList<RawBulkCompany>();
             rawCompanyList.Width = RawBulkCompany.Width;
+            rawCompanyList.StoredFileName = "Company";
 
             rawPassportList.StatusUpdated += OnListUpdated;
             rawPersonList.StatusUpdated += OnListUpdated;
             rawMileCardList.StatusUpdated += OnListUpdated;
             rawCompanyList.StatusUpdated += OnListUpdated;
+
+            dict = new Dictionary<RawFileType, IRawBulkDataList>();
+
+            dict.Add(RawFileType.passport, rawPassportList);
+            dict.Add(RawFileType.person, rawPersonList);
+            dict.Add(RawFileType.milecard, rawMileCardList);
+            dict.Add(RawFileType.company, rawCompanyList);
+
+            string labelName = "Unverified";
+            LabelList labelList = new LabelList();
+            labelList.Load();
+            labelUnverified = labelList.Find(item => item.Name == labelName);
+            if (labelUnverified == null)
+            {
+                labelUnverified = labelList.Create();
+                labelUnverified.Name = labelName;
+                labelUnverified.Save();
+            }
+        }
+
+        private void ContactHandler(PersonGeneral personGen, 
+            RawBulkData.RawDataField rawPhone1, RawBulkData.RawDataField rawPhone2, 
+            RawBulkData.RawDataField rawEmail1, RawBulkData.RawDataField rawEmail2)
+        {
+            if (rawPhone1.IsValid)
+            {
+                Contact phone1 = personGen.ContactList.Create("mobile");
+                phone1.Description = rawPhone1.Data;
+            }
+
+            if (rawPhone2.IsValid)
+            {
+                Contact phone2 = personGen.ContactList.Create("mobile");
+                phone2.Description = rawPhone2.Data;
+            }
+
+            if (!rawEmail1.IsEmpty)
+            {
+                Contact email1 = personGen.ContactList.Create("e-mail");
+                if (rawEmail1.IsValid)
+                {
+                    email1.Content = rawEmail1.Data;
+                }
+                else
+                {
+                    email1.Description = rawEmail1.Data;
+                }
+            }
+
+            if (!rawEmail2.IsEmpty)
+            {
+                Contact email2 = personGen.ContactList.Create("e-mail");
+                if (rawEmail2.IsValid)
+                {
+                    email2.Content = rawEmail2.Data;
+                }
+                else
+                {
+                    email2.Description = rawEmail2.Data;
+                }
+            }
+        }
+
+
+        private void AssemblyCountryList()
+        {
+            countryList = new CountryList();
+            countryList.Load();
+            foreach (RawBulkPassport rawPassport in rawPassportList)
+            {
+                try
+                {
+                    if (rawPassport.citizen.IsValid)
+                    {
+                        string name = rawPassport.citizen.Data;
+                        if (countryList.Find(item => item.Name == name) == null)
+                        {
+                            Country country = countryList.Create();
+                            country.Name = name;
+                            country.Save();
+                        }
+                    }
+
+                    if (rawPassport.emmitated.IsValid)
+                    {
+                        string name = rawPassport.citizen.Data;
+                        if (countryList.Find(item => item.Name == name) == null)
+                        {
+                            Country country = countryList.Create();
+                            country.Name = name;
+                            country.Save();
+                        }
+                    }
+                }
+                catch
+                {
+                    failedPassport.Add(rawPassport);
+                }
+            }
+        }
+
+        private void AssemblyAviaCompanyList()
+        {
+            aviaCompanyList = new AviaCompanyList();
+            aviaCompanyList.Load();
+            foreach (RawBulkCompany rawCompany in rawCompanyList)
+            {
+                try
+                {
+                    if (rawCompany.isaviacompany.Data == "1")
+                    {
+                        AviaCompany aviacompany = aviaCompanyList.Create();
+                        aviacompany.FullName = rawCompany.name.Data;
+
+                        if (!rawCompany.phone1.IsEmpty)
+                        {
+                            aviacompany.Description = " Phone1: " + rawCompany.phone1.Data;
+                        }
+
+                        if (!rawCompany.phone2.IsEmpty)
+                        {
+                            aviacompany.Description = " Phone2: " + rawCompany.phone2.Data;
+                        }
+
+                        if (!rawCompany.email1.IsEmpty)
+                        {
+                            aviacompany.Description = " Email1: " + rawCompany.email1.Data;
+                        }
+
+                        if (!rawCompany.email2.IsEmpty)
+                        {
+                            aviacompany.Description = " Email2: " + rawCompany.email2.Data;
+                        }
+
+                        if (!rawCompany.number.IsEmpty)
+                        {
+                            aviacompany.Description = " Number: " + rawCompany.number.Data;
+                        }
+
+                        if (!rawCompany.officialname.IsEmpty)
+                        {
+                            aviacompany.Description = " Official name: " + rawCompany.officialname.Data;
+                        }
+
+                        aviacompany.Save();
+                    }
+
+                    rawCompany.IsHandled = true;
+                }
+                catch
+                {
+                    failedCompany.Add(rawCompany);
+                }
+            }
+        }
+        
+        private void ActionPersonByPassport(RawBulkPerson rawPerson, RawBulkPassport rawPassport, Person person)
+        {
+            if (rawPassport.IsValid && (rawPassport.owner.Data == rawPerson.name.Data))
+            {
+                person.FirstName = rawPassport.FirstName.Data;
+                person.SecondName = rawPassport.SecondName.Data;
+                person.MiddleName = rawPassport.Middle.Data;
+
+                int year = Convert.ToInt32(rawPassport.yearBirth.Data);
+                int month = Convert.ToInt32(rawPassport.monthBirth.Data);
+                int day = Convert.ToInt32(rawPassport.dayBirth.Data);
+                person.Birth = new DateTime(year, month, day);
+
+                if (rawPassport.gender.IsValid)
+                {
+                    person.Gender = rawPassport.gender.Data.ToLower();
+                }
+
+                Passport passport = person.PassportList.Create();
+                passport.SerialNumber = rawPassport.number.Data;
+
+                year = Convert.ToInt32(rawPassport.yearValid.Data);
+                month = Convert.ToInt32(rawPassport.monthValid.Data);
+                day = Convert.ToInt32(rawPassport.dayValid.Data);
+                passport.ValidTill = new DateTime(year, month, day);
+
+                passport.Description = rawPassport.note.Data;
+
+                passport.Citizen = countryList.Find(item => item.Name == rawPassport.citizen.Data);
+                passport.CountryOfEmmitation = countryList.Find(item => item.Name == rawPassport.emmitated.Data);
+
+                passport.Save();
+            }
+
+            rawPassport.IsHandled = true;
+        }
+
+        private void ActionPersonByMileCard(RawBulkPerson rawPerson, RawBulkMileCard rawMileCard, Person person)
+        {
+            if (rawMileCard.IsValid && (rawMileCard.owner.Data == rawPerson.name.Data))
+            {
+                AviaCompany aviaCompany = aviaCompanyList.Find((item) => item.FullName == rawMileCard.company.Data);
+                if (aviaCompany != null)
+                {
+                    MileCard mileCard = person.mileCardList.Create();
+
+                    mileCard.AviaCompanyID = aviaCompany.ID;
+                    mileCard.Number = rawMileCard.number.Data;
+
+                    mileCard.Save();
+                }
+                else
+                {
+                    person.Description += " Mile card: " + rawMileCard.company.Data + " " + rawMileCard.number.Data;
+                }
+            }
+            rawMileCard.IsHandled = true;
+        }
+
+        private void ActionPerson(RawBulkPerson rawPerson)
+        {
+            try
+            {
+                if (rawPerson.IsValid)
+                {
+                    string personRawName = rawPerson.name.Data;
+
+                    Person person = Person.CreatePerson();
+
+                    ContactHandler(person, rawPerson.phone1, rawPerson.phone2, rawPerson.email1, rawPerson.email2);
+
+                    person.Description = "Name: " + personRawName;
+                    if (rawPerson.company.IsValid)
+                    {
+                        person.Description += " Company: " + rawPerson.company.Data;
+                    }
+                    if (rawPerson.NMS.IsValid)
+                    {
+                        person.Description += " FIO: " + rawPerson.NMS.Data;
+                    }
+
+                    rawPassportList.ForEach((rawPassport) => { ActionPersonByPassport(rawPerson, rawPassport, person); });
+                    rawMileCardList.ForEach((rawMileCard) => { ActionPersonByMileCard(rawPerson, rawMileCard, person); });
+
+                    person.Save();
+                }
+                rawPerson.IsHandled = true;
+            }
+            catch
+            {
+                failedPerson.Add(rawPerson);
+            }
+        }
+
+        private void ActionCompany(RawBulkCompany rawCompany)
+        {
+            try
+            {
+                if (rawCompany.IsValid && (rawCompany.isaviacompany.Data == "0"))
+                {
+                    Company company = Company.Create();
+
+                    company.FullName = rawCompany.name.Data;
+
+                    ContactHandler(company, rawCompany.phone1, rawCompany.phone2, rawCompany.email1, rawCompany.email2);
+
+                    company.Description = "";
+
+                    if (rawCompany.officialname.IsValid)
+                    {
+                        company.Description += " Official name: " + rawCompany.officialname.Data;
+                    }
+
+                    if (rawCompany.number.IsValid)
+                    {
+                        company.Description += " Number: " + rawCompany.number.Data;
+                    }
+
+                    if (rawCompany.isinsurance.Data == "1")
+                    {
+                        company.Description += " Insurance";
+                    }
+
+                    if (rawCompany.isprovider.Data == "1")
+                    {
+                        company.Description += " Provider";
+                    }
+
+                    company.Save();
+                }
+                rawCompany.IsHandled = true;
+            }
+            catch
+            {
+                failedCompany.Add(rawCompany);
+            }
+        }
+
+        private void DataHandling()
+        {
+            failedMileCard = new List<RawBulkMileCard>();
+            failedPassport = new List<RawBulkPassport>();
+            failedPerson = new List<RawBulkPerson>();
+            failedCompany = new List<RawBulkCompany>();
+
+            AssemblyCountryList();
+            AssemblyAviaCompanyList();
+
+            rawPersonList.ForEach(rawPerson => ActionPerson(rawPerson) );
+            rawCompanyList.ForEach(rawCompany => ActionCompany(rawCompany) );
         }
 
         private void OnListUpdated(object sender, EventArgs e)
         {
             if (rawCompanyList.IsLoaded & rawPersonList.IsLoaded & rawPassportList.IsLoaded & rawMileCardList.IsLoaded)
             {
-                int x = 1;
-                x++;
+                foreach(var pair in dict)
+                {
+                    pair.Value.Export(pair.Value.StoredFileNameFull);
+                    Thread.Sleep(1000);
+                }
+
+                DataHandling();
+
+                if (DataExported != null)
+                {
+                    EventArgsRawData arg = new EventArgsRawData();
+                    foreach(var pair in dict)
+                    {
+                        arg.FileName.Add(pair.Value.StoredFileName);
+                    }
+                    DataExported(this, arg);
+                }
             }
         }
     }
 
-    public class RawBulkDataList<T> : List<T>
+    public interface IRawBulkDataList
+    {
+        string StoredFileName { get; }
+
+        string StoredFileNameFull { get; set; }
+
+        bool IsLoaded { get; set; }
+
+        bool Export(string fileName);
+    }
+
+    public class RawBulkDataList<T> : List<T>, IRawBulkDataList
         where T : RawBulkData, new()
     {
+        public string StoredFileName { get; set; }
+
+        public string StoredFileNameFull { get; set; }
+
         public event EventHandler StatusUpdated;
 
-        private enum BulkListStatus { unloaded, loaded };
+        private enum BulkListStatus { unloaded, loaded, exported };
 
         private BulkListStatus _status;
 
@@ -75,20 +481,33 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
         {
             get
             {
-                return _status == BulkListStatus.loaded;
+                return status == BulkListStatus.loaded;
+            }
+            set
+            {
+                if (value != IsLoaded)
+                {
+                    status = BulkListStatus.loaded;
+                }
             }
         }
 
         public int Width { get; set; }
 
+        public string StartCell { get; set; }
+
         public RawBulkDataList()
         {
             Width = 0;
             status = BulkListStatus.unloaded;
+            StartCell = "A2";
         }
 
         public bool Export(string fileName)
         {
+            if (!System.IO.File.Exists(fileName))
+                return false;
+
             ExcelEI comp = null;
             try
             {
@@ -123,7 +542,7 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
                 }
             }
 
-            status = BulkListStatus.loaded;
+            status = BulkListStatus.exported;
             return true;
         }
     }
@@ -133,6 +552,14 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
         public class RawDataField
         {
             public bool IsValid { get; private set; }
+
+            public bool IsEmpty 
+            { 
+                get
+                {
+                    return Data == string.Empty;
+                }
+            }
 
             private Func<string, bool> Validator { get; set; }
 
@@ -188,6 +615,19 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
             return true;
         }
 
+        protected bool NotEmptyValidator(string str)
+        {
+            return (str != null) && (str != string.Empty);
+        }
+
+        protected bool EmailValidator(string str)
+        {
+            if (str.Contains(' '))
+                return false;
+
+            return str.Split('@').Length == 2;
+        }
+
         public abstract void Parser(string[] data);
 
         public abstract bool IsValid { get; }
@@ -195,6 +635,13 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public bool IsHandled { get; set; }
+
+        public RawBulkData()
+        {
+            IsHandled = false;
         }
     }
 
@@ -216,7 +663,7 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
 
         public RawDataField gender { get; private set; }
 
-        public RawDataField estimated { get; private set; }
+        public RawDataField emmitated { get; private set; }
 
         public RawDataField validtill { get; private set; }
 
@@ -249,10 +696,10 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
             FirstName = new RawDataField(DefaultTrueValidator);
             Middle = new RawDataField(DefaultTrueValidator);
             SecondName = new RawDataField(DefaultTrueValidator);
-            citizen = new RawDataField(DefaultTrueValidator);
+            citizen = new RawDataField(NotEmptyValidator);
             birth = new RawDataField(DefaultTrueValidator);
             gender = new RawDataField(DefaultTrueValidator);
-            estimated = new RawDataField(DefaultTrueValidator);
+            emmitated = new RawDataField(NotEmptyValidator);
             validtill = new RawDataField(DefaultTrueValidator);
             note = new RawDataField(DefaultTrueValidator);
 
@@ -263,6 +710,11 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
             dayValid = new RawDataField(DefaultTrueValidator);
             monthValid = new RawDataField(DefaultTrueValidator);
             yearValid = new RawDataField(DefaultTrueValidator);
+        }
+
+        private bool GenderValidator(string str)
+        {
+            return (str == "Male") | (str == "Female");
         }
 
         public override void Parser(string[] data)
@@ -280,7 +732,7 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
             citizen.Data = data[5];
             birth.Data = data[6];
             gender.Data = data[7];
-            estimated.Data = data[8];
+            emmitated.Data = data[8];
             validtill.Data = data[9];
             note.Data = data[10];
 
@@ -297,7 +749,7 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
         {
             get 
             {
-                return owner.IsValid;
+                return owner.IsValid && citizen.IsValid  && emmitated.IsValid;
             }
         }
 
@@ -347,14 +799,14 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
 
         public RawBulkPerson()
         {
-            company = new RawDataField(DefaultTrueValidator);
-            NMS = new RawDataField(DefaultTrueValidator);
+            company = new RawDataField(NotEmptyValidator);
+            NMS = new RawDataField(NotEmptyValidator);
             number = new RawDataField(DefaultTrueValidator);
-            phone1 = new RawDataField(DefaultTrueValidator);
-            phone2 = new RawDataField(DefaultTrueValidator);
-            email1 = new RawDataField(DefaultTrueValidator);
-            email2 = new RawDataField(DefaultTrueValidator);
-            name = new RawDataField(DefaultTrueValidator);
+            phone1 = new RawDataField(NotEmptyValidator);
+            phone2 = new RawDataField(NotEmptyValidator);
+            email1 = new RawDataField(EmailValidator);
+            email2 = new RawDataField(EmailValidator);
+            name = new RawDataField(NotEmptyValidator);
         }
 
         public override void Parser(string[] data)
@@ -419,8 +871,8 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
         public RawBulkMileCard()
         {
             owner = new RawDataField(DefaultTrueValidator);
-            number = new RawDataField(DefaultTrueValidator);
-            company = new RawDataField(DefaultTrueValidator);
+            number = new RawDataField(NotEmptyValidator);
+            company = new RawDataField(NotEmptyValidator);
         }
 
         public override void Parser(string[] data)
@@ -439,7 +891,7 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
         {
             get
             {
-                return owner.IsValid;
+                return owner.IsValid & company.IsValid;
             }
         }
 
@@ -469,7 +921,7 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
 
         public RawDataField isinsurance { get; private set; }
 
-        public RawDataField oficialname { get; private set; }
+        public RawDataField officialname { get; private set; }
 
         public RawDataField number { get; private set; }
 
@@ -496,12 +948,12 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
             isaviacompany = new RawDataField(DefaultTrueValidator);
             isprovider = new RawDataField(DefaultTrueValidator);
             isinsurance = new RawDataField(DefaultTrueValidator);
-            oficialname = new RawDataField(DefaultTrueValidator);
-            number = new RawDataField(DefaultTrueValidator);
-            phone1 = new RawDataField(DefaultTrueValidator);
-            phone2 = new RawDataField(DefaultTrueValidator);
-            email1 = new RawDataField(DefaultTrueValidator);
-            email2 = new RawDataField(DefaultTrueValidator);
+            officialname = new RawDataField(NotEmptyValidator);
+            number = new RawDataField(NotEmptyValidator);
+            phone1 = new RawDataField(NotEmptyValidator);
+            phone2 = new RawDataField(NotEmptyValidator);
+            email1 = new RawDataField(EmailValidator);
+            email2 = new RawDataField(EmailValidator);
             name = new RawDataField(DefaultTrueValidator);
         }
 
@@ -515,7 +967,7 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
             isaviacompany.Data = data[0];
             isprovider.Data = data[1];
             isinsurance.Data = data[2];
-            oficialname.Data = data[3];
+            officialname.Data = data[3];
             number.Data = data[4];
             phone1.Data = data[5];
             phone2.Data = data[6];

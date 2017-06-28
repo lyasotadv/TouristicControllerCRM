@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        @if (Model.role.RoleString == "admin")
+        @if ((Model.role.RoleString == "admin") | (Model.role.RoleString == "god"))
         { 
             <div class="col-lg-6" style="text-align: center">
                 <div class="login-panel panel panel-default">

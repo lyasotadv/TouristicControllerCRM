@@ -121,7 +121,7 @@ namespace sb_admin_2.Web1.Models.Mapping.ExpImpUtils
             apl = new Excel.Application();
             books = apl.Workbooks;
             book = apl.Workbooks.Open(fname,
-             Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+             Type.Missing, true, Type.Missing, Type.Missing,
              Type.Missing, Type.Missing, Type.Missing, Type.Missing,
              Type.Missing, Type.Missing, Type.Missing, Type.Missing,
              Type.Missing, Type.Missing);
