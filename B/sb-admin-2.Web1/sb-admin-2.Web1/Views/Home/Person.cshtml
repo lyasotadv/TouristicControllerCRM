@@ -9,237 +9,257 @@
 {
 
     <script>
-        $(document).ready(function () {
-            $('#tableContact').DataTable({
-                responsive: true
-            });
+    $(document).ready(function () {
+        $('#tableContact').DataTable({
+            responsive: true
         });
+    });
 
-        $(document).ready(function () {
-            $('#tableDocument').DataTable({
-                responsive: true
-            });
+    $(document).ready(function () {
+        $('#tableDocument').DataTable({
+            responsive: true
         });
+    });
 
-        $(document).ready(function () {
-            $('#tableVizas').DataTable({
-                responsive: true
-            });
+    $(document).ready(function () {
+        $('#tableVizas').DataTable({
+            responsive: true
         });
+    });
 
-        var EditedPassportID = 0;
+    var EditedPassportID = 0;
 
-        function ClearPassportDetails() {
-            EditedPassportID = 0;
+    function ClearPassportDetails() {
+        EditedPassportID = 0;
 
-            $('#inputPassportSerial').val('');
-            $('#inputExpireDate').val('');
-            $('#inputPersonName').val('');
-            $('#inputPersonSurname').val('');
-            $('#inputCountryOfEmitation').val('');
-            $('#inputCountryOfCitizen').val('');
-            $('#textpassportdescription').val('');
-        }
+        $('#inputPassportSerial').val('');
+        $('#inputExpireDate').val('');
+        $('#inputPersonName').val('');
+        $('#inputPersonSurname').val('');
+        $('#inputCountryOfEmitation').val('');
+        $('#inputCountryOfCitizen').val('');
+        $('#textpassportdescription').val('');
+    }
 
-        function FillPassportDetails(id) {
-            EditedPassportID = id;
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("FindPassport", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    id: id
-                },
-                success: function (data) {
-                    if (data != null) {
-                        document.getElementById("inputPassportSerial").value = data.SerialNumber;
-                        document.getElementById("inputExpireDate").value = data.ValidTillStr;
-                        document.getElementById("inputPersonName").value = data.PersonName;
-                        document.getElementById("inputPersonSurname").value = data.PersonSurname;
-                        document.getElementById("inputCountryOfEmitation").value = data.CountryOfEmmitation.Name;
-                        document.getElementById("inputCountryOfCitizen").value = data.Citizen.Name;
-                        document.getElementById("textpassportdescription").value = data.Description;
-                    }
-                },
-                error: function () {
-                    alert('error');
+    function FillPassportDetails(id) {
+        EditedPassportID = id;
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindPassport", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: id
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("inputPassportSerial").value = data.SerialNumber;
+                    document.getElementById("inputExpireDate").value = data.ValidTillStr;
+                    document.getElementById("inputPersonName").value = data.PersonName;
+                    document.getElementById("inputPersonSurname").value = data.PersonSurname;
+                    document.getElementById("inputCountryOfEmitation").value = data.CountryOfEmmitation.Name;
+                    document.getElementById("inputCountryOfCitizen").value = data.Citizen.Name;
+                    document.getElementById("textpassportdescription").value = data.Description;
                 }
-            });
-        }
-
-        function SavePassportDetails() {
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("SavePassport", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    id: EditedPassportID,
-                    passportSerial: document.getElementById("inputPassportSerial").value,
-                    expireDate: document.getElementById("inputExpireDate").value,
-                    personName: document.getElementById("inputPersonName").value,
-                    personSurname: document.getElementById("inputPersonSurname").value,
-                    countryOfEmitation: document.getElementById("inputCountryOfEmitation").value,
-                    countryOfCitizen: document.getElementById("inputCountryOfCitizen").value,
-                    description: document.getElementById("textpassportdescription").value
-                },
-                success: function (data) {
-                    if (data != '') {
-                        alert(data);
-                    }
-                    else {
-                        $('#passportdetails').modal('toggle');
-                        location.reload();
-                    }
-                },
-                error: function () {
-                    alert('error');
-                }
-            })
-        }
-
-        function DeletePassport() {
-            if (confirm("Are you sure to delete the passport?")) {
-                $.ajax({
-                    type: 'POST',
-                    url: '@Url.Action("DeletePassport", "Home")',
-                    dataType: 'json',
-                    data: {
-                        PersonID: '@Model.person.ID',
-                        id: EditedPassportID
-                    },
-                    success: function (data) {
-                        $('#passportdetails').modal('toggle');
-                        location.reload();
-                    },
-                    error: function () {
-                        alert('error');
-                    }
-                })
+            },
+            error: function () {
+                alert('error');
             }
-        }
+        });
+    }
 
-        function FillPersonDetails() {
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("GetPersonalData", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID'
-                },
-                success: function (data) {
-                    if (data != null) {
-                        document.getElementById("inputFirstName").value = data.FirstName;
-                        document.getElementById("inputMiddleName").value = data.MiddleName;
-                        document.getElementById("inputSecondName").value = data.SecondName;
-                        document.getElementById("inputNameUA").value = data.FullNameUA;
-                        document.getElementById("inputBirthDay").value = data.BirthStr;
-                        document.getElementById("inputITN").value = data.itn;
-                        document.getElementById("textpersondescription").value = data.Description;
-
-                        switch (data.Gender) {
-                            case "male":
-                                $('#selectGender').val('male').change();
-                                break;
-                            case "female":
-                                $('#selectGender').val('female').change();
-                                break;
-                        }
-                    }
-                },
-                error: function () {
-                    alert('error');
+    function SavePassportDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SavePassport", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: EditedPassportID,
+                passportSerial: document.getElementById("inputPassportSerial").value,
+                expireDate: document.getElementById("inputExpireDate").value,
+                personName: document.getElementById("inputPersonName").value,
+                personSurname: document.getElementById("inputPersonSurname").value,
+                countryOfEmitation: document.getElementById("inputCountryOfEmitation").value,
+                countryOfCitizen: document.getElementById("inputCountryOfCitizen").value,
+                description: document.getElementById("textpassportdescription").value
+            },
+            success: function (data) {
+                if (data != '') {
+                    alert(data);
                 }
-            });
-        }
+                else {
+                    $('#passportdetails').modal('toggle');
+                    location.reload();
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
 
-        function SavePersonDetails() {
+    function DeletePassport() {
+        if (confirm("Are you sure to delete the passport?")) {
             $.ajax({
                 type: 'POST',
-                url: '@Url.Action("SavePersonDetails", "Home")',
+                url: '@Url.Action("DeletePassport", "Home")',
                 dataType: 'json',
                 data: {
                     PersonID: '@Model.person.ID',
-                    FirstName: document.getElementById("inputFirstName").value,
-                    MiddleName: document.getElementById("inputMiddleName").value,
-                    SecondName: document.getElementById("inputSecondName").value,
-                    NameUA: document.getElementById("inputNameUA").value,
-                    BirthDay: document.getElementById("inputBirthDay").value,
-                    Description: document.getElementById("textpersondescription").value,
-                    Gender: document.getElementById("selectGender").value,
-                    itn: document.getElementById("inputITN").value
+                    id: EditedPassportID
                 },
                 success: function (data) {
-                    if (data != '') {
-                        alert(data);
-                    }
-                    else {
-                        $('#personaldata').modal('toggle');
-                        location.reload();
-                    }
+                    $('#passportdetails').modal('toggle');
+                    location.reload();
                 },
                 error: function () {
                     alert('error');
                 }
             })
         }
+    }
 
+    function FillPersonDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetPersonalData", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID'
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("inputFirstName").value = data.FirstName;
+                    document.getElementById("inputMiddleName").value = data.MiddleName;
+                    document.getElementById("inputSecondName").value = data.SecondName;
+                    document.getElementById("inputNameUA").value = data.FullNameUA;
+                    document.getElementById("inputBirthDay").value = data.BirthStr;
+                    document.getElementById("inputITN").value = data.itn;
+                    document.getElementById("textpersondescription").value = data.Description;
+
+                    switch (data.Gender) {
+                        case "male":
+                            $('#selectGender').val('male').change();
+                            break;
+                        case "female":
+                            $('#selectGender').val('female').change();
+                            break;
+                    }
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    function SavePersonDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SavePersonDetails", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                FirstName: document.getElementById("inputFirstName").value,
+                MiddleName: document.getElementById("inputMiddleName").value,
+                SecondName: document.getElementById("inputSecondName").value,
+                NameUA: document.getElementById("inputNameUA").value,
+                BirthDay: document.getElementById("inputBirthDay").value,
+                Description: document.getElementById("textpersondescription").value,
+                Gender: document.getElementById("selectGender").value,
+                itn: document.getElementById("inputITN").value
+            },
+            success: function (data) {
+                if (data != '') {
+                    alert(data);
+                }
+                else {
+                    $('#personaldata').modal('toggle');
+                    location.reload();
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
+
+    EditedConatctID = 0;
+
+    function ClearContactDetails() {
         EditedConatctID = 0;
 
-        function ClearContactDetails() {
-            EditedConatctID = 0;
+        $('#inputContactContent').val('');
+        $('#textcontactdescription').val('');
+        $('#selectContactType').val('e-mail').change();
+    }
 
-            $('#inputContactContent').val('');
-            $('#textcontactdescription').val('');
-            $('#selectContactType').val('e-mail').change();
-        }
+    function FillContactDetails(id) {
+        EditedConatctID = id;
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindContact", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: id
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("inputContactContent").value = data.Content;
+                    document.getElementById("textcontactdescription").value = data.Description;
 
-        function FillContactDetails(id) {
-            EditedConatctID = id;
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("FindContact", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    id: id
-                },
-                success: function (data) {
-                    if (data != null) {
-                        document.getElementById("inputContactContent").value = data.Content;
-                        document.getElementById("textcontactdescription").value = data.Description;
-
-                        switch (data.contactType) {
-                            case "e-mail":
-                                $('#selectContactType').val('e-mail').change();
-                                break;
-                            case "mobile":
-                                $('#selectContactType').val('mobile').change();
-                                break;
-                            case "adress":
-                                $('#selectContactType').val('adress').change();
-                                break;
-                        }
+                    switch (data.contactType) {
+                        case "e-mail":
+                            $('#selectContactType').val('e-mail').change();
+                            break;
+                        case "mobile":
+                            $('#selectContactType').val('mobile').change();
+                            break;
+                        case "adress":
+                            $('#selectContactType').val('adress').change();
+                            break;
                     }
-                },
-                error: function () {
-                    alert('error');
                 }
-            });
-        }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
 
-        function SaveContactDetails() {
+    function SaveContactDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SaveContact", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: EditedConatctID,
+                content: document.getElementById("inputContactContent").value,
+                description: document.getElementById("textcontactdescription").value,
+                contactType: document.getElementById("selectContactType").value
+            },
+            success: function (data) {
+                $('#contactdetails').modal('toggle');
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
+
+    function DeleteContact() {
+        if (confirm("Are you sure to delete the contact?")) {
             $.ajax({
                 type: 'POST',
-                url: '@Url.Action("SaveContact", "Home")',
+                url: '@Url.Action("DeleteContact", "Home")',
                 dataType: 'json',
                 data: {
                     PersonID: '@Model.person.ID',
-                    id: EditedConatctID,
-                    content: document.getElementById("inputContactContent").value,
-                    description: document.getElementById("textcontactdescription").value,
-                    contactType: document.getElementById("selectContactType").value
+                    id: EditedConatctID
                 },
                 success: function (data) {
                     $('#contactdetails').modal('toggle');
@@ -250,19 +270,79 @@
                 }
             })
         }
+    }
 
-        function DeleteContact() {
-            if (confirm("Are you sure to delete the contact?")) {
+    EditedVizaID = 0;
+
+    function ClearVizaDetails() {
+        EditedVizaID = 0;
+
+        $('#inputVizaExpired').val('');
+        $('#inputVizaCountry').val('');
+        document.getElementById("chkIsUnion").checked = true;
+    }
+
+    function FillVizaDetails(id, PassportSerial) {
+        EditedVizaID = 0;
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindViza", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: id,
+                PassportSerial: PassportSerial
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("inputVizaExpired").value = data.ValidTillStr;
+                    document.getElementById("inputVizaCountry").value = data.TargetName;
+                    $('#selectVizaPassport').val(data.PassportSerial).change();
+                    document.getElementById("chkIsUnion").checked = data.IsTargetUnion;
+                    $('#chkIsUnion').val(PassportSerial).change();
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+        function SaveVizaDetails() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveVizaDetails", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.person.ID',
+                    id: EditedVizaID,
+                    ValidTillStr: document.getElementById("inputVizaExpired").value,
+                    TargetName: document.getElementById("inputVizaCountry").value,
+                    IsUnion: document.getElementById("chkIsUnion").checked,
+                    PassportSerial: document.getElementById("selectVizaPassport").value
+                },
+                success: function (data) {
+                    $('#vizadetails').modal('toggle');
+                    location.reload();
+                },
+                error: function () {
+                    alert('error');
+                }
+            })
+        }
+
+        function DeleteViza() {
+            if (confirm("Are you sure to delete the viza?")) {
                 $.ajax({
                     type: 'POST',
-                    url: '@Url.Action("DeleteContact", "Home")',
+                    url: '@Url.Action("DeleteViza", "Home")',
                     dataType: 'json',
                     data: {
                         PersonID: '@Model.person.ID',
-                        id: EditedConatctID
+                        id: EditedVizaID
                     },
                     success: function (data) {
-                        $('#contactdetails').modal('toggle');
+                        $('#vizadetails').modal('toggle');
                         location.reload();
                     },
                     error: function () {
@@ -272,231 +352,198 @@
             }
         }
 
-        EditedVizaID = 0;
-
-        function ClearVizaDetails() {
-            EditedVizaID = 0;
-
-            $('#inputVizaExpired').val('');
-            $('#inputVizaCountry').val('');
-        }
-
-        function FillVizaDetails(id, PassportSerial) {
-            EditedVizaID = 0;
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("FindViza", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    id: id,
-                    PassportSerial: PassportSerial
-                },
-                success: function (data) {
-                    if (data != null) {
-                        document.getElementById("inputVizaExpired").value = data.ValidTillStr;
-                        document.getElementById("inputVizaCountry").value = data.CountryOfInvintation.Name;
-                        $('#selectVizaPassport').val(data.PassportSerial).change();
-                    }
-                },
-                error: function () {
-                    alert('error');
-                }
-            });
-        }
-
         function DeletePerson() {
             if (confirm("Are you sure to delete the person and all attached contacts and documents?")) {
                 $.ajax({
                     type: 'POST',
                     url: '@Url.Action("DeletePerson", "Home")',
+                dataType: 'json',
+                data: {
+                    PersonID: '@Model.person.ID'
+                },
+                success: function (data) {
+                    if (data != null) {
+                        var url = '@Url.Action("PersonList", "Home")/';
+                        window.location.href = url;
+                    }
+                },
+                error: function () {
+                    alert('error');
+                }
+            });
+        };
+    }
+
+    function ShowPassportDataString(id, syst) {
+        var str = '';
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindPassport", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                id: id
+            },
+            success: function (data) {
+                if (data != null) {
+                    str = '';
+                    if (syst == 'Amadeus') {
+                        str = data.AmadeusString;
+                    }
+                    if (syst == 'Galileo') {
+                        str = data.Galileo;
+                    }
+                    if (syst == 'Sabre') {
+                        str = data.Sabre;
+                    }
+                    if (str != '') {
+                        window.prompt("Copy to clipboard: Ctrl+C, Enter", str);
+                    }
+                }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
+
+    function AddLabel() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("AddLabelPerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                Name: document.getElementById("inputLabelAdd").value,
+                Note: ''
+            },
+            success: function (data) {
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
+
+    function DeleteLabel(id) {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("DeleteLabelPerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                LabelID: id
+            },
+            success: function (data) {
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
+
+    EditedFilePersonID = 0;
+
+    function AddFilePerson() {
+        var formData = new FormData();
+        var totalFiles = document.getElementById("fileUploadFile").files.length;
+        for (var i = 0; i < totalFiles; i++) {
+            var file = document.getElementById("fileUploadFile").files[i];
+            formData.append("FileUpload", file);
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("UploadFile", "Home")',
+            dataType: 'json',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                document.getElementById("fileUploadFile").value = "";
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("UploadFileToPerson", "Home")',
                     dataType: 'json',
                     data: {
-                        PersonID: '@Model.person.ID'
+                        PersonID: '@Model.person.ID',
+                        data: data
                     },
                     success: function (data) {
-                        if (data != null) {
-                            var url = '@Url.Action("PersonList", "Home")/';
-                            window.location.href = url;
-                        }
+                        location.reload();
                     },
                     error: function () {
                         alert('error');
                     }
                 });
-            };
-        }
-
-        function ShowPassportDataString(id, syst) {
-            var str = '';
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("FindPassport", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    id: id
-                },
-                success: function (data) {
-                    if (data != null) {
-                        str = '';
-                        if (syst == 'Amadeus') {
-                            str = data.AmadeusString;
-                        }
-                        if (syst == 'Galileo') {
-                            str = data.Galileo;
-                        }
-                        if (syst == 'Sabre') {
-                            str = data.Sabre;
-                        }
-                        if (str != '') {
-                            window.prompt("Copy to clipboard: Ctrl+C, Enter", str);
-                        }
-                    }
-                },
-                error: function () {
-                    alert('error');
-                }
-            });
-        }
-
-        function AddLabel() {
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("AddLabelPerson", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    Name: document.getElementById("inputLabelAdd").value,
-                    Note: ''
-                },
-                success: function (data) {
-                    location.reload();
-                },
-                error: function () {
-                    alert('error');
-                }
-            })
-        }
-
-        function DeleteLabel(id) {
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("DeleteLabelPerson", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    LabelID: id
-                },
-                success: function (data) {
-                    location.reload();
-                },
-                error: function () {
-                    alert('error');
-                }
-            })
-        }
-
-        EditedFilePersonID = 0;
-
-        function AddFilePerson() {
-            var formData = new FormData();
-            var totalFiles = document.getElementById("fileUploadFile").files.length;
-            for (var i = 0; i < totalFiles; i++) {
-                var file = document.getElementById("fileUploadFile").files[i];
-                formData.append("FileUpload", file);
+            },
+            error: function () {
+                alert('error');
             }
+        });
+    }
 
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("UploadFile", "Home")',
-                dataType: 'json',
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (data) {
-                    document.getElementById("fileUploadFile").value = "";
+    function DeleteFilePerson() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("DeleteFilePerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                FileID: EditedFilePersonID
+            },
+            success: function (data) {
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
 
-                    $.ajax({
-                        type: 'POST',
-                        url: '@Url.Action("UploadFileToPerson", "Home")',
-                        dataType: 'json',
-                        data: {
-                            PersonID: '@Model.person.ID',
-                            data: data
-                        },
-                        success: function (data) {
-                            location.reload();
-                        },
-                        error: function () {
-                            alert('error');
-                        }
-                    });
-                },
-                error: function () {
-                    alert('error');
+    function FillFilePersonDetails(id) {
+        EditedFilePersonID = id;
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("FindFilePerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                FileID: id
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("textfilepersondescription").value = data.Description;
                 }
-            });
-        }
+            },
+            error: function () {
+                alert('error');
+            }
+        });
+    }
 
-        function DeleteFilePerson() {
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("DeleteFilePerson", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    FileID: EditedFilePersonID
-                },
-                success: function (data) {
-                    location.reload();
-                },
-                error: function () {
-                    alert('error');
-                }
-            })
-        }
-
-        function FillFilePersonDetails(id) {
-            EditedFilePersonID = id;
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("FindFilePerson", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    FileID: id
-                },
-                success: function (data) {
-                    if (data != null) {
-                        document.getElementById("textfilepersondescription").value = data.Description;
-                    }
-                },
-                error: function () {
-                    alert('error');
-                }
-            });
-        }
-
-        function SaveFilePersonDetails() {
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("SaveFilePerson", "Home")',
-                dataType: 'json',
-                data: {
-                    PersonID: '@Model.person.ID',
-                    FileID: EditedFilePersonID,
-                    Description: document.getElementById("textfilepersondescription").value
-                },
-                success: function (data) {
-                    $('#filepersondetails').modal('toggle');
-                    location.reload();
-                },
-                error: function () {
-                    alert('error');
-                }
-            })
-        }
+    function SaveFilePersonDetails() {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SaveFilePerson", "Home")',
+            dataType: 'json',
+            data: {
+                PersonID: '@Model.person.ID',
+                FileID: EditedFilePersonID,
+                Description: document.getElementById("textfilepersondescription").value
+            },
+            success: function (data) {
+                $('#filepersondetails').modal('toggle');
+                location.reload();
+            },
+            error: function () {
+                alert('error');
+            }
+        })
+    }
     </script>
 
     <div class="row">
@@ -898,7 +945,7 @@
                                                     <td>@Html.DisplayFor(model => item.SerialNumber)</td>
                                                     <td>@Html.DisplayFor(model => item.Description)</td>
                                                     <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
-                                                    <td>@Html.DisplayFor(model => item.VizaList.StrFormat)</td>
+                                                    <td>@Html.DisplayFor(model => item.vizaList.StrFormat)</td>
                                                     <td>
                                                         <button type="button" tittle="Amadeus" onclick="ShowPassportDataString('@item.ID', 'Amadeus')">A</button>
                                                         <button type="button" tittle="Galileo" onclick="ShowPassportDataString('@item.ID', 'Galileo')">G</button>
@@ -913,7 +960,7 @@
                                                     <td>@Html.DisplayFor(model => item.SerialNumber)</td>
                                                     <td>@Html.DisplayFor(model => item.Description)</td>
                                                     <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
-                                                    <td>@Html.DisplayFor(model => item.VizaList.StrFormat)</td>
+                                                    <td>@Html.DisplayFor(model => item.vizaList.StrFormat)</td>
                                                     <td>
                                                         <button type="button" tittle="Amadeus" onclick="ShowPassportDataString('@item.ID', 'Amadeus')">A</button>
                                                         <button type="button" tittle="Galileo" onclick="ShowPassportDataString('@item.ID', 'Galileo')">G</button>
@@ -928,7 +975,7 @@
                                                     <td>@Html.DisplayFor(model => item.SerialNumber)</td>
                                                     <td>@Html.DisplayFor(model => item.Description)</td>
                                                     <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
-                                                    <td>@Html.DisplayFor(model => item.VizaList.StrFormat)</td>
+                                                    <td>@Html.DisplayFor(model => item.vizaList.StrFormat)</td>
                                                     <td>
                                                         <button type="button" tittle="Amadeus" onclick="ShowPassportDataString('@item.ID', 'Amadeus')">A</button>
                                                         <button type="button" tittle="Galileo" onclick="ShowPassportDataString('@item.ID', 'Galileo')">G</button>
@@ -973,10 +1020,10 @@
                                     <tbody>
                                         @foreach (var pass in Model.person.PassportList)
                                         {
-                                            foreach (var item in pass.VizaList)
+                                            foreach (var item in pass.vizaList)
                                             {
                                                 <tr class="odd gradeX">
-                                                    <td>@Html.DisplayFor(model => item.CountryOfInvintation.Name)</td>
+                                                    <td>@Html.DisplayFor(model => item.TargetName)</td>
                                                     <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
                                                     <td>@Html.DisplayFor(model => item.PassportSerial)</td>
                                                     <td><button type="button" data-toggle="modal" data-target="#vizadetails" onclick="FillVizaDetails('@item.ID','@item.PassportSerial')"><i class="glyphicon glyphicon-pencil"></i></button></td>
@@ -1103,7 +1150,19 @@
             <option value='@item.FullName' />
         }
     </datalist>
-    
+
+    <datalist id="listCountryAndUnion">
+        @foreach (var item in Model.catalog.countryList)
+        {
+            <option value='@item.Name' />
+        }
+
+        @foreach (var item in Model.catalog.countryUnionList)
+        {
+            <option value='@item.Name' />
+        }
+    </datalist>
+
     <!--Modal-->
     <!--Passport-->
     <div class="modal fade" id="passportdetails" tabindex="-1" role="dialog" aria-hidden="true">
@@ -1422,12 +1481,17 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-5">
                             <div class="form-group" id="divVizaCountry">
-                                <input class="form-control" placeholder="Country" id="inputVizaCountry" list="listCountry">
+                                <input class="form-control" placeholder="Country" id="inputVizaCountry" list="listCountryAndUnion">
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-2">
+                            <div class="form-group" id="divVizaIsUnion">
+                                <input class="form-control" type="checkbox" id="chkIsUnion">
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
                             <div class="form-group" id="divVizaExpired">
                                 <input class="form-control" placeholder="Expired" id="inputVizaExpired" list="listCountry">
                             </div>
@@ -1435,8 +1499,17 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save</button>
+                    <div class="row">
+                        <div class="col-lg-6" style="text-align: left">
+                            <button type="button" class="btn btn-primary btn-circle btn-lg" title="Delete" onclick="DeleteViza()">
+                                <i class="glyphicon glyphicon-remove fa-1x"></i>
+                            </button>
+                        </div>
+                        <div class="col-lg-6" style="text-align: right">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="SaveVizaDetails()">Save</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

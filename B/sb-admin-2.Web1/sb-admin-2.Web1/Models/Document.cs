@@ -264,12 +264,12 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public VizaList VizaList { get; private set; }
+        public VizaList vizaList { get; private set; }
 
         public Passport()
         {
             documentType = "Passport";
-            VizaList = new VizaList(this);
+            vizaList = new VizaList(this);
 
             Changed = false;
             ID = -1;
@@ -295,15 +295,6 @@ namespace sb_admin_2.Web1.Models
                     Changed = true;
                 }
             }
-        }
-
-        public void AddViza(IVizaFormation country, DateTime expired)
-        {
-            Viza viza = VizaList.Create();
-
-            viza.CountryOfInvintation = country;
-            viza.ValidTill = expired;
-            viza.PassportSerial = SerialNumber;
         }
 
         protected override void Validate()
@@ -352,6 +343,8 @@ namespace sb_admin_2.Web1.Models
                 Citizen = new Country();
                 Citizen.ID = idCountry;
                 Citizen.Load();
+
+                vizaList.Load();
             }
         }
 
@@ -518,18 +511,16 @@ namespace sb_admin_2.Web1.Models
 
         public override void Load()
         {
-            throw new NotImplementedException("Load method for viza not implementted unitil respective table has not been created");
-
             Clear();
-            DBInterface.CommandText = "";
-
-            DBInterface.AddParameter("", MySql.Data.MySqlClient.MySqlDbType.Int32, null);
-
+            DBInterface.CommandText = "SELECT * FROM sellcontroller.visa where idPassport = @idPassport;";
+            DBInterface.AddParameter("@idPassport", MySql.Data.MySqlClient.MySqlDbType.Int32, passport.ID);
             DataTable tab = DBInterface.ExecuteSelection();
 
             foreach(DataRow row in tab.Rows)
             {
                 Viza viza = Create();
+                viza.ID = Convert.ToInt32(row["idViza"]);
+                viza.Load();
             }
         }
 
@@ -538,7 +529,6 @@ namespace sb_admin_2.Web1.Models
             Viza viza = new Viza();
             Init(viza);
             Add(viza);
-            viza.PassportSerial = passport.SerialNumber;
             return viza;
         }
 
@@ -549,7 +539,7 @@ namespace sb_admin_2.Web1.Models
             {
                 if (str != string.Empty)
                     str += ", ";
-                str += viza.CountryOfInvintation.ShortName;
+                str += viza.TargetName;
             }
             return str;
         }
@@ -565,9 +555,281 @@ namespace sb_admin_2.Web1.Models
 
     public class Viza : Document, IDBObject
     {
-        public string PassportSerial { get; set; }
+        private Passport passport { get; set; }
 
-        public IVizaFormation CountryOfInvintation { get; set; }
+        public int PassportID
+        {
+            get
+            {
+                return passport.ID;
+            }
+            set
+            {
+                if (value != PassportID)
+                {
+                    passport.ID = value;
+                    passport.Load();
+                    Changed = true;
+                }
+            }
+        }
+
+        public string PassportSerial
+        {
+            get
+            {
+                return passport.SerialNumber;
+            }
+        }
+
+        private string _OwnerName;
+
+        public string OwnerName
+        {
+            get
+            {
+                return _OwnerName;
+            }
+            set
+            {
+                if (value != _OwnerName)
+                {
+                    _OwnerName = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _Number;
+
+        public string Number
+        {
+            get
+            {
+                return _Number;
+            }
+            set
+            {
+                if (value != _Number)
+                {
+                    _Number = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private DateTime _ValidFrom;
+
+        public DateTime ValidFrom
+        {
+            get
+            {
+                return _ValidFrom;
+            }
+            set
+            {
+                if (value != _ValidFrom)
+                {
+                    _ValidFrom = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        public string ValidFromStr
+        {
+            get { return ValidFrom.ToString("ddMMMyy", Preferences.cultureInfo); }
+            set
+            {
+                if (value != ValidFromStr)
+                {
+                    try
+                    {
+                        ValidFrom = DateTime.ParseExact(value, "ddMMMyy", Preferences.cultureInfo);
+                    }
+                    catch
+                    {
+                        throw new FormatException("Incorrect input date format. Please use: ddMMMyy. Example: 13Jun31");
+                    }
+                    Changed = true;
+                }
+            }
+        }
+
+        private DateTime _DateApproved;
+
+        public DateTime DateApproved
+        {
+            get
+            {
+                return _DateApproved;
+            }
+            set
+            {
+                if (value != _DateApproved)
+                {
+                    _DateApproved = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        public string DateApprovedStr
+        {
+            get { return DateApproved.ToString("ddMMMyy", Preferences.cultureInfo); }
+            set
+            {
+                if (value != DateApprovedStr)
+                {
+                    try
+                    {
+                        DateApproved = DateTime.ParseExact(value, "ddMMMyy", Preferences.cultureInfo);
+                    }
+                    catch
+                    {
+                        throw new FormatException("Incorrect input date format. Please use: ddMMMyy. Example: 13Jun31");
+                    }
+                    Changed = true;
+                }
+            }
+        }
+
+        private Country CountryOfEmmitation { get; set; }
+
+        public int CountryOfEmmitationID
+        {
+            get
+            {
+                return CountryOfEmmitation.ID;
+            }
+            set
+            {
+                if (value != CountryOfEmmitationID)
+                {
+                    CountryOfEmmitation.ID = value;
+                    CountryOfEmmitation.Load();
+                    Changed = true;
+                }
+            }
+        }
+
+        public string CountryOfEmmitationName
+        {
+            get
+            {
+                return CountryOfEmmitation.Name;
+            }
+        }
+
+        private string _VizaType;
+
+        public string VizaType
+        {
+            get
+            {
+                return _VizaType;
+            }
+            set
+            {
+                if (value != _VizaType)
+                {
+                    _VizaType = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private int _EntriesNumber;
+
+        public int EntriesNumber
+        {
+            get
+            {
+                return _EntriesNumber;
+            }
+            set
+            {
+                if (value != _EntriesNumber)
+                {
+                    _EntriesNumber = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private int _DaysCount;
+
+        public int DaysCount
+        {
+            get
+            {
+                return _DaysCount;
+            }
+            set
+            {
+                if (value != _DaysCount)
+                {
+                    _DaysCount = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private int _DaysUsed;
+
+        public int DaysUsed
+        {
+            get
+            {
+                return _DaysUsed;
+            }
+            set
+            {
+                if (value != _DaysUsed)
+                {
+                    _DaysUsed = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private string _Issued;
+
+        public string Issued
+        {
+            get
+            {
+                return _Issued;
+            }
+            set
+            {
+                if (value != _Issued)
+                {
+                    _Issued = value;
+                    Changed = true;
+                }
+            }
+        }
+
+        private IVizaFormation Target { get; set; }
+
+        public string TargetName
+        {
+            get
+            {
+                if (Target == null)
+                    return string.Empty;
+                return Target.Name;
+            }
+        }
+
+        public bool IsTargetUnion
+        {
+            get
+            {
+                return (Target != null) && (Target is CountryUnion);
+            }
+        }
 
         public Viza()
         {
@@ -575,41 +837,183 @@ namespace sb_admin_2.Web1.Models
 
             Changed = false;
             ID = -1;
+
+            CountryOfEmmitation = new Country();
+            passport = new Passport();
         }
 
 
         public event EventHandler Updated;
 
-        public void Load()
+        private void SetTargetCountryOrUnion(int countryID, int unionID)
         {
-            Changed = false;
-            throw new NotImplementedException("Load method for viza is not implemented");
-
-            DBInterface.CommandText = "";
-            DBInterface.AddParameter("idViza", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
-            DataTable tab = DBInterface.ExecuteSelection();
-
-            if (tab.Rows.Count == 1)
+            if (countryID * unionID > 0)
             {
-                PassportSerial = Convert.ToString(tab.Rows[0][""]);
+                throw new ArgumentException("Viza must be targeted on country or union");
+            }
+
+            if (countryID > -1)
+            {
+                Target = new Country();
+                Target.ID = countryID;
+            }
+
+            if (unionID > -1)
+            {
+                Target = new CountryUnion();
+                Target.ID = unionID;
+            }
+
+            Target.Load();
+            Changed = true;
+        }
+
+        private void GetTargetCountryOrUnion(out int countryID, out int unionID)
+        {
+            countryID = -1;
+            unionID = -1;
+
+            if (Target != null)
+            {
+                if (Target is Country)
+                {
+                    countryID = Target.ID;
+                }
+
+                if (Target is CountryUnion)
+                {
+                    unionID = Target.ID;
+                }
+            }
+        }
+
+        public void SetTarget(int id, bool IsUnion)
+        {
+            if (IsUnion)
+                SetTargetCountryOrUnion(-1, id);
+            else
+                SetTargetCountryOrUnion(id, -1);
+        }
+
+        public void SetTarget(string Name, bool IsUnion)
+        {
+            if (IsUnion)
+            {
+                CountryUnionList cul = new CountryUnionList();
+                cul.Load();
+                Target = cul.Find(item => item.Name == Name);
             }
             else
             {
-                throw new ArgumentException("Viza with curreny ID have not been found in DataBase");
+                CountryList cl = new CountryList();
+                cl.Load();
+                Target = cl.Find(item => item.Name == Name);
+            }
+            if (Target != null)
+            {
+                Target.Load();
+                Changed = true;
+            }
+        }
+
+        public void Load()
+        {
+            if (ID != -1)
+            {
+                IDBInterface db = DBInterface.CreatePointer();
+
+                db.StoredProcedure("Visa_select_by_id");
+
+                db.AddParameter("@inVisa", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+
+                db.AddOutParameter("@outIdPassport", MySql.Data.MySqlClient.MySqlDbType.Int32);
+                db.AddOutParameter("@outName", MySql.Data.MySqlClient.MySqlDbType.String);
+                db.AddOutParameter("@outVisaNumber", MySql.Data.MySqlClient.MySqlDbType.String);
+                db.AddOutParameter("@outDateOn", MySql.Data.MySqlClient.MySqlDbType.DateTime);
+                db.AddOutParameter("@outdateFrom", MySql.Data.MySqlClient.MySqlDbType.DateTime);
+                db.AddOutParameter("@outDateUntil", MySql.Data.MySqlClient.MySqlDbType.DateTime);
+                db.AddOutParameter("@outIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32);
+                db.AddOutParameter("@outIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32);
+                db.AddOutParameter("@outIdCountryEsquire", MySql.Data.MySqlClient.MySqlDbType.Int32);
+                db.AddOutParameter("@outTypeVisa", MySql.Data.MySqlClient.MySqlDbType.String);
+                db.AddOutParameter("@outEntriesNumber", MySql.Data.MySqlClient.MySqlDbType.Int32);
+                db.AddOutParameter("@outDaysCount", MySql.Data.MySqlClient.MySqlDbType.Int32);
+                db.AddOutParameter("@outUsedDays", MySql.Data.MySqlClient.MySqlDbType.Int32);
+                db.AddOutParameter("@outIssuedIn", MySql.Data.MySqlClient.MySqlDbType.String);
+                db.AddOutParameter("@outIdDocument", MySql.Data.MySqlClient.MySqlDbType.Int32);
+                db.AddOutParameter("@outNote", MySql.Data.MySqlClient.MySqlDbType.String);
+
+                db.Execute();
+
+                PassportID = db.GetOutParameterInt("@outIdPassport");
+                int countryID = db.GetOutParameterInt("@outIdCountry");
+                int unionID = db.GetOutParameterInt("@outIdCountryUnion");
+                CountryOfEmmitationID = db.GetOutParameterInt("@outIdCountryEsquire");
+                EntriesNumber = db.GetOutParameterInt("@outEntriesNumber");
+                DaysCount = db.GetOutParameterInt("@outDaysCount");
+                DaysUsed = db.GetOutParameterInt("@outUsedDays");
+
+                OwnerName = db.GetOutParameterStr("@outName");
+                Number = db.GetOutParameterStr("@outVisaNumber");
+                VizaType = db.GetOutParameterStr("@outTypeVisa");
+                Issued = db.GetOutParameterStr("@outIssuedIn");
+                Description = db.GetOutParameterStr("@outNote");
+
+                DateApproved = db.GetOutParameterDateTime("@outDateOn");
+                ValidFrom = db.GetOutParameterDateTime("@outdateFrom");
+                ValidTill = db.GetOutParameterDateTime("@outDateUntil");
+
+                Changed = false;
             }
         }
 
         public void Save()
         {
-            throw new NotImplementedException("Save method for viza is not implemented");
-
             if (Changed)
             {
-                if (ID < 0)
-                {
-                    DBInterface.CommandText = "";
+                int countryID;
+                int unionID;
+                GetTargetCountryOrUnion(out countryID, out unionID);
 
-                    DBInterface.AddParameter("idViza", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                if (ID >= 0)
+                {
+                    DBInterface.StoredProcedure("visa_update");
+
+                    DBInterface.AddParameter("@inVisa", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+                    DBInterface.AddParameter("@inIdPassport", MySql.Data.MySqlClient.MySqlDbType.Int32, PassportID);
+                    DBInterface.AddParameter("@inName", MySql.Data.MySqlClient.MySqlDbType.String, OwnerName);
+                    DBInterface.AddParameter("@inVisaNumber", MySql.Data.MySqlClient.MySqlDbType.String, Number);
+                    DBInterface.AddParameter("@inDateOn", MySql.Data.MySqlClient.MySqlDbType.DateTime, DateApproved);
+                    DBInterface.AddParameter("@indateFrom", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidFrom);
+                    DBInterface.AddParameter("@inDateUntil", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidTill);
+
+                    if (countryID == -1)
+                    {
+                        DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
+                    }
+                    else
+                    {
+                        DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, countryID);
+                    }
+
+
+                    if (unionID == -1)
+                    {
+                        DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
+                    }
+                    else
+                    {
+                        DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, unionID);
+                    }
+
+                    DBInterface.AddParameter("@inIdCountryEsquire", MySql.Data.MySqlClient.MySqlDbType.Int32, CountryOfEmmitationID);
+                    DBInterface.AddParameter("@inTypeVisa", MySql.Data.MySqlClient.MySqlDbType.String, VizaType);
+                    DBInterface.AddParameter("@inEntriesNumber", MySql.Data.MySqlClient.MySqlDbType.Int32, EntriesNumber);
+                    DBInterface.AddParameter("@inDaysCount", MySql.Data.MySqlClient.MySqlDbType.Int32, DaysCount);
+                    DBInterface.AddParameter("@inUsedDays", MySql.Data.MySqlClient.MySqlDbType.Int32, DaysUsed);
+                    DBInterface.AddParameter("@inIssuedIn", MySql.Data.MySqlClient.MySqlDbType.String, Issued);
+                    DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+                    DBInterface.AddParameter("@inIdDocument", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
 
                     DBInterface.ExecuteTransaction();
 
@@ -620,11 +1024,48 @@ namespace sb_admin_2.Web1.Models
                 }
                 else
                 {
-                    InsertRow insertRow = new InsertRow("");
+                    DBInterface.StoredProcedure("visa_insert");
 
-                    insertRow.Add("", MySql.Data.MySqlClient.MySqlDbType.String, null);
+                    DBInterface.AddOutParameter("@outIdVisa", MySql.Data.MySqlClient.MySqlDbType.Int32);
+
+                    DBInterface.AddParameter("@inIdPassport", MySql.Data.MySqlClient.MySqlDbType.Int32, PassportID);
+                    DBInterface.AddParameter("@inName", MySql.Data.MySqlClient.MySqlDbType.String, OwnerName);
+                    DBInterface.AddParameter("@inVisaNumber", MySql.Data.MySqlClient.MySqlDbType.String, Number);
+                    DBInterface.AddParameter("@inDateOn", MySql.Data.MySqlClient.MySqlDbType.DateTime, DateApproved);
+                    DBInterface.AddParameter("@indateFrom", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidFrom);
+                    DBInterface.AddParameter("@inDateUntil", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidTill);
+
+                    if (countryID == -1)
+                    {
+                        DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
+                    }
+                    else
+                    {
+                        DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, countryID);
+                    }
                     
-                    insertRow.Execute();
+
+                    if (unionID == -1)
+                    {
+                        DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
+                    }
+                    else
+                    {
+                        DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, unionID);
+                    }
+
+                    DBInterface.AddParameter("@inIdCountryEsquire", MySql.Data.MySqlClient.MySqlDbType.Int32, CountryOfEmmitationID);
+                    DBInterface.AddParameter("@inTypeVisa", MySql.Data.MySqlClient.MySqlDbType.String, VizaType);
+                    DBInterface.AddParameter("@inEntriesNumber", MySql.Data.MySqlClient.MySqlDbType.Int32, EntriesNumber);
+                    DBInterface.AddParameter("@inDaysCount", MySql.Data.MySqlClient.MySqlDbType.Int32, DaysCount);
+                    DBInterface.AddParameter("@inUsedDays", MySql.Data.MySqlClient.MySqlDbType.Int32, DaysUsed);
+                    DBInterface.AddParameter("@inIssuedIn", MySql.Data.MySqlClient.MySqlDbType.String, Issued);
+                    DBInterface.AddParameter("@inNote", MySql.Data.MySqlClient.MySqlDbType.String, Description);
+                    DBInterface.AddParameter("@inIdDocument", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
+
+                    DBInterface.ExecuteTransaction();
+
+                    ID = DBInterface.GetOutParameterInt("@outIdVisa");
 
                     if (Updated != null)
                     {
@@ -637,7 +1078,9 @@ namespace sb_admin_2.Web1.Models
 
         public void Delete()
         {
-
+            DBInterface.StoredProcedure("Visa_delete");
+            DBInterface.AddParameter("@inIdVisa", MySql.Data.MySqlClient.MySqlDbType.Int32, ID);
+            DBInterface.ExecuteTransaction();
         }
     }
 }

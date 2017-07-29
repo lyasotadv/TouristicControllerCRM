@@ -22,6 +22,8 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
 
         string GetOutParameterStr(string parameterName);
 
+        DateTime GetOutParameterDateTime(string parameterName);
+
         void Execute();
     }
 
@@ -165,6 +167,20 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
                 else
                 {
                     return Convert.ToString(obj.command.Parameters[parameterName].Value);
+                }
+            }
+
+            public DateTime GetOutParameterDateTime(string parameterName)
+            {
+                if (obj.command == null)
+                    throw new NullReferenceException("DB command have not be created. Set command text before add parameters");
+                if (obj.command.Parameters[parameterName].Value == DBNull.Value)
+                {
+                    return new DateTime();
+                }
+                else
+                {
+                    return Convert.ToDateTime(obj.command.Parameters[parameterName].Value);
                 }
             }
 

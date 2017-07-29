@@ -169,6 +169,7 @@ namespace sb_admin_2.Web1.Controllers
             }
             else
             {
+                controllerUtils.DataLog("Session is failed");
                 return RedirectToAction("Login");
             }
         }
@@ -403,6 +404,64 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
+        public ActionResult FindViza(int PersonID, int ID)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
+            {
+                person.Load();
+                Viza viza = (person as Person).FindVizaForAllPassport(item => item.ID == ID);
+                if (viza != null)
+                {
+                    viza.Load();
+                    return Json(viza);
+                }
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult SaveVizaDetails(int PersonID, int ID, string ValidTillStr, string TargetName, bool IsUnion, string PassportSerial)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
+            {
+                person.Load();
+                Passport passport = (person as Person).PassportList.Find(item => item.SerialNumber == PassportSerial);
+                if (passport != null)
+                {
+                    Viza viza = (person as Person).FindVizaForAllPassport(item => item.ID == ID);
+                    if (viza == null)
+                    {
+                        viza = passport.vizaList.Create();
+                    }
+
+                    viza.PassportID = passport.ID;
+                    viza.ValidTillStr = ValidTillStr;
+                    viza.SetTarget(TargetName, IsUnion);
+                    viza.Save();
+                }
+            }
+            return Json("");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteViza(int PersonID, int ID)
+        {
+            PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
+            if ((person != null) && (person is Person))
+            {
+                person.Load();
+                Viza viza = (person as Person).FindVizaForAllPassport(item => item.ID == ID);
+                if (viza != null)
+                {
+                    viza.Delete();
+                }
+            }
+            return Json("");
+        }
+
+        [HttpPost]
         public ActionResult GetPersonalData(int PersonID)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
@@ -583,7 +642,7 @@ namespace sb_admin_2.Web1.Controllers
             {
                 Passport passport = (person as Person).PassportList.Find((item) => { return item.SerialNumber == PassportSerial; });
                 if (passport != null)
-                    viza = passport.VizaList.Find((item) => { return item.ID == id; });
+                    viza = passport.vizaList.Find((item) => { return item.ID == id; });
             }
             return Json(viza);
         }

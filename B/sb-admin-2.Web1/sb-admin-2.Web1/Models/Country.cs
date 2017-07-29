@@ -558,5 +558,7 @@ namespace sb_admin_2.Web1.Models
         string Name { get; }
 
         string ShortName { get; }
+
+        void Load();
     }
 }

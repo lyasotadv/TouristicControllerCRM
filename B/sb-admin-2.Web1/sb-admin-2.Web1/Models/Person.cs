@@ -733,6 +733,27 @@ namespace sb_admin_2.Web1.Models
 
             return str;
         }
+
+        public Viza FindVizaForAllPassport(Predicate<Viza> condition)
+        {
+            if ((PassportList != null) && (condition != null))
+            {
+                foreach (Passport pass in PassportList)
+                {
+                    if (pass.vizaList != null)
+                    {
+                        foreach (Viza viza in pass.vizaList)
+                        {
+                            if (condition(viza))
+                            {
+                                return viza;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
     }
 
     public class Company : PersonGeneral
