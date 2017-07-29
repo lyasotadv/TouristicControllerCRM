@@ -177,6 +177,27 @@ namespace sb_admin_2.Web1.Models
             passport.SetPerson(person);
             return passport;
         }
+
+        public Viza FindViza(Predicate<Viza> condition)
+        {
+            if (condition != null)
+            {
+                foreach (Passport pass in this)
+                {
+                    if (pass.vizaList != null)
+                    {
+                        foreach (Viza viza in pass.vizaList)
+                        {
+                            if (condition(viza))
+                            {
+                                return viza;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
     }
 
     public class Passport : Document, IDBObject

@@ -410,7 +410,7 @@ namespace sb_admin_2.Web1.Controllers
             if ((person != null) && (person is Person))
             {
                 person.Load();
-                Viza viza = (person as Person).FindVizaForAllPassport(item => item.ID == ID);
+                Viza viza = (person as Person).PassportList.FindViza(item => item.ID == ID);
                 if (viza != null)
                 {
                     viza.Load();
@@ -430,7 +430,7 @@ namespace sb_admin_2.Web1.Controllers
                 Passport passport = (person as Person).PassportList.Find(item => item.SerialNumber == PassportSerial);
                 if (passport != null)
                 {
-                    Viza viza = (person as Person).FindVizaForAllPassport(item => item.ID == ID);
+                    Viza viza = (person as Person).PassportList.FindViza(item => item.ID == ID);
                     if (viza == null)
                     {
                         viza = passport.vizaList.Create();
@@ -452,7 +452,7 @@ namespace sb_admin_2.Web1.Controllers
             if ((person != null) && (person is Person))
             {
                 person.Load();
-                Viza viza = (person as Person).FindVizaForAllPassport(item => item.ID == ID);
+                Viza viza = (person as Person).PassportList.FindViza(item => item.ID == ID);
                 if (viza != null)
                 {
                     viza.Delete();

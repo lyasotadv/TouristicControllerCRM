@@ -7,6 +7,7 @@ using System.Data;
 using System.Drawing;
 
 using sb_admin_2.Web1.Models.Mapping.DBUtils;
+using sb_admin_2.Web1.Models.AbstractStructure;
 
 namespace sb_admin_2.Web1.Models
 {
@@ -35,6 +36,21 @@ namespace sb_admin_2.Web1.Models
             Label label = new Label();
             Init(label);
             return label;
+        }
+
+        static public GraphDirected CreateParentGraph()
+        {
+            GraphDirected graph = new GraphDirected();
+            DBInterface.CommandText = "SELECT * FROM sellcontroller.label";
+            DataTable tab = DBInterface.ExecuteSelection();
+            foreach (DataRow row in tab.Rows)
+            {
+                if (!(row["idParent"] is DBNull))
+                {
+                    graph.Add(Convert.ToInt32(row["idLabel"]), Convert.ToInt32(row["idParent"]));
+                }
+            }
+            return graph;
         }
     }
 
@@ -168,6 +184,12 @@ namespace sb_admin_2.Web1.Models
             _ParentID = -1;
         }
 
+        private Label(int labelID)
+        {
+            this.ID = labelID;
+            this.Load();
+        }
+
         public void SetColor(object obj)
         {
             try
@@ -252,7 +274,7 @@ namespace sb_admin_2.Web1.Models
             }
             set
             {
-                if (value != _ParentID)
+                if ((value != _ParentID) && (!IsParentCyclic(value)))
                 {
                     _ParentID = value;
                     Changed = true;
@@ -268,6 +290,18 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
+        private bool IsParentCyclic(int parentID)
+        {
+            if (parentID != -1)
+            {
+                GraphDirected graph = LabelList.CreateParentGraph();
+                graph.Add(ID, parentID);
+                return graph.IsCyclic(ID);
+
+            }
+            return false;
+        }
+
         private string _ParentName;
 
         public string ParentName
@@ -280,15 +314,10 @@ namespace sb_admin_2.Web1.Models
             {
                 if (value != _ParentName)
                 {
-                    _ParentName = value;
                     Changed = true;
-
                     Label label = new Label();
-                    label.Load(ParentName);
-
-                    _ParentID = label.ID;
-                    ParentColorHTML = label.ColorHtml;
-                    ParentBlackOrWhite = label.BlackOrWhite;
+                    label.Load(value);
+                    ParentID = label.ID;
                 }
             }
         }
@@ -405,8 +434,6 @@ namespace sb_admin_2.Web1.Models
             {
                 throw new DuplicateNameException("Label table has rows with same name");
             }
-
-            Changed = false;
         }
     }
 
