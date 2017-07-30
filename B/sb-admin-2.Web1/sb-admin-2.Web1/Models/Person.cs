@@ -859,13 +859,13 @@ namespace sb_admin_2.Web1.Models
                     {
                         if ((value == null) || (value.Length != 8) || (!CheckEDRPOU(value)))
                         {
-                            throw new FormatException("EDRPOU must contains 8 digits");
+                            throw new FormatException("EDRPOU is incorrect");
                         }
                         _EDRPOU = Convert.ToInt32(value.Replace(" ", ""));
                     }
                     catch
                     {
-                        throw new FormatException("EDRPOU must contains 8 digits");
+                        throw new FormatException("EDRPOU is incorrect");
                     }
                     Changed = true;
                 }
