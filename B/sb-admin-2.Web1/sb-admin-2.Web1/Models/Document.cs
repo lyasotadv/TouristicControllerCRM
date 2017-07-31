@@ -410,7 +410,7 @@ namespace sb_admin_2.Web1.Models
                     InsertRow insertRow = new InsertRow("passport");
 
                     insertRow.Add("ownerName", MySql.Data.MySqlClient.MySqlDbType.String, PersonName);
-                    insertRow.Add("ownerSurname", MySql.Data.MySqlClient.MySqlDbType.String, PersonName);
+                    insertRow.Add("ownerSurname", MySql.Data.MySqlClient.MySqlDbType.String, PersonSurname);
                     insertRow.Add("number", MySql.Data.MySqlClient.MySqlDbType.String, SerialNumber);
                     insertRow.Add("expireDate", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidTill);
                     insertRow.Add("note", MySql.Data.MySqlClient.MySqlDbType.String, Description);
