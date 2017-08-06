@@ -277,13 +277,25 @@
     function ClearVizaDetails() {
         EditedVizaID = 0;
 
-        $('#inputVizaExpired').val('');
-        $('#inputVizaCountry').val('');
-        document.getElementById("chkIsUnion").checked = true;
+        $('#inputVizaApproved').val('');
+        $('#inputVizaFrom').val('');
+        $('#inputVizaTill').val('');
+
+        $('#inputVizaTarget').val('');
+        $('#inputVizaEsquire').val('');
+
+        $('#inputVizaNumber').val('');
+        $('#inputVizaType').val('');
+
+        $('#inputVizaEntries').val('');
+        $('#inputVizaDays').val('');
+        $('#inputVizaDaysUsed').val('');
+
+        $('#textvizadescription').val('');
     }
 
     function FillVizaDetails(id, PassportSerial) {
-        EditedVizaID = 0;
+        EditedVizaID = id;
         $.ajax({
             type: 'POST',
             url: '@Url.Action("FindViza", "Home")',
@@ -295,11 +307,23 @@
             },
             success: function (data) {
                 if (data != null) {
-                    document.getElementById("inputVizaExpired").value = data.ValidTillStr;
-                    document.getElementById("inputVizaCountry").value = data.TargetName;
+                    document.getElementById("inputVizaApproved").value = data.DateApprovedStr;
+                    document.getElementById("inputVizaFrom").value = data.ValidFromStr;
+                    document.getElementById("inputVizaTill").value = data.ValidTillStr;
+                    
+                    document.getElementById("inputVizaTarget").value = data.TargetName;
+                    document.getElementById("inputVizaEsquire").value = data.CountryOfEmmitationName;
+
+                    document.getElementById("inputVizaNumber").value = data.Number;
+                    document.getElementById("inputVizaType").value = data.VizaType;
+
+                    document.getElementById("inputVizaEntries").value = data.EntriesNumber;
+                    document.getElementById("inputVizaDays").value = data.DaysCount;
+                    document.getElementById("inputVizaDaysUsed").value = data.DaysUsed;
+
+                    document.getElementById("textvizadescription").value = data.Description;
+
                     $('#selectVizaPassport').val(data.PassportSerial).change();
-                    document.getElementById("chkIsUnion").checked = data.IsTargetUnion;
-                    $('#chkIsUnion').val(PassportSerial).change();
                 }
             },
             error: function () {
@@ -315,10 +339,18 @@
                 dataType: 'json',
                 data: {
                     PersonID: '@Model.person.ID',
-                    id: EditedVizaID,
-                    ValidTillStr: document.getElementById("inputVizaExpired").value,
-                    TargetName: document.getElementById("inputVizaCountry").value,
-                    IsUnion: document.getElementById("chkIsUnion").checked,
+                    ID: EditedVizaID,
+                    DateApprovedStr: document.getElementById("inputVizaApproved").value,
+                    ValidFromStr: document.getElementById("inputVizaFrom").value,
+                    ValidTillStr: document.getElementById("inputVizaTill").value,
+                    TargetName: document.getElementById("inputVizaTarget").value,
+                    CountryOfEmmitationName: document.getElementById("inputVizaEsquire").value,
+                    Number: document.getElementById("inputVizaNumber").value,
+                    VizaType: document.getElementById("inputVizaType").value,
+                    EntriesNumber: document.getElementById("inputVizaEntries").value,
+                    DaysCount: document.getElementById("inputVizaDays").value,
+                    DaysUsed: document.getElementById("inputVizaDaysUsed").value,
+                    Description: document.getElementById("textvizadescription").value,
                     PassportSerial: document.getElementById("selectVizaPassport").value
                 },
                 success: function (data) {
@@ -1022,12 +1054,33 @@
                                         {
                                             foreach (var item in pass.vizaList)
                                             {
-                                                <tr class="odd gradeX">
-                                                    <td>@Html.DisplayFor(model => item.TargetName)</td>
-                                                    <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
-                                                    <td>@Html.DisplayFor(model => item.PassportSerial)</td>
-                                                    <td><button type="button" data-toggle="modal" data-target="#vizadetails" onclick="FillVizaDetails('@item.ID','@item.PassportSerial')"><i class="glyphicon glyphicon-pencil"></i></button></td>
-                                                </tr>
+                                                if (item.Status == sb_admin_2.Web1.Models.Document.DocumentStatus.green)
+                                                {
+                                                    <tr class="odd gradeX">
+                                                        <td>@Html.DisplayFor(model => item.TargetName)</td>
+                                                        <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
+                                                        <td>@Html.DisplayFor(model => item.PassportSerial)</td>
+                                                        <td><button type="button" data-toggle="modal" data-target="#vizadetails" onclick="FillVizaDetails('@item.ID','@item.PassportSerial')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                                    </tr>
+                                                }
+                                                else if (item.Status == sb_admin_2.Web1.Models.Document.DocumentStatus.yellow)
+                                                {
+                                                    <tr class="warning text-warning">
+                                                        <td>@Html.DisplayFor(model => item.TargetName)</td>
+                                                        <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
+                                                        <td>@Html.DisplayFor(model => item.PassportSerial)</td>
+                                                        <td><button type="button" data-toggle="modal" data-target="#vizadetails" onclick="FillVizaDetails('@item.ID','@item.PassportSerial')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                                    </tr>
+                                                }
+                                                else if (item.Status == sb_admin_2.Web1.Models.Document.DocumentStatus.red)
+                                                {
+                                                    <tr class="danger text-danger">
+                                                        <td>@Html.DisplayFor(model => item.TargetName)</td>
+                                                        <td>@Html.DisplayFor(model => item.ValidTillStr)</td>
+                                                        <td>@Html.DisplayFor(model => item.PassportSerial)</td>
+                                                        <td><button type="button" data-toggle="modal" data-target="#vizadetails" onclick="FillVizaDetails('@item.ID','@item.PassportSerial')"><i class="glyphicon glyphicon-pencil"></i></button></td>
+                                                    </tr>
+                                                }
                                             }
                                         }
                                     </tbody>
@@ -1480,20 +1533,88 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="row">
-                        <div class="col-lg-5">
-                            <div class="form-group" id="divVizaCountry">
-                                <input class="form-control" placeholder="Country" id="inputVizaCountry" list="listCountryAndUnion">
+                        <div class="col-lg-6">
+                            <div class="form-group" id="divVizaTarget">
+                                <input class="form-control" placeholder="Target" id="inputVizaTarget" list="listCountryAndUnion">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group" id="divVizaEsquire">
+                                <input class="form-control" placeholder="Esquire" id="inputVizaEsquire" list="listCountryAndUnion">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="form-group" id="divVizaNumber">
+                                <input class="form-control" placeholder="Number" id="inputVizaNumber">
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group" id="divVizaType">
+                                <input class="form-control" placeholder="Type" id="inputVizaType">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <div class="form-group" id="divVizaEntriesLabel">
+                                <label>Entries:</label>
                             </div>
                         </div>
                         <div class="col-lg-2">
-                            <div class="form-group" id="divVizaIsUnion">
-                                <input class="form-control" type="checkbox" id="chkIsUnion">
+                            <div class="form-group" id="divVizaEntries">
+                                <input class="form-control" placeholder="Entries (stay clear for MULT)" id="inputVizaEntries">
                             </div>
                         </div>
-                        <div class="col-lg-5">
-                            <div class="form-group" id="divVizaExpired">
-                                <input class="form-control" placeholder="Expired" id="inputVizaExpired" list="listCountry">
+                        <div class="col-lg-2">
+                            <div class="form-group" id="divVizaDaysLabel">
+                                <label>Days:</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group" id="divVizaDays">
+                                <input class="form-control" placeholder="Total days" id="inputVizaDays">
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group" id="divVizaDaysUsedLabel">
+                                <label>Used days:</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group" id="divVizaDaysUsed">
+                                <input class="form-control" placeholder="Used" id="inputVizaDaysUsed">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="form-group" id="divVizaApproved">
+                                <input class="form-control" placeholder="Approved" id="inputVizaApproved">
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group" id="divVizaFrom">
+                                <input class="form-control" placeholder="From" id="inputVizaFrom">
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group" id="divVizaTill">
+                                <input class="form-control" placeholder="Till" id="inputVizaTill">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <textarea class="form-control" rows="3" id="textvizadescription" placeholder="Note"></textarea>
                             </div>
                         </div>
                     </div>

@@ -241,6 +241,18 @@ namespace sb_admin_2.Web1.Models.Mapping.DBUtils
             obj.command.Parameters[cnt - 1].Value = Value;
         }
 
+        static public void AddIdParameter(string parameterName, int id)
+        {
+            if (id < 0)
+            {
+                AddParameter(parameterName, MySqlDbType.Int32, DBNull.Value);
+            }
+            else
+            {
+                AddParameter(parameterName, MySqlDbType.Int32, id);
+            }
+        }
+
         static public void AddOutParameter(string parameterName, MySqlDbType DBType)
         {
             if (obj.command == null)

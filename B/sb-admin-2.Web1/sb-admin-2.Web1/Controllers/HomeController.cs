@@ -421,7 +421,12 @@ namespace sb_admin_2.Web1.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveVizaDetails(int PersonID, int ID, string ValidTillStr, string TargetName, bool IsUnion, string PassportSerial)
+        public ActionResult SaveVizaDetails(int PersonID, int ID, 
+            string DateApprovedStr, string ValidFromStr, string ValidTillStr, 
+            string TargetName, string CountryOfEmmitationName,
+            string Number, string VizaType,
+            int EntriesNumber, int DaysCount, int DaysUsed,
+            string Description, string PassportSerial)
         {
             PersonGeneral person = mappingController.personListData.personList.Find(item => item.ID == PersonID);
             if ((person != null) && (person is Person))
@@ -437,8 +442,25 @@ namespace sb_admin_2.Web1.Controllers
                     }
 
                     viza.PassportID = passport.ID;
+
+                    viza.DateApprovedStr = DateApprovedStr;
+                    viza.ValidFromStr = ValidFromStr;
                     viza.ValidTillStr = ValidTillStr;
-                    viza.SetTarget(TargetName, IsUnion);
+
+                    viza.TargetName = TargetName;
+                    Country countryOfEmmitation = mappingController.personListData.catalog.countryList.Find(item => item.Name == CountryOfEmmitationName);
+                    if (countryOfEmmitation != null)
+                    {
+                        viza.CountryOfEmmitationID = countryOfEmmitation.ID;
+                    }
+
+                    viza.Number = Number;
+                    viza.VizaType = VizaType;
+                    viza.EntriesNumber = EntriesNumber;
+                    viza.DaysCount = DaysCount;
+                    viza.DaysUsed = DaysUsed;
+                    viza.Description = Description;
+
                     viza.Save();
                 }
             }

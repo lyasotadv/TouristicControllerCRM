@@ -285,13 +285,28 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        public VizaList vizaList { get; private set; }
+        private VizaList _vizaList;
+
+        public VizaList vizaList 
+        { 
+            get
+            {
+                if (_vizaList == null)
+                {
+                    _vizaList = new VizaList(this);
+                    _vizaList.Load();
+                }
+                return _vizaList;
+            }
+            private set
+            {
+                _vizaList = value;
+            }
+        }
 
         public Passport()
         {
             documentType = "Passport";
-            vizaList = new VizaList(this);
-
             Changed = false;
             ID = -1;
         }
@@ -365,7 +380,7 @@ namespace sb_admin_2.Web1.Models
                 Citizen.ID = idCountry;
                 Citizen.Load();
 
-                vizaList.Load();
+                vizaList = null;
             }
         }
 
@@ -540,7 +555,7 @@ namespace sb_admin_2.Web1.Models
             foreach(DataRow row in tab.Rows)
             {
                 Viza viza = Create();
-                viza.ID = Convert.ToInt32(row["idViza"]);
+                viza.ID = Convert.ToInt32(row["idVisa"]);
                 viza.Load();
             }
         }
@@ -576,20 +591,40 @@ namespace sb_admin_2.Web1.Models
 
     public class Viza : Document, IDBObject
     {
-        private Passport passport { get; set; }
+        private Passport _passport;
+
+        private Passport passport 
+        { 
+            get
+            {
+                if (_passport == null)
+                {
+                    _passport = new Passport();
+                    _passport.ID = PassportID;
+                    _passport.Load();
+                }
+                return _passport;
+            }
+            set
+            {
+                _passport = value;
+            }
+        }
+
+        private int _PassportID;
 
         public int PassportID
         {
             get
             {
-                return passport.ID;
+                return _PassportID;
             }
             set
             {
-                if (value != PassportID)
+                if (value != _PassportID)
                 {
-                    passport.ID = value;
-                    passport.Load();
+                    _PassportID = value;
+                    passport = null;
                     Changed = true;
                 }
             }
@@ -842,6 +877,27 @@ namespace sb_admin_2.Web1.Models
                     return string.Empty;
                 return Target.Name;
             }
+            set
+            {
+                if (value != TargetName)
+                {
+                    CountryUnionList cul = new CountryUnionList();
+                    cul.Load();
+                    Target = cul.Find(item => item.Name == value);
+                    if (Target == null)
+                    {
+                        CountryList cl = new CountryList();
+                        cl.Load();
+                        Target = cl.Find(item => item.Name == value);
+                    }
+
+                    if (Target != null)
+                    {
+                        Target.Load();
+                        Changed = true;
+                    }
+                }
+            }
         }
 
         public bool IsTargetUnion
@@ -860,9 +916,27 @@ namespace sb_admin_2.Web1.Models
             ID = -1;
 
             CountryOfEmmitation = new Country();
-            passport = new Passport();
         }
 
+        protected override void Validate()
+        {
+            bool IsYellow = false;
+            IsYellow = IsYellow || (DateTime.Now < ValidFrom);
+
+            bool IsRed = false;
+            IsRed = IsRed || (ValidFrom > ValidTill);
+            IsRed = IsRed || (ValidTill < DateTime.Now);
+            IsRed = IsRed || (DaysUsed > DaysCount);
+
+            if (IsYellow)
+                Status = DocumentStatus.yellow;
+
+            if (IsRed)
+                Status = DocumentStatus.red;
+
+            if (!(IsYellow | IsRed))
+                Status = DocumentStatus.green;
+        }
 
         public event EventHandler Updated;
 
@@ -905,35 +979,6 @@ namespace sb_admin_2.Web1.Models
                 {
                     unionID = Target.ID;
                 }
-            }
-        }
-
-        public void SetTarget(int id, bool IsUnion)
-        {
-            if (IsUnion)
-                SetTargetCountryOrUnion(-1, id);
-            else
-                SetTargetCountryOrUnion(id, -1);
-        }
-
-        public void SetTarget(string Name, bool IsUnion)
-        {
-            if (IsUnion)
-            {
-                CountryUnionList cul = new CountryUnionList();
-                cul.Load();
-                Target = cul.Find(item => item.Name == Name);
-            }
-            else
-            {
-                CountryList cl = new CountryList();
-                cl.Load();
-                Target = cl.Find(item => item.Name == Name);
-            }
-            if (Target != null)
-            {
-                Target.Load();
-                Changed = true;
             }
         }
 
@@ -984,6 +1029,8 @@ namespace sb_admin_2.Web1.Models
                 ValidFrom = db.GetOutParameterDateTime("@outdateFrom");
                 ValidTill = db.GetOutParameterDateTime("@outDateUntil");
 
+                SetTargetCountryOrUnion(countryID, unionID);
+
                 Changed = false;
             }
         }
@@ -1008,26 +1055,10 @@ namespace sb_admin_2.Web1.Models
                     DBInterface.AddParameter("@indateFrom", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidFrom);
                     DBInterface.AddParameter("@inDateUntil", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidTill);
 
-                    if (countryID == -1)
-                    {
-                        DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
-                    }
-                    else
-                    {
-                        DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, countryID);
-                    }
+                    DBInterface.AddIdParameter("@inIdCountry", countryID);
+                    DBInterface.AddIdParameter("@inIdCountryUnion", unionID);
+                    DBInterface.AddIdParameter("@inIdCountryEsquire", CountryOfEmmitationID);
 
-
-                    if (unionID == -1)
-                    {
-                        DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
-                    }
-                    else
-                    {
-                        DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, unionID);
-                    }
-
-                    DBInterface.AddParameter("@inIdCountryEsquire", MySql.Data.MySqlClient.MySqlDbType.Int32, CountryOfEmmitationID);
                     DBInterface.AddParameter("@inTypeVisa", MySql.Data.MySqlClient.MySqlDbType.String, VizaType);
                     DBInterface.AddParameter("@inEntriesNumber", MySql.Data.MySqlClient.MySqlDbType.Int32, EntriesNumber);
                     DBInterface.AddParameter("@inDaysCount", MySql.Data.MySqlClient.MySqlDbType.Int32, DaysCount);
@@ -1056,26 +1087,10 @@ namespace sb_admin_2.Web1.Models
                     DBInterface.AddParameter("@indateFrom", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidFrom);
                     DBInterface.AddParameter("@inDateUntil", MySql.Data.MySqlClient.MySqlDbType.DateTime, ValidTill);
 
-                    if (countryID == -1)
-                    {
-                        DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
-                    }
-                    else
-                    {
-                        DBInterface.AddParameter("@inIdCountry", MySql.Data.MySqlClient.MySqlDbType.Int32, countryID);
-                    }
+                    DBInterface.AddIdParameter("@inIdCountry", countryID);
+                    DBInterface.AddIdParameter("@inIdCountryUnion", unionID);
+                    DBInterface.AddIdParameter("@inIdCountryEsquire", CountryOfEmmitationID);
                     
-
-                    if (unionID == -1)
-                    {
-                        DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, DBNull.Value);
-                    }
-                    else
-                    {
-                        DBInterface.AddParameter("@inIdCountryUnion", MySql.Data.MySqlClient.MySqlDbType.Int32, unionID);
-                    }
-
-                    DBInterface.AddParameter("@inIdCountryEsquire", MySql.Data.MySqlClient.MySqlDbType.Int32, CountryOfEmmitationID);
                     DBInterface.AddParameter("@inTypeVisa", MySql.Data.MySqlClient.MySqlDbType.String, VizaType);
                     DBInterface.AddParameter("@inEntriesNumber", MySql.Data.MySqlClient.MySqlDbType.Int32, EntriesNumber);
                     DBInterface.AddParameter("@inDaysCount", MySql.Data.MySqlClient.MySqlDbType.Int32, DaysCount);
