@@ -160,22 +160,39 @@ namespace sb_admin_2.Web1.Models
 
         private PersonGeneral personOwner { get; set; }
 
-        private PersonGeneral personResponded { get; set; }
+        private PersonGeneral _personResponded;
+
+        private PersonGeneral personResponded 
+        { 
+            get
+            {
+                if (_personResponded == null)
+                {
+                    _personResponded = PersonGeneral.Create(PersonRespondedID);
+                    _personResponded.Load();
+                }
+                return _personResponded;
+            }
+            set
+            {
+                _personResponded = value;
+            }
+        }
+
+        private int _PersonRespondedID;
 
         public int PersonRespondedID
         {
             get
             {
-                if (personResponded == null)
-                    return -1;
-                return personResponded.ID;
+                return _PersonRespondedID;
             }
             set
             {
                 if (value != PersonRespondedID)
                 {
-                    personResponded = PersonGeneral.Create(value);
-                    personResponded.Load();
+                    _PersonRespondedID = value;
+                    personResponded = null;
                     Changed = true;
                 }
             }
@@ -185,8 +202,6 @@ namespace sb_admin_2.Web1.Models
         {
             get
             {
-                if (personResponded == null)
-                    return string.Empty;
                 return personResponded.FullName;
             }
         }
