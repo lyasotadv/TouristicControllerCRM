@@ -554,7 +554,7 @@ namespace sb_admin_2.Web1.Models
             }
         }
 
-        private int _itn;
+        private long _itn;
 
         public string itn
         {
@@ -570,7 +570,7 @@ namespace sb_admin_2.Web1.Models
                     {
                         if (value.Length != 10)
                             throw new FormatException("ITN must contains 10 digits");
-                        _itn = Convert.ToInt32(value);
+                        _itn = Convert.ToInt64(value);
                     }
                     catch
                     {
